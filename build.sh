@@ -6,7 +6,7 @@ set -o pipefail
 SCRIPTDIR="$(dirname "$0")"
 export HERE="$(cd "$SCRIPTDIR" && pwd)"
 PREFIX="$HERE/prefix"
-PARALLEL="-j 8"
+PARALLEL="-j 4"
 #PARALLEL=""
 
 # Set this to false to disable C++ (speed up build a bit).
