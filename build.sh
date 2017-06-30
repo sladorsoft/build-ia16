@@ -180,8 +180,9 @@ if in_list sim BUILDLIST; then
     mkdir build-dosemu
     pushd build-dosemu
     (cd ../dosemu && autogen.sh)
-    ../dosemu/default-configure
+    ../dosemu/default-configure --prefix="$PREFIX"
     make $PARALLEL 2>&1 | tee -a build.log
+    make $PARALLEL install 2>&1 | tee -a build.log
     popd
   fi
 fi
@@ -207,7 +208,7 @@ if in_list test BUILDLIST; then
   while [[ -e ../fails-$GROUP$i.txt ]] ; do
     i=$[$i+1]
   done
-  make -k check RUNTESTFLAGS="$target_board" 2>&1 | tee test.log
+  nice make -k check RUNTESTFLAGS="$target_board" 2>&1 | tee test.log
   ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
