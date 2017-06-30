@@ -172,8 +172,18 @@ if in_list sim BUILDLIST; then
   echo "* Building simulator *"
   echo "**********************"
   echo
-  [ -e 86sim/86sim ] && rm 86sim/86sim
-  gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
+  if [ -e 86sim/86sim.cpp ]; then
+    [ -e 86sim/86sim ] && rm 86sim/86sim
+    gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
+  else
+    rm -rf build-dosemu
+    mkdir build-dosemu
+    pushd build-dosemu
+    (cd ../dosemu && autogen.sh)
+    ../dosemu/default-configure
+    make $PARALLEL 2>&1 | tee -a build.log
+    popd
+  fi
 fi
 
 if in_list test BUILDLIST; then
@@ -183,6 +193,11 @@ if in_list test BUILDLIST; then
   echo "*****************"
   echo
   export DEJAGNU="$HERE/site.exp"
+  if [ -e 86sim/86sim.cpp ]; then
+    target_board="--target_board=86sim"
+  else
+    target_board="--target_board=dosemu"
+  fi
   pushd build2
   GROUP=""
   if [ -f ../group ]; then
@@ -192,7 +207,7 @@ if in_list test BUILDLIST; then
   while [[ -e ../fails-$GROUP$i.txt ]] ; do
     i=$[$i+1]
   done
-  make -k check RUNTESTFLAGS="--target_board=86sim" 2>&1 | tee test.log
+  make -k check RUNTESTFLAGS="$target_board" 2>&1 | tee test.log
   ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log

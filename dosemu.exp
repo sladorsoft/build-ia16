@@ -23,7 +23,7 @@ proc dosemu_load {dest prog args} {
     exec cp $prog $env(HERE)/testcase.com
     set output ""
     set result "unresolved"
-    set pid [spawn $env(HERE)/dosemu/bin/dosemu "--Flibdir" /usr/lib/dosemu "-dumb" $env(HERE)/run.bat testcase.com]
+    set pid [spawn $env(HERE)/build-dosemu/bin/dosemu "-dumb" $env(HERE)/run.bat testcase.com]
 #    set timeout 300
     expect {
 	timeout {

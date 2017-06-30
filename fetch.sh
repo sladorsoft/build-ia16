@@ -2,7 +2,7 @@
 git clone git@github.com:tkchia/gcc-ia16.git
 git clone git@github.com:crtc-demos/newlib-ia16.git
 git clone git@github.com:crtc-demos/binutils-ia16.git
-git clone -b devel git@github.com:tkchia/dosemu2.git dosemu
+git clone -b devel-tk git@github.com:tkchia/dosemu2.git dosemu
 wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2
 tar -xjf gmp-6.1.2.tar.bz2
 wget http://www.mpfr.org/mpfr-current/mpfr-3.1.5.tar.bz2
