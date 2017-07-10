@@ -208,7 +208,12 @@ if in_list test BUILDLIST; then
   while [[ -e ../fails-$GROUP$i.txt ]] ; do
     i=$[$i+1]
   done
-  nice make -k check RUNTESTFLAGS="$target_board" 2>&1 | tee test.log
+  if [ -z "$RUNTESTFLAGS" ]; then
+    RUNTESTFLAGS="$target_board"
+  else
+    RUNTESTFLAGS="$RUNTESTFLAGS $target_board"
+  fi
+  nice make -k check RUNTESTFLAGS="$RUNTESTFLAGS" 2>&1 | tee test.log
   ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
