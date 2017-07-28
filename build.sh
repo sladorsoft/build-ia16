@@ -179,12 +179,14 @@ if in_list sim BUILDLIST; then
     rm -rf build-dosemu
     mkdir build-dosemu
     pushd build-dosemu
-    (cd ../dosemu && autogen.sh)
+    (cd ../dosemu && ./autogen.sh)
     ../dosemu/default-configure --prefix="$PREFIX"
     make $PARALLEL 2>&1 | tee -a build.log
     make $PARALLEL install 2>&1 | tee -a build.log
     popd
   fi
+  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
+    reenigne/logtools/log_filter/log_filter.cpp -o log_filter
 fi
 
 if in_list test BUILDLIST; then

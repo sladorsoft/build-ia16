@@ -1,0 +1,50 @@
+diff --git a/include/alfe/file.h b/include/alfe/file.h
+index c06fd70..9606df0 100644
+--- a/include/alfe/file.h
++++ b/include/alfe/file.h
+@@ -314,8 +314,8 @@ private:
+     friend class Console;
+ 
+     template<class U> friend void applyToWildcard(U functor,
+-        const String& wildcard, int recurseIntoDirectories,
+-        const Directory& relativeTo);
++        const String& wildcard, int recurseIntoDirectories = true,
++        const Directory& relativeTo = CurrentDirectory());
+ };
+ 
+ template<class T> class DirectoryT : public FileSystemObject
+@@ -891,8 +891,8 @@ template<class T> void applyToWildcard(T functor, CharacterSourceT<T> s,
+ }
+ 
+ template<class T> void applyToWildcard(T functor, const String& wildcard,
+-    int recurseIntoDirectories = true,
+-    const Directory& relativeTo = CurrentDirectory())
++    int recurseIntoDirectories,
++    const Directory& relativeTo)
+ {
+     CharacterSource s(wildcard);
+ #ifdef _WIN32
+diff --git a/include/alfe/main.h b/include/alfe/main.h
+index 73df7aa..f1a3ee8 100644
+--- a/include/alfe/main.h
++++ b/include/alfe/main.h
+@@ -44,8 +44,8 @@ bool alerting = false;
+ #include "alfe/stream.h"
+ #include "alfe/file_stream.h"
+ #include "alfe/character_source.h"
+-#include "alfe/thread.h"
+ #if defined(_WIN32) && defined(_WINDOWS)
++#include "alfe/thread.h"
+ #include "alfe/vectors.h"
+ #include "alfe/colour_space.h"
+ #include "alfe/bitmap.h"
+@@ -106,7 +106,9 @@ protected:
+     virtual void run() = 0;
+     Array<String> _arguments;
+     int _returnValue;
++#if defined(_WIN32) && defined(_WINDOWS)
+     HINSTANCE _hInst;
++#endif
+ private:
+ #ifdef _WIN32
+ #ifdef _WINDOWS
