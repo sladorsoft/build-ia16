@@ -1,5 +1,5 @@
 diff --git a/8088/86sim/86sim.cpp b/8088/86sim/86sim.cpp
-index 5ca2e7d..d769caa 100644
+index 5ca2e7d..e946bd2 100644
 --- a/8088/86sim/86sim.cpp
 +++ b/8088/86sim/86sim.cpp
 @@ -45,12 +45,14 @@ int oCycle;
@@ -17,3 +17,13 @@ index 5ca2e7d..d769caa 100644
  }
  
  Word cs() { return registers[9]; }
+@@ -205,7 +207,9 @@ void div()
+ }
+ void doJump(Word newIP)
+ {
++#if 0
+     printf("\n");
++#endif
+     ip = newIP;
+ }
+ void jumpShort(Byte data, bool jump)

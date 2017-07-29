@@ -1,7 +1,25 @@
 diff --git a/include/alfe/file.h b/include/alfe/file.h
-index c06fd70..9606df0 100644
+index c06fd70..89bff52 100644
 --- a/include/alfe/file.h
 +++ b/include/alfe/file.h
+@@ -94,7 +94,7 @@ protected:
+         bool equals(const ConstHandle::Body* other) const
+         {
+             auto o = other->to<NamedBody>();
+-            return o != 0 && _parent == o->_parent & _name == o->_name;
++            return o != 0 && _parent == o->_parent && _name == o->_name;
+         }
+     private:
+         DirectoryT<T> _parent;
+@@ -268,7 +268,7 @@ private:
+ 
+         String name;
+         do {
+-            int p;
++            int p = subDirectoryStart;
+             while (c != '/') {
+                 if (c == 0)
+                     throw Exception("Invalid path");
 @@ -314,8 +314,8 @@ private:
      friend class Console;
  
@@ -24,6 +42,24 @@ index c06fd70..9606df0 100644
  {
      CharacterSource s(wildcard);
  #ifdef _WIN32
+diff --git a/include/alfe/find_handle.h b/include/alfe/find_handle.h
+index 4a1fd0f..5c94864 100644
+--- a/include/alfe/find_handle.h
++++ b/include/alfe/find_handle.h
+@@ -99,11 +99,12 @@ public:
+         do {
+             errno = 0;
+             _data = readdir(_dir);
+-            if (_data == NULL)
++            if (_data == NULL) {
+                 if (errno == 0)
+                     _complete = true;
+                 else
+                     throw Exception::systemError("Reading directory " + _path);
++            }
+             String n = name();
+             if (n == "." || n == "..")
+                 continue;
 diff --git a/include/alfe/main.h b/include/alfe/main.h
 index 73df7aa..f1a3ee8 100644
 --- a/include/alfe/main.h
