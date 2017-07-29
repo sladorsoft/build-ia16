@@ -1,0 +1,21 @@
+diff --git a/8088/86sim/86sim.cpp b/8088/86sim/86sim.cpp
+index 5ca2e7d..dbc7b9f 100644
+--- a/8088/86sim/86sim.cpp
++++ b/8088/86sim/86sim.cpp
+@@ -613,6 +613,16 @@ int main(int argc, char* argv[])
+         registers[8] = d >> 4;
+         writeByte(0, d & 15, 0);
+     }
++#if 1
++    // Fill up parts of the interrupt vector table and parts of the BIOS ROM
++    // area with stuff, for the benefit of the far pointer tests.
++    registers[8] = 0x0000;
++    writeWord(0x0000, 0x0080);
++    writeWord(0xFFFF, 0x0082);
++    registers[8] = 0xF000;
++    for (i = 0; i < 0x100; i += 2)
++        writeWord(0xF4F4, 0xFF00 + (unsigned)i);
++#endif
+     ios = 0;
+     registers[8] = loadSegment - 0x10;
+     setAX(0x0000);
