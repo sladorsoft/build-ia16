@@ -4,6 +4,7 @@ git clone git@github.com:crtc-demos/newlib-ia16.git
 git clone git@github.com:crtc-demos/binutils-ia16.git
 if git clone git@github.com:reenigne/reenigne.git; then
   patch -dreenigne -p1 <alfe-ubuntu.diff
+  patch -dreenigne -p1 <86sim-quiet.diff
   # ln -s -f reenigne/8088/86sim 86sim
 fi
 git clone -b devel-tk git@github.com:tkchia/dosemu2.git dosemu

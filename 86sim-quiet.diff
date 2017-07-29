@@ -1,0 +1,19 @@
+diff --git a/8088/86sim/86sim.cpp b/8088/86sim/86sim.cpp
+index 5ca2e7d..d769caa 100644
+--- a/8088/86sim/86sim.cpp
++++ b/8088/86sim/86sim.cpp
+@@ -45,12 +45,14 @@ int oCycle;
+ 
+ void o(char c)
+ {
++#if 0
+     while (oCycle < ios) {
+         ++oCycle;
+         printf(" ");
+     }
+     ++oCycle;
+     printf("%c", c);
++#endif
+ }
+ 
+ Word cs() { return registers[9]; }
