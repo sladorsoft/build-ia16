@@ -187,6 +187,8 @@ if in_list sim BUILDLIST; then
   fi
   g++ -std=c++11 -Ireenigne/include -Wall -O2 \
     reenigne/logtools/log_filter/log_filter.cpp -o log_filter
+  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
+    reenigne/logtools/log_compare/log_compare.cpp -o log_compare
 fi
 
 if in_list test BUILDLIST; then
