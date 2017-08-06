@@ -1,6 +1,6 @@
 #!/bin/sh
 git clone git@github.com:tkchia/gcc-ia16.git
-git clone git@github.com:crtc-demos/newlib-ia16.git
+git clone git@github.com:tkchia/newlib-ia16.git
 git clone git@github.com:crtc-demos/binutils-ia16.git
 if git clone git@github.com:reenigne/reenigne.git; then
   patch -dreenigne -p1 <alfe-ubuntu.diff
