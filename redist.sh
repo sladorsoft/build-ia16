@@ -4,7 +4,9 @@ set -e -o pipefail
 
 cd $(dirname "$0")
 
-rm -rf redist
+out=prefix/build-ia16-redist.tar.xz
+
+rm -rf "$out" redist
 mkdir redist
 find prefix -type d \! -path '*/locale' \! -path '*/info' \! -path '*/man' \
   \! -path '*/plugin/include' \! -path '*/locale/*' \! -path '*/info/*' \
@@ -15,3 +17,4 @@ find prefix \! -type d \! -name '*.info' \! -name '*.[0-9]' \! -name dir \
   cpio -p -v redist
 find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
   \! -name '*.sh' \! -name 'mk*' -print0 | xargs -0 strip -s -v
+tar cvf - -C redist prefix | xz -9 >"$out"

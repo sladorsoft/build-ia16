@@ -6,6 +6,7 @@ set -o pipefail
 SCRIPTDIR="$(dirname "$0")"
 export HERE="$(cd "$SCRIPTDIR" && pwd)"
 PREFIX="$HERE/prefix"
+REDIST="$HERE/redist"
 PARALLEL="-j 4"
 #PARALLEL=""
 
@@ -30,11 +31,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows)
+    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -45,7 +46,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows"
+  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows"
   exit 1
 fi
 
@@ -71,7 +72,7 @@ if in_list clean BUILDLIST; then
   echo "* Cleaning *"
   echo "************"
   echo
-  rm -rf "$PREFIX"
+  rm -rf "$PREFIX" "$REDIST"
   mkdir -p "$PREFIX/bin"
 fi
 
@@ -223,6 +224,15 @@ if in_list test BUILDLIST; then
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
   popd
+fi
+
+if in_list redist BUILDLIST; then
+  echo
+  echo "*********************************************"
+  echo "* Making (somewhat) redistributable tarball *"
+  echo "*********************************************"
+  echo
+  ./redist.sh
 fi
 
 if in_list debug BUILDLIST; then
