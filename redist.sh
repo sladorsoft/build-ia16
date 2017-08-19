@@ -12,7 +12,7 @@ find prefix -type d \! -path '*/locale' \! -path '*/info' \! -path '*/man' \
   \! -path '*/plugin/include' \! -path '*/locale/*' \! -path '*/info/*' \
   \! -path '*/man/*' \! -path '*/plugin/include/*' \! -path '*/ia16-elf/bin' \
   -print0 | (cd redist && xargs -0 mkdir)
-find prefix \! -type d \! -name '*.info' \! -name '*.[0-9]' \! -name dir \
+find prefix \! -type d \! -name '*.info' \! -path '*/man/*' \! -name dir \
   \! -name '*.mo' \! -path '*/plugin/include/*' \! -path '*/ia16-elf/bin/*' | \
   cpio -p -v redist
 find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
