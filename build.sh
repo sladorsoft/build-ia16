@@ -169,23 +169,25 @@ fi
 
 if in_list sim BUILDLIST; then
   echo
-  echo "**********************"
-  echo "* Building simulator *"
-  echo "**********************"
+  echo "*************************"
+  echo "* Building simulator(s) *"
+  echo "*************************"
   echo
+
   if [ -e 86sim/86sim.cpp ]; then
     [ -e 86sim/86sim ] && rm 86sim/86sim
     gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
-  else
-    rm -rf build-dosemu
-    mkdir build-dosemu
-    pushd build-dosemu
-    (cd ../dosemu && ./autogen.sh)
-    ../dosemu/default-configure --prefix="$PREFIX"
-    make $PARALLEL 2>&1 | tee -a build.log
-    make $PARALLEL install 2>&1 | tee -a build.log
-    popd
   fi
+
+  rm -rf build-dosemu
+  mkdir build-dosemu
+  pushd build-dosemu
+  (cd ../dosemu && ./autogen.sh)
+  ../dosemu/default-configure --prefix="$PREFIX"
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
+  popd
+
   g++ -std=c++11 -Ireenigne/include -Wall -O2 \
     reenigne/logtools/log_filter/log_filter.cpp -o log_filter
   g++ -std=c++11 -Ireenigne/include -Wall -O2 \

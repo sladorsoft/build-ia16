@@ -11,10 +11,22 @@ mkdir redist
 find prefix -type d \! -path '*/locale' \! -path '*/info' \! -path '*/man' \
   \! -path '*/plugin/include' \! -path '*/locale/*' \! -path '*/info/*' \
   \! -path '*/man/*' \! -path '*/plugin/include/*' \! -path '*/ia16-elf/bin' \
+  \! -path '*/include/c++/*/experimental' \
+  \! -path '*/include/c++/*/experimental/*' \
+  \! -path '*/freedos/doc' \! -path '*/freedos/doc/*' \
+  \! -path '*/freedos/nls' \! -path '*/freedos/nls/*' \
   -print0 | (cd redist && xargs -0 mkdir)
 find prefix \! -type d \! -name '*.info' \! -path '*/man/*' \! -name dir \
-  \! -name '*.mo' \! -path '*/plugin/include/*' \! -path '*/ia16-elf/bin/*' | \
+  \! -name '*.mo' \! -path '*/plugin/include/*' \! -path '*/ia16-elf/bin/*' \
+  \! -path '*/include/c++/*/experimental/*' \
+  \! -name '*-readelf' \! -name '*-elfedit' \! -name '*-c++filt' \
+  \! -name '*-gcov' \! -name '*-gcov-tool' \! -name '*-gprof' \
+  \! -name '*-addr2line' \! -path '*/freedos/doc/*' \
+  \! -path '*/freedos/help/*.en' \! -path '*/freedos/nls/*' \! -name '*.lsm' |\
   cpio -p -v redist
 find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
-  \! -name '*.sh' \! -name 'mk*' -print0 | xargs -0 strip -s -v
-tar cvf - -C redist prefix | xz -9 >"$out"
+  \! -name '*.sh' \! -name 'mk*' \! -name dosemu -print0 | \
+  xargs -0 strip -s -v
+(git log -n1 --pretty=tformat:'%H' && \
+ git remote -v show | awk '{ print $2; exit }') >redist/prefix/VERSION
+tar cvf - -C redist prefix | xz -9e >"$out"
