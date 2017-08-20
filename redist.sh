@@ -27,6 +27,7 @@ find prefix \! -type d \! -name '*.info' \! -path '*/man/*' \! -name dir \
 find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
   \! -name '*.sh' \! -name 'mk*' \! -name dosemu -print0 | \
   xargs -0 strip -s -v
+(cd redist/prefix/bin && ln -s ../lib/dosemu/*.so .)
 (git log -n1 --pretty=tformat:'%H' && \
  git remote -v show | awk '{ print $2; exit }') >redist/prefix/VERSION
 tar cvf - -C redist prefix | xz -9e >"$out"
