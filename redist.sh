@@ -22,7 +22,8 @@ find prefix \! -type d \! -name '*.info' \! -path '*/man/*' \! -name dir \
   \! -name '*-readelf' \! -name '*-elfedit' \! -name '*-c++filt' \
   \! -name '*-gcov' \! -name '*-gcov-tool' \! -name '*-gprof' \
   \! -name '*-addr2line' \! -path '*/freedos/doc/*' \
-  \! -path '*/freedos/help/*.en' \! -path '*/freedos/nls/*' \! -name '*.lsm' |\
+  \! -path '*/freedos/help/*.en' \! -path '*/freedos/nls/*' \! -name '*.lsm' \
+  \! -name '*.pdf' | \
   cpio -p -v redist
 find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
   \! -name '*.sh' \! -name 'mk*' \! -name dosemu -print0 | \
@@ -30,4 +31,10 @@ find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
 (cd redist/prefix/bin && ln -s ../lib/dosemu/*.so .)
 (git log -n1 --pretty=tformat:'%H' && \
  git remote -v show | awk '{ print $2; exit }') >redist/prefix/VERSION
+(cd gcc-ia16 && \
+ git log -n1 --pretty=tformat:'%H' && \
+ git remote -v show | awk '{ print $2; exit }') >>redist/prefix/VERSION
+(cd newlib-ia16 && \
+ git log -n1 --pretty=tformat:'%H' && \
+ git remote -v show | awk '{ print $2; exit }') >>redist/prefix/VERSION
 tar cvf - -C redist prefix | xz -9e >"$out"
