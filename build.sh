@@ -31,11 +31,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows)
+    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|extra|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -46,7 +46,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows"
+  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test extra redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows"
   exit 1
 fi
 
@@ -225,6 +225,23 @@ if in_list test BUILDLIST; then
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
+  popd
+fi
+
+if in_list extra BUILDLIST; then
+  echo
+  echo "***********************************"
+  echo "* Building extra stuff (PDCurses) *"
+  echo "***********************************"
+  echo
+  [ -f pdcurses/.git/config ] || \
+    git clone git@github.com:tkchia/PDCurses.git pdcurses
+  rm -rf build-pdcurses
+  mkdir build-pdcurses
+  pushd build-pdcurses
+  make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
+    pdcurses.a 2>&1 | tee -a build.log
+  cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
   popd
 fi
 
