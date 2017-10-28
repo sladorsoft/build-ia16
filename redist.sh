@@ -29,12 +29,18 @@ find redist/prefix -executable \! -type d \! -type l \! -name '*.la' \
   \! -name '*.sh' \! -name 'mk*' \! -name dosemu -print0 | \
   xargs -0 strip -s -v
 (cd redist/prefix/bin && ln -s ../lib/dosemu/*.so .)
-(git log -n1 --pretty=tformat:'%H' && \
+(git log -n1 --pretty=tformat:'%H build-ia16' && \
  git remote -v show | awk '{ print $2; exit }') >redist/prefix/VERSION
 (cd gcc-ia16 && \
- git log -n1 --pretty=tformat:'%H' && \
+ git log -n1 --pretty=tformat:'%H gcc-ia16' && \
  git remote -v show | awk '{ print $2; exit }') >>redist/prefix/VERSION
 (cd newlib-ia16 && \
- git log -n1 --pretty=tformat:'%H' && \
+ git log -n1 --pretty=tformat:'%H newlib-ia16' && \
  git remote -v show | awk '{ print $2; exit }') >>redist/prefix/VERSION
+if [ -f pdcurses/.git/config -a -f redist/prefix/ia16-elf/lib/libpdcurses.a ]
+then
+  (cd pdcurses && \
+   git log -n1 --pretty=tformat:'%H pdcurses' && \
+   git remote -v show | awk '{ print $2; exit }') >>redist/prefix/VERSION
+fi
 tar cvf - -C redist prefix | xz -9e >"$out"
