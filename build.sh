@@ -242,6 +242,7 @@ if in_list extra BUILDLIST; then
   make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
     pdcurses.a 2>&1 | tee -a build.log
   cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
+  cp -a ../pdcurses/curses.h "$PREFIX"/ia16-elf/include
   popd
 fi
 
