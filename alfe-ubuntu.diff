@@ -1,5 +1,5 @@
 diff --git a/include/alfe/file.h b/include/alfe/file.h
-index c06fd70..89bff52 100644
+index fab369a..00b8787 100644
 --- a/include/alfe/file.h
 +++ b/include/alfe/file.h
 @@ -94,7 +94,7 @@ protected:
@@ -31,8 +31,19 @@ index c06fd70..89bff52 100644
  };
  
  template<class T> class DirectoryT : public FileSystemObject
-@@ -891,8 +891,8 @@ template<class T> void applyToWildcard(T functor, CharacterSourceT<T> s,
+@@ -796,6 +796,7 @@ private:
+     friend class Console;
+ };
+ 
++#if 0
+ template<class T> void applyToWildcard(T functor, CharacterSource s,
+     int recurseIntoDirectories, Directory directory)
+ {
+@@ -892,10 +893,11 @@ template<class T> void applyToWildcard(T functor, CharacterSource s,
+         handle.next();
+     }
  }
++#endif
  
  template<class T> void applyToWildcard(T functor, const String& wildcard,
 -    int recurseIntoDirectories = true,

@@ -6,6 +6,7 @@ if git clone git@github.com:reenigne/reenigne.git; then
   patch -dreenigne -p1 <alfe-ubuntu.diff
   patch -dreenigne -p1 <86sim-quiet.diff
   patch -dreenigne -p1 <86sim-init.diff
+  patch -dreenigne -p1 <86sim-0xa0..3-fix.diff
   rm -f 86sim
   ln -s reenigne/8088/86sim 86sim
 fi

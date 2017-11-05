@@ -1,0 +1,21 @@
+diff --git a/8088/86sim/86sim.cpp b/8088/86sim/86sim.cpp
+index 5ca2e7d..5f95fec 100644
+--- a/8088/86sim/86sim.cpp
++++ b/8088/86sim/86sim.cpp
+@@ -865,12 +879,14 @@ int main(int argc, char* argv[])
+                 o('L');
+                 break;
+             case 0xa0: case 0xa1:  // MOV accum,xv
+-                data = read(fetchWord(), 3);
++                segment = 3;
++                data = read(fetchWord());
+                 setAccum();
+                 o('m');
+                 break;
+             case 0xa2: case 0xa3:  // MOV xv,accum
+-                write(getAccum(), fetchWord(), 3);
++                segment = 3;
++                write(getAccum(), fetchWord());
+                 o('m');
+                 break;
+             case 0xa4: case 0xa5:  // MOVSv
