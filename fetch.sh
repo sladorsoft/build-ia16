@@ -2,11 +2,7 @@
 git clone git@github.com:tkchia/gcc-ia16.git
 git clone git@github.com:tkchia/newlib-ia16.git
 git clone git@github.com:crtc-demos/binutils-ia16.git
-if git clone git@github.com:reenigne/reenigne.git; then
-  patch -dreenigne -p1 <alfe-ubuntu.diff
-  patch -dreenigne -p1 <86sim-quiet.diff
-  patch -dreenigne -p1 <86sim-init.diff
-  patch -dreenigne -p1 <86sim-0xa0..3-fix.diff
+if git clone git@github.com:tkchia/reenigne.git; then
   rm -f 86sim
   ln -s reenigne/8088/86sim 86sim
 fi

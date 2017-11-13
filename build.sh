@@ -179,6 +179,11 @@ if in_list sim BUILDLIST; then
     gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
   fi
 
+  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
+    reenigne/logtools/log_filter/log_filter.cpp -o log_filter
+  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
+    reenigne/logtools/log_compare/log_compare.cpp -o log_compare
+
   rm -rf build-dosemu
   mkdir build-dosemu
   pushd build-dosemu
@@ -187,11 +192,6 @@ if in_list sim BUILDLIST; then
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
-
-  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
-    reenigne/logtools/log_filter/log_filter.cpp -o log_filter
-  g++ -std=c++11 -Ireenigne/include -Wall -O2 \
-    reenigne/logtools/log_compare/log_compare.cpp -o log_compare
 fi
 
 if in_list test BUILDLIST; then
