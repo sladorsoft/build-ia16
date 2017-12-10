@@ -52,7 +52,9 @@ fi
 
 if $WITHCXX; then
   LANGUAGES="c,c++"
-  EXTRABUILD2OPTS="--with-newlib"
+  # Exclude the "dual ABI" backward compatibility stuff --- including it makes
+  # it harder than it already is to fit the text section into 64 KiB.
+  EXTRABUILD2OPTS="--with-newlib --disable-libstdcxx-dual-abi"
 else
   LANGUAGES="c"
   EXTRABUILD2OPTS=
@@ -127,6 +129,10 @@ if in_list gcc1 BUILDLIST; then
   echo "* Building stage 1 GCC *"
   echo "************************"
   echo
+  # Check for any previously installed `i80286' multilib, and clean it away...
+  if [ -e "$PREFIX"/ia16-elf/lib/i80286 ]; then
+    find "$PREFIX" -name i80286 -print0 | xargs -0 rm -rf
+  fi
   rm -rf build
   mkdir build
   pushd build
@@ -143,6 +149,10 @@ if in_list newlib BUILDLIST; then
   echo "* Building Newlib C library *"
   echo "*****************************"
   echo
+  if [ -e "$PREFIX"/ia16-elf/lib/i80286 ]; then
+    echo 'Please rebuild gcc1.'
+    exit 1
+  fi
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
@@ -158,6 +168,10 @@ if in_list gcc2 BUILDLIST; then
   echo "* Building stage 2 GCC *"
   echo "************************"
   echo
+  if [ -e "$PREFIX"/ia16-elf/lib/i80286 ]; then
+    echo 'Please rebuild gcc1 and newlib.'
+    exit 1
+  fi
   rm -rf build2
   mkdir build2
   pushd build2
