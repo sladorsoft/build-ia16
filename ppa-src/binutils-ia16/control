@@ -1,0 +1,15 @@
+Source: binutils-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9),autotools-dev
+#Depends: newlib-ia16-elf (>=2.4.0)
+Standards-Version: 3.9.6
+Homepage: https://github.com/crtc-demos/binutils-ia16
+Vcs-Git: https://github.com/crtc-demos/binutils-ia16.git
+
+Package: binutils-ia16-elf
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU binary utilities, for ia16-elf target
+ Unofficial port of GNU binutils to the ia16-elf target.

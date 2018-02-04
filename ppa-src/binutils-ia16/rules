@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_OPTIONS += parallel=4
+host_platform := $(shell $(CC) -dumpmachine || uname -p || arch)
+
+%:
+	exec dh $@ --parallel --builddirectory=build
+
+override_dh_update_autotools_config:
+	# nope, do not touch config.sub or config.guess
+
+override_dh_auto_configure:
+	exec dh_auto_configure -O--parallel -- \
+	    --infodir=/usr/ia16-elf/info \
+	    --target=ia16-elf --disable-gdb --disable-libdecnumber \
+	    --disable-readline --disable-sim --disable-nls \
+	    --with-system-zlib --disable-static --enable-shared \
+
+override_dh_shlibdeps:
+	exec dh_shlibdeps -O--parallel -O--builddirectory=build \
+	    -l/usr/"$(host_platform)"/ia16-elf/lib
