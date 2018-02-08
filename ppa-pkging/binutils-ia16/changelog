@@ -1,0 +1,5 @@
+binutils-ia16-elf (2.28.51-20170417ppa1) xenial; urgency=low
+
+  * Initial attempt at a binutils-ia16-elf source package for Ubuntu.
+
+ -- TK Chia <tkchia@gmx.com>  Thu, 08 Feb 2018 14:00:00 +0000
