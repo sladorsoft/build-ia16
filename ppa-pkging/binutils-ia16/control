@@ -2,7 +2,8 @@ Source: binutils-ia16-elf
 Section: devel
 Priority: optional
 Maintainer: TK Chia <tkchia@gmx.com>
-Build-Depends: debhelper (>=9),autotools-dev,texinfo
+Build-Depends: debhelper (>=9), autotools-dev, texinfo, bison, flex, gettext,
+ dejagnu, quilt, python3:any, file, lsb-release, zlib1g-dev
 #Depends: newlib-ia16-elf (>=2.4.0)
 Standards-Version: 3.9.6
 Homepage: https://github.com/crtc-demos/binutils-ia16
