@@ -13,7 +13,8 @@ Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: GNU binary utilities, for ia16-elf target
  Unofficial port of GNU binutils to the ia16-elf target --- for 16-bit Intel
- x86 CPUs, using ELF objects internally, and producing MS-DOS executables.
+ x86 CPUs, using ELF objects internally, and producing MS-DOS executables ---
+ by Andrew Jenner.
  .
  This is based on the sources of Jenner et al.'s toolchain for IA-16 (see
  https://sourcery.mentor.com/GNUToolchain/subscription57091?cmpid=11885 and

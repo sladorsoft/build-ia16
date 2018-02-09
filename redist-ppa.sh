@@ -36,6 +36,7 @@ tar xzf ../"$bu_updir".orig.tar.gz --strip-components=1
 dh_make -s -p binutils-ia16-elf_"$bu_upver"-"$bu_date"ppa1 -n -y
 rm debian/*.ex debian/*.EX debian/README debian/README.*
 cp -a ../../ppa-pkging/binutils-ia16/* debian/
+find debian -name '*~' -print0 | xargs -0 rm -f
 cp -a debian/docs debian/*.docs
 # The dpkg-buildpackage(1) and debsign(1) man pages claim to recognize the
 # $DEB_SIGN_KEYID and $DEBSIGN_KEYID environment variables respectively.  In
