@@ -1,0 +1,17 @@
+Source: gcc-bootstrap-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9), binutils-ia16-elf (>= @bu_ver@),
+ autotools-dev, gcc, g++, libc6-dev, texinfo, bison, flex, libisl-dev (>=
+ 0.16.1), libmpc-dev (>= 1.0.3), libmpfr-dev (>= 3.1.4), libgmp-dev (>=
+ 6.1.2), gettext, dejagnu, quilt, python3:any, file, lsb-release, zlib1g-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/tkchia/gcc-ia16
+Vcs-Git: https://github.com/tkchia/gcc-ia16.git
+
+Package: gcc-bootstrap-ia16-elf
+Architecture: any
+Depends: binutils-ia16-elf (>= @bu_ver@), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU C compiler for ia16-elf target (temporary bootstrap package)
+ This package is only used to bootstrap the build of gcc-ia16-elf.
