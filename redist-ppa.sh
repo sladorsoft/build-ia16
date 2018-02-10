@@ -74,20 +74,21 @@ if in_list clean BUILDLIST; then
 fi
 
 decide_binutils_ver_and_dirs () {
-  # $bu_upver is the GNU upstream version number, and $bu_date is our
-  # (downstream) commit date.  $bu_updir is the upstream directory name
-  # constructed from $bu_upver.
+  # $bu_uver is the GNU upstream version number, and $bu_date is our
+  # (downstream) commit date.  $bu_dir is the downstream directory name
+  # constructed from $bu_uver and $bu_date.  $bu_pdir is $bu_dir with the
+  # package revision number appended to it.
   #
   # I factored out this logic as a function, as several build tasks use it.
-  bu_upver="`cat binutils-ia16/bfd/configure | \
+  bu_uver="`cat binutils-ia16/bfd/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
   bu_date="`cd binutils-ia16 && git show --format='%aI' -s HEAD | \
     sed 's/[A-Z].*//; s/-//g'`"
-  [ -n "$bu_upver" -a -n "$bu_date" ]
-  bu_ver="$bu_upver"-"$bu_date"
-  bu_ppa_ver="$bu_ver"ppa"$ppa_no"
-  bu_updir=binutils-ia16-elf_"$bu_upver"
-  bu_dir=binutils-ia16-elf_"$bu_ppa_ver"
+  [ -n "$bu_uver" -a -n "$bu_date" ]
+  bu_ver="$bu_uver"-"$bu_date"
+  bu_pver="$bu_ver"-ppa"$ppa_no"
+  bu_dir=binutils-ia16-elf_"$bu_ver"
+  bu_pdir=binutils-ia16-elf_"$bu_pver"
 }
 
 if in_list binutils BUILDLIST; then
@@ -100,14 +101,14 @@ if in_list binutils BUILDLIST; then
   # launchpad.net to build.
   rm -rf redist-ppa/binutils-ia16-elf_*
   decide_binutils_ver_and_dirs
-  mkdir redist-ppa/"$bu_dir"
+  mkdir redist-ppa/"$bu_pdir"
   # Copy the source tree over, but do not include .git* or untracked files.
-  (cd binutils-ia16 && git archive --prefix="$bu_updir"/ HEAD) | pixz -6t \
-    >redist-ppa/"$bu_updir".orig.tar.xz
-  pushd redist-ppa/"$bu_dir"
+  (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | pixz -6t \
+    >redist-ppa/"$bu_dir".orig.tar.xz
+  pushd redist-ppa/"$bu_pdir"
   # (Argh!  Do we really need to do this unpacking?)
-  tar xJf ../"$bu_updir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$bu_dir" -n -y
+  tar xJf ../"$bu_dir".orig.tar.xz --strip-components=1
+  dh_make -s -p "$bu_pdir" -n -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build-binutils/* debian/
   find debian -name '*~' -print0 | xargs -0 rm -f
@@ -116,7 +117,7 @@ if in_list binutils BUILDLIST; then
   #     extract and include the user id information from $DEBSIGN_KEYID.
   #   * Include changelog entries for actual source changes.
   (
-    echo "binutils-ia16-elf ($bu_ppa_ver) $distro; urgency=low"
+    echo "binutils-ia16-elf ($bu_pver) $distro; urgency=low"
     echo
     echo '  * Release.'
     echo
@@ -133,18 +134,18 @@ if in_list binutils BUILDLIST; then
 fi
 
 decide_gcc_ver_and_dirs () {
-  # $gcc_upver is the GNU upstream version number, and $gcc_date is our
+  # $gcc_uver is the GNU upstream version number, and $gcc_date is our
   # downstream commit date.
-  gcc_upver="`cat gcc-ia16/gcc/BASE-VER`"
+  gcc_uver="`cat gcc-ia16/gcc/BASE-VER`"
   gcc_date="`cd gcc-ia16 && git show --format='%aI' -s HEAD | \
     sed 's/[A-Z].*//; s/-//g'`"
-  [ -n "$gcc_upver" -a -n "$gcc_date" ]
-  gcc_ver="$gcc_upver"-"$gcc_date"
-  gcc_ppa_ver="$gcc_ver"ppa"$ppa_no"
-  g1_updir=gcc-bootstrap-ia16-elf_"$gcc_upver"
-  g1_dir=gcc-bootstrap-ia16-elf_"$gcc_ppa_ver"
-  g2_updir=gcc-ia16-elf_"$gcc_upver"
-  g2_dir=gcc-ia16-elf_"$gcc_ppa_ver"
+  [ -n "$gcc_uver" -a -n "$gcc_date" ]
+  gcc_ver="$gcc_uver"-"$gcc_date"
+  gcc_pver="$gcc_ver"-ppa"$ppa_no"
+  g1_dir=gcc-bootstrap-ia16-elf_"$gcc_ver"
+  g1_pdir=gcc-bootstrap-ia16-elf_"$gcc_pver"
+  g2_dir=gcc-ia16-elf_"$gcc_uver"
+  g2_pdir=gcc-ia16-elf_"$gcc_pver"
 }
 
 if in_list gcc1 BUILDLIST; then
@@ -163,7 +164,7 @@ if in_list gcc1 BUILDLIST; then
   rm -rf redist-ppa/gcc-bootstrap-ia16-elf_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
-  mkdir redist-ppa/"$g1_dir"
+  mkdir redist-ppa/"$g1_pdir"
   # Copy the source tree over, but do not include .git* or untracked files.
   #
   # Also exclude the _huge_ testsuite, and language support other than for C
@@ -171,25 +172,25 @@ if in_list gcc1 BUILDLIST; then
   # bit hard to do with `git archive' alone --- without dirtying the
   # original source tree --- so rope in GNU tar for the task.
   (cd gcc-ia16 && \
-   git archive --prefix="$g1_updir"/ HEAD | \
+   git archive --prefix="$g1_dir"/ HEAD | \
    tar --delete --wildcards \
-    "$g1_updir"/gotools "$g1_updir"/libada "$g1_updir"/libgfortran \
-    "$g1_updir"/libgo "$g1_updir"/libjava "$g1_updir"/libobjc \
-    "$g1_updir"/libstdc++-v3 "$g1_updir"/gcc/testsuite "$g1_updir"/gcc/ada \
-    "$g1_updir"/gnattools "$g1_updir"/gcc/fortran "$g1_updir"/gcc/go \
-    "$g1_updir"/gcc/java "$g1_updir"/gcc/objc "$g1_updir/gcc/ChangeLog*") | \
+    "$g1_dir"/gotools "$g1_dir"/libada "$g1_dir"/libgfortran \
+    "$g1_dir"/libgo "$g1_dir"/libjava "$g1_dir"/libobjc \
+    "$g1_dir"/libstdc++-v3 "$g1_dir"/gcc/testsuite "$g1_dir"/gcc/ada \
+    "$g1_dir"/gnattools "$g1_dir"/gcc/fortran "$g1_dir"/gcc/go \
+    "$g1_dir"/gcc/java "$g1_dir"/gcc/objc "$g1_dir/gcc/ChangeLog*") | \
     pixz -6t \
-    >redist-ppa/"$g1_updir".orig.tar.xz
-  pushd redist-ppa/"$g1_dir"
-  tar xJf ../"$g1_updir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$g1_dir" -n -y
+    >redist-ppa/"$g1_dir".orig.tar.xz
+  pushd redist-ppa/"$g1_pdir"
+  tar xJf ../"$g1_dir".orig.tar.xz --strip-components=1
+  dh_make -s -p "$g1_pdir" -n -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build/* debian/
   sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-bootstrap-ia16-elf ($gcc_ppa_ver) $distro; urgency=low"
+    echo "gcc-bootstrap-ia16-elf ($gcc_pver) $distro; urgency=low"
     echo
     echo '  * Release.'
     echo
