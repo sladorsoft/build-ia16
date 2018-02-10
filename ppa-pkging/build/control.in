@@ -1,4 +1,4 @@
-Source: gcc-bootstrap-ia16-elf
+Source: gcc-bootstraps-ia16-elf
 Section: devel
 Priority: optional
 Maintainer: TK Chia <tkchia@gmx.com>
@@ -10,7 +10,7 @@ Standards-Version: 3.9.6
 Homepage: https://github.com/tkchia/gcc-ia16
 Vcs-Git: https://github.com/tkchia/gcc-ia16.git
 
-Package: gcc-bootstrap-ia16-elf
+Package: gcc-bootstraps-ia16-elf
 Architecture: any
 Depends: binutils-ia16-elf (>= @bu_ver@), ${shlibs:Depends}, ${misc:Depends}
 Description: GNU C compiler for ia16-elf target (temporary bootstrap package)

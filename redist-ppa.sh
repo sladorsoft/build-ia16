@@ -2,6 +2,16 @@
 
 # TODO: This is still incomplete!  It should also create packages for
 # newlib, GCC proper, and libgcc.
+#
+# This shell script will create Ubuntu source packages which we can pass to
+# launchpad.net (e.g.) to build.  The build environment, options, etc. are
+# --- and _should be_! --- kept in sync with those in build.sh as far as
+# possible.  There are a few important exceptions:
+#
+#   * The packaging scripts (debian/rules) arrange to install .info files in
+#     their own directory (/usr/ia16-elf/info/) rather than the expected place
+#     ($PREFIX/share/info/).  This is to avoid clashing with any .info files
+#     on the host system.
 
 set -e -o pipefail
 cd $(dirname "$0")
@@ -97,8 +107,7 @@ if in_list binutils BUILDLIST; then
   echo "* Packaging binutils *"
   echo "**********************"
   echo
-  # Package up binutils-ia16 as a source package, which we can then pass to
-  # launchpad.net to build.
+  # Package up binutils-ia16 as a source package.
   rm -rf redist-ppa/binutils-ia16-elf_*
   decide_binutils_ver_and_dirs
   mkdir redist-ppa/"$bu_pdir"
@@ -142,8 +151,8 @@ decide_gcc_ver_and_dirs () {
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
   gcc_pver="$gcc_ver"-ppa"$ppa_no"
-  g1_dir=gcc-bootstrap-ia16-elf_"$gcc_ver"
-  g1_pdir=gcc-bootstrap-ia16-elf_"$gcc_pver"
+  g1_dir=gcc-bootstraps-ia16-elf_"$gcc_ver"
+  g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
   g2_dir=gcc-ia16-elf_"$gcc_uver"
   g2_pdir=gcc-ia16-elf_"$gcc_pver"
 }
@@ -154,14 +163,15 @@ if in_list gcc1 BUILDLIST; then
   echo "* Packaging stage 1 GCC *"
   echo "*************************"
   echo
+
   # Package up gcc-ia16 as a source package.  My current idea is that this
-  # `gcc-bootstrap-ia16-elf' package will only be used to build newlib, and
+  # `gcc-bootstraps-ia16-elf' package will only be used to build newlib, and
   # then it can be safely jettisoned.  So I try to pack as little stuff as
   # possible into the `.orig' tarball.
   #
   # (The resulting tarball is still pretty big though (20+ MiB).  There is
   # likely a better way...)
-  rm -rf redist-ppa/gcc-bootstrap-ia16-elf_*
+  rm -rf redist-ppa/gcc-bootstraps-ia16-elf_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   mkdir redist-ppa/"$g1_pdir"
@@ -171,14 +181,18 @@ if in_list gcc1 BUILDLIST; then
   # and C++.  (C++ is needed for gcc/c-family/cilk.c to build...)  This is a
   # bit hard to do with `git archive' alone --- without dirtying the
   # original source tree --- so rope in GNU tar for the task.
+  #
+  # Also take out the boehm-gc/ and libffi/ directories, which we do not
+  # really need at this stage.  Keep gcc/fortran/, gcc/go/, and gcc/java/
+  # around so that libbacktrace/ will not be built for ia16-elf (!).
   (cd gcc-ia16 && \
    git archive --prefix="$g1_dir"/ HEAD | \
    tar --delete --wildcards \
-    "$g1_dir"/gotools "$g1_dir"/libada "$g1_dir"/libgfortran \
-    "$g1_dir"/libgo "$g1_dir"/libjava "$g1_dir"/libobjc \
+    "$g1_dir"/gotools "$g1_dir"/libada "$g1_dir"/libgfortran "$g1_dir"/libgo \
+    "$g1_dir"/libjava "$g1_dir"/libobjc "$g1_dir"/libsanitizer \
     "$g1_dir"/libstdc++-v3 "$g1_dir"/gcc/testsuite "$g1_dir"/gcc/ada \
-    "$g1_dir"/gnattools "$g1_dir"/gcc/fortran "$g1_dir"/gcc/go \
-    "$g1_dir"/gcc/java "$g1_dir"/gcc/objc "$g1_dir/gcc/ChangeLog*") | \
+    "$g1_dir"/gnattools "$g1_dir"/gcc/objc "$g1_dir"/boehm-gc \
+    "$g1_dir"/libffi "$g1_dir/gcc/ChangeLog*") | \
     pixz -6t \
     >redist-ppa/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$g1_pdir"
@@ -190,7 +204,7 @@ if in_list gcc1 BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-bootstrap-ia16-elf ($gcc_pver) $distro; urgency=low"
+    echo "gcc-bootstraps-ia16-elf ($gcc_pver) $distro; urgency=low"
     echo
     echo '  * Release.'
     echo
