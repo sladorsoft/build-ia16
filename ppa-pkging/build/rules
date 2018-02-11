@@ -9,11 +9,17 @@ override_dh_update_autotools_config:
 	# Nope, do not touch config.sub or config.guess .
 
 override_dh_auto_configure:
-	# See redist-ppa.sh .
 	exec dh_auto_configure -O--parallel -- \
 	    --target=ia16-elf --infodir=/usr/ia16-elf/info \
 	    --without-headers --with-newlib --enable-languages=c \
 	    --disable-libssp
+
+override_dh_auto_build-arch:
+	dh_auto_build -a -O--parallel -O--builddirectory=build
+	# See redist-ppa.sh .
+	mkdir -p build/gcc/include-fixed
+	cp gcc/glimits.h build/gcc/include-fixed/limits.h
+	echo timestamp >build/gcc/stmp-fixinc
 
 override_dh_auto_test:
 	# Do not run the test suite at this stage.

@@ -8,10 +8,14 @@
 # --- and _should be_! --- kept in sync with those in build.sh as far as
 # possible.  There are a few important exceptions:
 #
-#   * The packaging scripts (debian/rules) arrange to install .info files in
-#     their own directory (/usr/ia16-elf/info/) rather than the expected place
-#     ($PREFIX/share/info/).  This is to avoid clashing with any .info files
-#     on the host system.
+#   * The respective packaging scripts (ppa-pkging/*/rules, which become
+#     debian/rules) arrange to install .info files in their own directory
+#     (/usr/ia16-elf/info/) rather than the expected place ($PREFIX/share/
+#     info/).  This is to avoid clashing with any .info files for the host
+#     system's binutils, GCC, etc.
+#
+#   * The trimmed-down stage 1 GCC source tree needs some help to correctly
+#     set up gcc/include-fixed/limits.h .
 
 set -e -o pipefail
 cd $(dirname "$0")
@@ -163,7 +167,6 @@ if in_list gcc1 BUILDLIST; then
   echo "* Packaging stage 1 GCC *"
   echo "*************************"
   echo
-
   # Package up gcc-ia16 as a source package.  My current idea is that this
   # `gcc-bootstraps-ia16-elf' package will only be used to build newlib, and
   # then it can be safely jettisoned.  So I try to pack as little stuff as
