@@ -96,8 +96,8 @@ decide_binutils_ver_and_dirs () {
   # I factored out this logic as a function, as several build tasks use it.
   bu_uver="`cat binutils-ia16/bfd/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
-  bu_date="`cd binutils-ia16 && git show --format='%aI' -s HEAD | \
-    sed 's/[A-Z].*//; s/-//g'`"
+  bu_date="`cd binutils-ia16 && git log -n1 --oneline --date=short-local \
+    --format='%ad' | sed 's/-//g'`"
   [ -n "$bu_uver" -a -n "$bu_date" ]
   bu_ver="$bu_uver"-"$bu_date"
   bu_pver="$bu_ver"-ppa"$ppa_no"
@@ -150,8 +150,8 @@ decide_gcc_ver_and_dirs () {
   # $gcc_uver is the GNU upstream version number, and $gcc_date is our
   # downstream commit date.
   gcc_uver="`cat gcc-ia16/gcc/BASE-VER`"
-  gcc_date="`cd gcc-ia16 && git show --format='%aI' -s HEAD | \
-    sed 's/[A-Z].*//; s/-//g'`"
+  gcc_date="`cd gcc-ia16 && git log -n1 --oneline --date=short-local \
+    --format='%ad' | sed 's/-//g'`"
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
   gcc_pver="$gcc_ver"-ppa"$ppa_no"
@@ -219,9 +219,50 @@ if in_list gcc1 BUILDLIST; then
   popd
 fi
 
+decide_newlib_ver_and_dirs () {
+  nl_uver="`cat newlib-ia16/newlib/configure | \
+    sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
+  nl_date="`cd newlib-ia16 && git log -n1 --oneline --date=short-local \
+    --format='%ad' | sed 's/-//g'`"
+  [ -n "$nl_uver" -a -n "$nl_date" ]
+  nl_ver="$nl_uver"-"$nl_date"
+  nl_pver="$nl_ver"-ppa"$ppa_no"
+  nl_dir=libnewlib-ia16-elf_"$nl_ver"
+  nl_pdir=libnewlib-ia16-elf_"$nl_pver"
+}
+
 if in_list newlib BUILDLIST; then
-  echo 'newlib packaging not yet supported.'
-  exit 1
+  echo
+  echo "******************************"
+  echo "* Packaging Newlib C library *"
+  echo "******************************"
+  echo
+  rm -rf redist-ppa/libnewlib-ia16-elf_*
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  decide_newlib_ver_and_dirs
+  mkdir redist-ppa/"$nl_pdir"
+  (cd newlib-ia16 && git archive --prefix="$nl_dir"/ HEAD) | pixz -6t \
+    >redist-ppa/"$nl_dir".orig.tar.xz
+  pushd redist-ppa/"$nl_pdir"
+  tar xJf ../"$nl_dir".orig.tar.xz --strip-components=1
+  dh_make -s -p "$nl_pdir" -n -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../ppa-pkging/build-newlib/* debian/
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
+    debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "libnewlib-ia16-elf ($nl_pver) $distro; urgency=low"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  popd
 fi
 
 if in_list gcc2 BUILDLIST; then
