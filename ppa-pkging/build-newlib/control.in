@@ -1,0 +1,23 @@
+Source: libnewlib-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9), autotools-dev, binutils-ia16-elf (>=
+ @bu_ver@), gcc-bootstraps-ia16-elf (>= @gcc_ver@), quilt, xz-utils
+Standards-Version: 3.9.6
+Homepage: https://github.com/tkchia/newlib-ia16
+Vcs-Git: https://github.com/tkchia/newlib-ia16.git
+
+Package: libnewlib-ia16-elf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: gcc-ia16-elf
+Description: C library and math library, for ia16-elf target
+ Unofficial port of the Newlib C library and math library to the ia16-elf
+ (16-bit Intel x86 CPUs) target.
+ .
+ This is based on the sources of Jenner et al.'s toolchain for IA-16 (see
+ https://sourcery.mentor.com/GNUToolchain/subscription57091?cmpid=11885),
+ with further modifications by Bart Oldeman and TK Chia (see
+ https://github.com/tkchia/newlib-ia16).
+
