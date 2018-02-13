@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# TODO: This is still incomplete!  It should also create packages for
-# newlib, GCC proper, and libgcc.
-#
 # This shell script will create Ubuntu source packages which we can pass to
 # launchpad.net (e.g.) to build.  The build environment, options, etc. are
 # --- and _should be_! --- kept in sync with those in build.sh as far as
@@ -14,8 +11,15 @@
 #     info/).  This is to avoid clashing with any .info files for the host
 #     system's binutils, GCC, etc.
 #
-#   * The trimmed-down stage 1 GCC source tree needs some help to correctly
-#     set up gcc/include-fixed/limits.h .
+#   * The trimmed-down stage 1 and 2 GCC source trees need some help to
+#     correctly set up gcc/include-fixed/limits.h .
+#
+# There is a Personal Package Archive (PPA) for the source packages I have
+# created, at https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/ .
+#
+# TODO: create more fine-grained packages, e.g. rather than one big package
+# gcc-ia16-elf, have separate packages for the C compiler, C++ compiler,
+# libgcc1, etc.
 
 set -e -o pipefail
 cd $(dirname "$0")
@@ -155,10 +159,18 @@ decide_gcc_ver_and_dirs () {
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
   gcc_pver="$gcc_ver"-ppa"$ppa_no"
+  g2_pver="$gcc_pver"
   g1_dir=gcc-bootstraps-ia16-elf_"$gcc_ver"
   g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
-  g2_dir=gcc-ia16-elf_"$gcc_uver"
+  g2_dir=gcc-ia16-elf_"$gcc_ver"
   g2_pdir=gcc-ia16-elf_"$gcc_pver"
+  # Messy temporary hack to work around a Launchpad restriction...
+  if [ 20180210 = "$gcc_date" ]; then
+    g2_ver="$gcc_uver"-"$gcc_date".0
+    g2_pver="$g2_ver"-ppa"$ppa_no"
+    g2_dir=gcc-ia16-elf_"$g2_ver"
+    g2_pdir=gcc-ia16-elf_"$g2_pver"
+  fi
 }
 
 if in_list gcc1 BUILDLIST; then
@@ -266,6 +278,42 @@ if in_list newlib BUILDLIST; then
 fi
 
 if in_list gcc2 BUILDLIST; then
-  echo 'gcc2 packaging not yet supported.'
-  exit 1
+  echo
+  echo "*************************"
+  echo "* Packaging stage 2 GCC *"
+  echo "*************************"
+  echo
+  rm -rf redist-ppa/gcc-ia16-elf_*
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  decide_newlib_ver_and_dirs
+  mkdir redist-ppa/"$g2_pdir"
+  # Copy the source tree over, except for .git* files, untracked files, and
+  # the bigger testsuites.
+  (cd gcc-ia16 && \
+   git archive --prefix="$g2_dir"/ HEAD | \
+   tar --delete --wildcards "$g2_dir"/libjava/testsuite \
+    "$g2_dir"/gcc/testsuite "$g2_dir"/libgomp/testsuite) | \
+    pixz -6t \
+    >redist-ppa/"$g2_dir".orig.tar.xz
+  pushd redist-ppa/"$g2_pdir"
+  tar xJf ../"$g2_dir".orig.tar.xz --strip-components=1
+  dh_make -s -p "$g2_pdir" -n -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../ppa-pkging/build2/* debian/
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" debian/control.in \
+    >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "gcc-ia16-elf ($g2_pver) $distro; urgency=low"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  cd ..
+  popd
 fi
