@@ -10,8 +10,14 @@ Vcs-Git: https://github.com/tkchia/build-ia16.git
 Package: g++-ia16-elf
 Architecture: any
 Depends: gcc-ia16-elf (>= @gcc_ver@)
-Description: C++ compiler for ia16-elf target (stub package)
- This is a dependency package providing the C++ compiler for ia16-elf.
+Description: GNU C++ compiler for ia16-elf target (stub package)
+ This is a dependency package providing the GNU C++ compiler for ia16-elf.
+
+Package: libstdc++6-ia16-elf
+Architecture: any
+Depends: gcc-ia16-elf (>= @gcc_ver@)
+Description: GNU Standard C++ Library v3 for ia16-elf target (stub package)
+ This is a dependency package providing the GNU C++ library for ia16-elf.
 
 Package: libgcc1-ia16-elf
 Architecture: any
