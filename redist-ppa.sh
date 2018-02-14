@@ -40,11 +40,11 @@ in_list () {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|gcc1|newlib|gcc2)
+    clean|binutils|gcc1|newlib|gcc2|stubs)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "gcc1" "newlib" "gcc2")
+      BUILDLIST=("clean" "binutils" "gcc1" "newlib" "gcc2" "stubs")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -55,7 +55,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "redist-ppa options: clean binutils gcc1 newlib gcc2"
+  echo "redist-ppa options: clean binutils gcc1 newlib gcc2 stubs"
   exit 1
 fi
 
@@ -164,6 +164,8 @@ decide_gcc_ver_and_dirs () {
   g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
   g2_dir=gcc-ia16-elf_"$gcc_ver"
   g2_pdir=gcc-ia16-elf_"$gcc_pver"
+  gs_dir=gcc-stubs-ia16-elf_"$gcc_ver"
+  gs_pdir=gcc-stubs-ia16-elf_"$gcc_pver"
   # Messy temporary hack to work around a Launchpad restriction...
   if [ 20180210 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
@@ -314,6 +316,35 @@ if in_list gcc2 BUILDLIST; then
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
   debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  cd ..
+  popd
+fi
+
+if in_list stubs BUILDLIST; then
+  echo
+  echo "**************************"
+  echo "* Creating stub packages *"
+  echo "**************************"
+  echo
+  rm -rf redist-ppa/gcc-stubs-ia16-elf_*
+  decide_gcc_ver_and_dirs
+  mkdir redist-ppa/"$gs_pdir"
+  pushd redist-ppa/"$gs_pdir"
+  dh_make -s -p "$gs_pdir" -n -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../ppa-pkging/build-stubs-gcc/* debian/
+  sed "s|@gcc_ver@|$gcc_ver|g" debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=low"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild --no-tgz-check -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi

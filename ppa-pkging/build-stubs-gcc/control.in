@@ -1,0 +1,27 @@
+Source: gcc-stubs-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9)
+Standards-Version: 3.9.6
+Homepage: https://github.com/tkchia/build-ia16
+Vcs-Git: https://github.com/tkchia/build-ia16.git
+
+Package: g++-ia16-elf
+Architecture: any
+Depends: gcc-ia16-elf (>= @gcc_ver@)
+Description: C++ compiler for ia16-elf target (stub package)
+ This is a dependency package providing the C++ compiler for ia16-elf.
+
+Package: libgcc1-ia16-elf
+Architecture: any
+Depends: gcc-ia16-elf (>= @gcc_ver@)
+Description: GCC support for ia16-elf target (stub package)
+ This is a dependency package providing the libgcc library for ia16-elf.
+
+Package: gcc-doc-ia16-elf
+Architecture: any
+Depends: gcc-ia16-elf (>= @gcc_ver@)
+Description: Documentation for GNU compilers for ia16-elf target (stub package)
+ This is a dependency package providing the documentation for the ia16-elf
+ port of the GNU C and C++ compilers in info format.
