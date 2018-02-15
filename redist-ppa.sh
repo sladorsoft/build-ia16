@@ -167,7 +167,7 @@ decide_gcc_ver_and_dirs () {
   gs_dir=gcc-stubs-ia16-elf_"$gcc_ver"
   gs_pdir=gcc-stubs-ia16-elf_"$gcc_pver"
   # Messy temporary hack to work around a Launchpad restriction...
-  if [ 20180210 = "$gcc_date" ]; then
+  if [ 20180210 = "$gcc_date" -o 20180215 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
     g2_pver="$g2_ver"-ppa"$ppa_no"
     g2_dir=gcc-ia16-elf_"$g2_ver"
