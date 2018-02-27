@@ -154,8 +154,8 @@ decide_gcc_ver_and_dirs () {
   # $gcc_uver is the GNU upstream version number, and $gcc_date is our
   # downstream commit date.
   gcc_uver="`cat gcc-ia16/gcc/BASE-VER`"
-  gcc_date="`cd gcc-ia16 && git log -n1 --oneline --date=short-local \
-    --format='%ad' | sed 's/-//g'`"
+  gcc_date="`cd gcc-ia16 && git log -n1 --oneline --date=iso-strict-local \
+    --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
   gcc_pver="$gcc_ver"-ppa"$ppa_no"
