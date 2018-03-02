@@ -38,6 +38,7 @@ in_list () {
   return 1
 }
 
+distro=
 while [ $# -gt 0 ]; do
   case "$1" in
     clean|binutils|gcc1|newlib|gcc2|stubs)
@@ -45,6 +46,9 @@ while [ $# -gt 0 ]; do
       ;;
     all)
       BUILDLIST=("clean" "binutils" "gcc1" "newlib" "gcc2" "stubs")
+      ;;
+    --distro=?*)
+      distro="${1#--distro=}"
       ;;
     *)
       echo "Unknown option '$1'."
@@ -55,7 +59,8 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "redist-ppa options: clean binutils gcc1 newlib gcc2 stubs"
+  echo "redist-ppa options:"
+  echo "--distro={trusty|xenial|...} clean binutils gcc1 newlib gcc2 stubs"
   exit 1
 fi
 
@@ -73,12 +78,15 @@ if ! which pixz >/dev/null; then
   exit 1
 fi
 
-# Obtain the code name for whatever Linux distribution we are running on, or
-# fall back on a wild guess.
-distro="`sed -n '/^DISTRIB_CODENAME=[[:alnum:]]\+$/ { s/^.*=//; p; q; }' \
-  /etc/lsb-release || :`"
-if [ -z "$distro" ]
-  then distro=xenial; fi
+# If no target Ubuntu distribution is specified, obtain the code name for
+# whatever Linux distribution we are running on, or fall back on a wild
+# guess.
+if [ -z "$distro" ]; then
+  distro="`sed -n '/^DISTRIB_CODENAME=[[:alnum:]]\+$/ { s/^.*=//; p; q; }' \
+    /etc/lsb-release || :`"
+  if [ -z "$distro" ]
+    then distro=xenial; fi
+fi
 
 if in_list clean BUILDLIST; then
   echo
@@ -104,7 +112,7 @@ decide_binutils_ver_and_dirs () {
     --format='%ad' | sed 's/-//g'`"
   [ -n "$bu_uver" -a -n "$bu_date" ]
   bu_ver="$bu_uver"-"$bu_date"
-  bu_pver="$bu_ver"-ppa"$ppa_no"
+  bu_pver="$bu_ver"-ppa"$ppa_no~$distro"
   bu_dir=binutils-ia16-elf_"$bu_ver"
   bu_pdir=binutils-ia16-elf_"$bu_pver"
 }
@@ -158,7 +166,7 @@ decide_gcc_ver_and_dirs () {
     --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
-  gcc_pver="$gcc_ver"-ppa"$ppa_no"
+  gcc_pver="$gcc_ver"-ppa"$ppa_no~$distro"
   g2_pver="$gcc_pver"
   g1_dir=gcc-bootstraps-ia16-elf_"$gcc_ver"
   g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
@@ -169,7 +177,7 @@ decide_gcc_ver_and_dirs () {
   # Messy temporary hack to work around a Launchpad restriction...
   if [ 20180210 = "$gcc_date" -o 20180215 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
-    g2_pver="$g2_ver"-ppa"$ppa_no"
+    g2_pver="$g2_ver"-ppa"$ppa_no~$distro"
     g2_dir=gcc-ia16-elf_"$g2_ver"
     g2_pdir=gcc-ia16-elf_"$g2_pver"
   fi
@@ -244,7 +252,7 @@ decide_newlib_ver_and_dirs () {
   # different newlib binaries compiled from the same source (but different
   # GCC versions).
   nl_ver="$nl_uver"-"$nl_date"-stage1gcc"$gcc_ver"
-  nl_pver="$nl_ver"-ppa"$ppa_no"
+  nl_pver="$nl_ver"-ppa"$ppa_no~$distro"
   nl_dir=libnewlib-ia16-elf_"$nl_ver"
   nl_pdir=libnewlib-ia16-elf_"$nl_pver"
 }
