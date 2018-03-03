@@ -17,6 +17,11 @@
 # There is a Personal Package Archive (PPA) for the source packages I have
 # created, at https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/ .
 #
+# For Ubuntu Trusty, the mainline version of libisl (0.12-2) is too old, so
+# I have copied over the libisl 0.16.1-1 from Jonathon F's PPA
+# (https://launchpad.net/%7Ejonathonf/+archive/ubuntu/gcc-5.3/+packages)
+# into my PPA.
+#
 # TODO: create more fine-grained packages, e.g. rather than one big package
 # gcc-ia16-elf, have separate packages for the C compiler, C++ compiler,
 # libgcc1, etc.
@@ -131,9 +136,11 @@ if in_list binutils BUILDLIST; then
   (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | pixz -6t \
     >redist-ppa/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$bu_pdir"
-  # (Argh!  Do we really need to do this unpacking?)
-  tar xJf ../"$bu_dir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$bu_pdir" -n -y
+  # We do not really need to do this unpacking here:
+  #	tar xJf ../"$bu_dir".orig.tar.xz --strip-components=1
+  # ...but we do need to tell debuild later to ignore all the "removed" files
+  # in the source tree.
+  dh_make -s -p "$bu_pdir" -n -f ../"$bu_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build-binutils/* debian/
   find debian -name '*~' -print0 | xargs -0 rm -f
@@ -149,12 +156,16 @@ if in_list binutils BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  # The dpkg-buildpackage(1) and debsign(1) man pages claim to recognize the
-  # $DEB_SIGN_KEYID and $DEBSIGN_KEYID environment variables respectively. 
-  # In practice though, debuild(1) actually just uses whatever name and
-  # e-mail address is in the changelog to serve as the key id.  So work
-  # around this.
-  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  # (1) Since we do not unpack the .orig tarball at all, we need to tell
+  #	debuild to ignore all the file "removals" in the "unpacked" source
+  #	tree.
+  #
+  # (2) The dpkg-buildpackage(1) and debsign(1) man pages claim to recognize
+  #	the $DEB_SIGN_KEYID and $DEBSIGN_KEYID environment variables
+  #	respectively.  In practice though, debuild(1) actually just uses
+  #	whatever name and e-mail address is in the changelog to serve as the
+  #	key id.  So work around this.
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -221,8 +232,7 @@ if in_list gcc1 BUILDLIST; then
     pixz -6t \
     >redist-ppa/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$g1_pdir"
-  tar xJf ../"$g1_dir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$g1_pdir" -n -y
+  dh_make -s -p "$g1_pdir" -n -f ../"$g1_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build/* debian/
   sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
@@ -236,7 +246,7 @@ if in_list gcc1 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
@@ -271,8 +281,7 @@ if in_list newlib BUILDLIST; then
   (cd newlib-ia16 && git archive --prefix="$nl_dir"/ HEAD) | pixz -6t \
     >redist-ppa/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$nl_pdir"
-  tar xJf ../"$nl_dir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$nl_pdir" -n -y
+  dh_make -s -p "$nl_pdir" -n -f ../"$nl_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build-newlib/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
@@ -287,7 +296,7 @@ if in_list newlib BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -311,8 +320,7 @@ if in_list gcc2 BUILDLIST; then
     pixz -6t \
     >redist-ppa/"$g2_dir".orig.tar.xz
   pushd redist-ppa/"$g2_pdir"
-  tar xJf ../"$g2_dir".orig.tar.xz --strip-components=1
-  dh_make -s -p "$g2_pdir" -n -y
+  dh_make -s -p "$g2_pdir" -n -f ../"$g2_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" debian/control.in \
@@ -327,7 +335,7 @@ if in_list gcc2 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
