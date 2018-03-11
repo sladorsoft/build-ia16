@@ -4,8 +4,8 @@ git clone git@github.com:tkchia/gcc-ia16.git || \
     git clone https://github.com/tkchia/gcc-ia16.git
 git clone git@github.com:tkchia/newlib-ia16.git || \
     git clone https://github.com/tkchia/newlib-ia16.git
-git clone git@github.com:crtc-demos/binutils-ia16.git || \
-    git clone https://github.com/crtc-demos/binutils-ia16.git
+git clone git@github.com:tkchia/binutils-ia16.git || \
+    git clone https://github.com/tkchia/binutils-ia16.git
 if git clone git@github.com:tkchia/reenigne.git || \
    git clone https://github.com/tkchia/reenigne.git; then
   rm -f 86sim
