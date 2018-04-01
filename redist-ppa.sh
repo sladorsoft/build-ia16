@@ -252,16 +252,17 @@ if in_list gcc1 BUILDLIST; then
 fi
 
 decide_newlib_ver_and_dirs () {
+  decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   nl_uver="`cat newlib-ia16/newlib/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
   nl_date="`cd newlib-ia16 && git log -n1 --oneline --date=short-local \
     --format='%ad' | sed 's/-//g'`"
   [ -n "$nl_uver" -a -n "$nl_date" ]
-  # Include the GCC version inside the newlib version, to distinguish between
-  # different newlib binaries compiled from the same source (but different
-  # GCC versions).
-  nl_ver="$nl_uver"-"$nl_date"-stage1gcc"$gcc_ver"
+  # Include the GCC and binutils versions inside the newlib version, to
+  # distinguish between different newlib binaries compiled from the same
+  # source (but different GCC and binutils versions).
+  nl_ver="$nl_uver"-"$nl_date"-stage1gcc"$gcc_ver"-binutils"$bu_ver"
   nl_pver="$nl_ver"-ppa"$ppa_no~$distro"
   nl_dir=libnewlib-ia16-elf_"$nl_ver"
   nl_pdir=libnewlib-ia16-elf_"$nl_pver"
