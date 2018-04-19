@@ -77,12 +77,6 @@ curr_tm="`date -R`"
 ppa_no="`date -d "$curr_tm" +%y%m%d%H%M`"
 ppa_no="${ppa_no%?}"
 
-# Do some sanity checks.
-if ! which pixz >/dev/null; then
-  echo "Cannot find 'pixz' program --- please install!"
-  exit 1
-fi
-
 # If no target Ubuntu distribution is specified, obtain the code name for
 # whatever Linux distribution we are running on, or fall back on a wild
 # guess.
@@ -92,6 +86,13 @@ if [ -z "$distro" ]; then
   if [ -z "$distro" ]
     then distro=xenial; fi
 fi
+
+case "$distro" in
+  '' | *[^-0-9a-z]*)
+    echo "Bad distribution name (\`$distro')!"
+    exit 1
+    ;;
+esac
 
 if in_list clean BUILDLIST; then
   echo
@@ -129,12 +130,12 @@ if in_list binutils BUILDLIST; then
   echo "**********************"
   echo
   # Package up binutils-ia16 as a source package.
-  rm -rf redist-ppa/binutils-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/binutils-ia16-elf_*
   decide_binutils_ver_and_dirs
-  mkdir redist-ppa/"$bu_pdir"
+  mkdir -p redist-ppa/"$distro"/"$bu_pdir"
   # Copy the source tree over, but do not include .git* or untracked files.
-  (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | pixz -6t \
-    >redist-ppa/"$bu_dir".orig.tar.xz
+  (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | xz -9v \
+    >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$bu_pdir"
   # We do not really need to do this unpacking here:
   #	tar xJf ../"$bu_dir".orig.tar.xz --strip-components=1
@@ -142,7 +143,7 @@ if in_list binutils BUILDLIST; then
   # in the source tree.
   dh_make -s -p "$bu_pdir" -n -f ../"$bu_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../ppa-pkging/build-binutils/* debian/
+  cp -a ../../../ppa-pkging/build-binutils/* debian/
   find debian -name '*~' -print0 | xargs -0 rm -f
   # TODO:
   #   * Generate the most recent changelog entry in a saner way.  E.g. 
@@ -207,10 +208,10 @@ if in_list gcc1 BUILDLIST; then
   #
   # (The resulting tarball is still pretty big though (20+ MiB).  There is
   # likely a better way...)
-  rm -rf redist-ppa/gcc-bootstraps-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/gcc-bootstraps-ia16-elf_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
-  mkdir redist-ppa/"$g1_pdir"
+  mkdir -p redist-ppa/"$distro"/"$g1_pdir"
   # Copy the source tree over, but do not include .git* or untracked files.
   #
   # Also exclude the _huge_ testsuite, and language support other than for C
@@ -229,12 +230,12 @@ if in_list gcc1 BUILDLIST; then
     "$g1_dir"/libstdc++-v3 "$g1_dir"/gcc/testsuite "$g1_dir"/gcc/ada \
     "$g1_dir"/gnattools "$g1_dir"/gcc/objc "$g1_dir"/boehm-gc \
     "$g1_dir"/libffi "$g1_dir/gcc/ChangeLog*") | \
-    pixz -6t \
-    >redist-ppa/"$g1_dir".orig.tar.xz
-  pushd redist-ppa/"$g1_pdir"
+    xz -9v \
+    >redist-ppa/"$distro"/"$g1_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$g1_pdir"
   dh_make -s -p "$g1_pdir" -n -f ../"$g1_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../ppa-pkging/build/* debian/
+  cp -a ../../../ppa-pkging/build/* debian/
   sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
@@ -274,17 +275,17 @@ if in_list newlib BUILDLIST; then
   echo "* Packaging Newlib C library *"
   echo "******************************"
   echo
-  rm -rf redist-ppa/libnewlib-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/libnewlib-ia16-elf_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
-  mkdir redist-ppa/"$nl_pdir"
-  (cd newlib-ia16 && git archive --prefix="$nl_dir"/ HEAD) | pixz -6t \
-    >redist-ppa/"$nl_dir".orig.tar.xz
-  pushd redist-ppa/"$nl_pdir"
+  mkdir -p redist-ppa/"$distro"/"$nl_pdir"
+  (cd newlib-ia16 && git archive --prefix="$nl_dir"/ HEAD) | xz -9v \
+    >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$nl_pdir"
   dh_make -s -p "$nl_pdir" -n -f ../"$nl_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../ppa-pkging/build-newlib/* debian/
+  cp -a ../../../ppa-pkging/build-newlib/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
     debian/control.in >debian/control
   rm debian/control.in
@@ -307,23 +308,23 @@ if in_list gcc2 BUILDLIST; then
   echo "* Packaging stage 2 GCC *"
   echo "*************************"
   echo
-  rm -rf redist-ppa/gcc-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/gcc-ia16-elf_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
-  mkdir redist-ppa/"$g2_pdir"
+  mkdir -p redist-ppa/"$distro"/"$g2_pdir"
   # Copy the source tree over, except for .git* files, untracked files, and
   # the bigger testsuites.
   (cd gcc-ia16 && \
    git archive --prefix="$g2_dir"/ HEAD | \
    tar --delete --wildcards "$g2_dir"/libjava/testsuite \
     "$g2_dir"/gcc/testsuite "$g2_dir"/libgomp/testsuite) | \
-    pixz -6t \
-    >redist-ppa/"$g2_dir".orig.tar.xz
-  pushd redist-ppa/"$g2_pdir"
+    xz -9v \
+    >redist-ppa/"$distro"/"$g2_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$g2_pdir"
   dh_make -s -p "$g2_pdir" -n -f ../"$g2_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../ppa-pkging/build2/* debian/
+  cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" debian/control.in \
     >debian/control
   rm debian/control.in
@@ -347,13 +348,13 @@ if in_list stubs BUILDLIST; then
   echo "* Creating stub packages *"
   echo "**************************"
   echo
-  rm -rf redist-ppa/gcc-stubs-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/gcc-stubs-ia16-elf_*
   decide_gcc_ver_and_dirs
-  mkdir redist-ppa/"$gs_pdir"
-  pushd redist-ppa/"$gs_pdir"
+  mkdir -p redist-ppa/"$distro"/"$gs_pdir"
+  pushd redist-ppa/"$distro"/"$gs_pdir"
   dh_make -s -p "$gs_pdir" -n -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../ppa-pkging/build-stubs-gcc/* debian/
+  cp -a ../../../ppa-pkging/build-stubs-gcc/* debian/
   sed "s|@gcc_ver@|$gcc_ver|g" debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
