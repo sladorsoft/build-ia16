@@ -23,3 +23,6 @@ wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2
 tar -xjf isl-0.16.1.tar.bz2
 git clone git@github.com:tkchia/PDCurses.git pdcurses || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
+wget https://github.com/andrewwutw/build-djgpp/releases/download/v2.8/` \
+  `djgpp-linux64-gcc720.tar.bz2
+tar -xjf djgpp-linux64-gcc720.tar.bz2
