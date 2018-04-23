@@ -36,7 +36,7 @@ while [ $# -gt 0 ]; do
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -407,21 +407,28 @@ if in_list prereqs-djgpp BUILDLIST; then
   rm -rf build-gmp-djgpp
   mkdir build-gmp-djgpp
   pushd build-gmp-djgpp
-  ../gmp-6.1.2/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee build.log
+  ../gmp-6.1.2/configure --target=i586-pc-msdosdjgpp \
+    --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
+    --disable-shared 2>&1 | tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
   rm -rf build-mpfr-djgpp
   mkdir build-mpfr-djgpp
   pushd build-mpfr-djgpp
-  ../mpfr-3.1.5/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee -a build.log
+  ../mpfr-3.1.5/configure --target=i586-pc-msdosdjgpp \
+    --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
+    --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee -a build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
   rm -rf build-mpc-djgpp
   mkdir build-mpc-djgpp
   pushd build-mpc-djgpp
-  ../mpc-1.0.3/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee -a build.log
+  ../mpc-1.0.3/configure --target=i586-pc-msdosdjgpp \
+    --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
+    --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" \
+    --disable-shared 2>&1 | tee -a build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
@@ -446,9 +453,21 @@ if in_list binutils-djgpp BUILDLIST; then
   rm -rf build-binutils-djgpp
   mkdir build-binutils-djgpp
   pushd build-binutils-djgpp
-  ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
-  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
+  # Use a short program prefix "i16" to try to keep the filename component
+  # unique for the first 8 characters.
+  ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
+    --program-prefix=i16 --prefix="$PREFIX" \
+    --datadir="$PREFIX-djgpp"/ia16-elf \
+    --infodir="$PREFIX-djgpp"/ia16-elf/info \
+    --localedir="$PREFIX-djgpp"/ia16-elf/locale \
+    --disable-gdb --disable-libdecnumber --disable-readline --disable-sim \
+    --disable-nls 2>&1 | tee build.log
+  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 \
+    | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-djgpp 2>&1 | tee -a build.log
+  # We do not really need these...
+  rm -f "$PREFIX-djgpp"/bin/i16ld.bfd.exe \
+	"$PREFIX-djgpp"/ia16-elf/bin/ld.bfd.exe
   popd
 fi
 
@@ -463,13 +482,30 @@ if in_list gcc-djgpp BUILDLIST; then
   pushd build-djgpp
   OLDPATH=$PATH
   export PATH=$PREFIX-djgpp/bin:$PATH
-  ../gcc-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf --program-prefix=ia16-elf- --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" --with-mpc="$PREFIX-djgpp-prereqs" $EXTRABUILD2OPTS --with-isl="$PREFIX-djgpp-prereqs" 2>&1 | tee build.log
+  ../gcc-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
+    --program-prefix=i16 --prefix="$PREFIX" \
+    --datadir="$PREFIX-djgpp"/ia16-elf \
+    --infodir="$PREFIX-djgpp"/ia16-elf/info \
+    --localedir="$PREFIX-djgpp"/ia16-elf/locale --disable-libssp \
+    --enable-languages=$LANGUAGES --with-gmp="$PREFIX-djgpp-prereqs" \
+    --with-mpfr="$PREFIX-djgpp-prereqs" --with-mpc="$PREFIX-djgpp-prereqs" \
+    $EXTRABUILD2OPTS --with-isl="$PREFIX-djgpp-prereqs" 2>&1 | tee build.log
   # `-Wno-narrowing' suppresses this error at configuration time (for now):
   #	"checking whether byte ordering is bigendian... unknown
   #	 configure: error: unknown endianness
   #	 presetting ac_cv_c_bigendian=no (or yes) will help"
-  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2 -Wno-narrowing' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
+  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2 -Wno-narrowing' \
+    'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-djgpp 2>&1 | tee -a build.log
+  # Give names which are more DOS-compatible to some of the user-invocable
+  # programs.
+  mv "$PREFIX-djgpp"/bin/i16g++.exe "$PREFIX-djgpp"/bin/i16gxx.exe
+  mv "$PREFIX-djgpp"/bin/i16c++.exe "$PREFIX-djgpp"/bin/i16cxx.exe
+  # Update the names of the man pages too...
+  mv "$PREFIX-djgpp"/share/man/man1/i16g++.1 \
+     "$PREFIX-djgpp"/share/man/man1/i16gxx.1
+  # And...
+  rm -f "$PREFIX-djgpp"/bin/ia16-elf-gcc-6.3.0.exe
   export PATH=$OLDPATH
   popd
 fi
