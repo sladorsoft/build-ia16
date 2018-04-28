@@ -11,8 +11,11 @@ REDIST_PPA="$HERE/redist-ppa"
 PARALLEL="-j 4"
 #PARALLEL=""
 
-# Set this to false to disable C++ (speed up build a bit).
+# Set this to false to disable C++ (speed up build a bit) for Linux and
+# Windows hosts.
 WITHCXX=true
+# Set this to false to disable C++ for DJGPP/MS-DOS.
+WITHCXXDJGPP=false
 
 in_list () {
   local needle=$1
@@ -59,6 +62,14 @@ if $WITHCXX; then
 else
   LANGUAGES="c"
   EXTRABUILD2OPTS=
+fi
+
+if $WITHCXXDJGPP; then
+  LANGUAGESDJGPP="c,c++"
+  EXTRABUILD2OPTSDJGPP="--with-newlib --disable-libstdcxx-dual-abi"
+else
+  LANGUAGESDJGPP="c"
+  EXTRABUILD2OPTSDJGPP=
 fi
 
 BIN=$HERE/prefix/bin
@@ -392,8 +403,10 @@ if in_list clean-djgpp BUILDLIST; then
   echo "* Cleaning DJGPP *"
   echo "******************"
   echo
-  rm -rf "$PREFIX-djgpp"
-  mkdir -p "$PREFIX-djgpp/bin"
+  rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-binutils" \
+	 "$PREFIX-djgpp-gcc"
+  mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" \
+	   "$PREFIX-djgpp-binutils/bin" "$PREFIX-djgpp-gcc/bin"
 fi
 
 if in_list prereqs-djgpp BUILDLIST; then
@@ -439,10 +452,24 @@ if in_list prereqs-djgpp BUILDLIST; then
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
-  mkdir "$PREFIX-djgpp/ia16-elf"
-  cp -R "$PREFIX/ia16-elf/lib" "$PREFIX-djgpp/ia16-elf"
-  cp -R "$PREFIX/ia16-elf/include" "$PREFIX-djgpp/ia16-elf"
+  # Instead of copying over everything in $PREFIX/ia16-elf/{lib, include} ---
+  # including any C++ libraries --- just install Newlib into the DJGPP tree.
+  # Create a separate tree dedicated to Newlib, then hard link everything.
+  pushd build-newlib
+  make install prefix="$PREFIX-djgpp-newlib"
+  cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
+  popd
 fi
+
+djgpp_symlink () {
+  rm -f "$2"
+  "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubify -g "$2"
+  # Set argv[0], because "i16ranlib.exe" does not really fit into 8.3, and
+  # we need the whole "ranlib" part around in argv[0].
+  "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubedit "$2" \
+    runfile="`basename "$1" .exe`" argv0="`basename "$2" .exe`"
+  chmod +x "$2"
+}
 
 if in_list binutils-djgpp BUILDLIST; then
   echo
@@ -456,19 +483,46 @@ if in_list binutils-djgpp BUILDLIST; then
   # Use a short program prefix "i16" to try to keep the filename component
   # unique for the first 8 characters.
   ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
-    --program-prefix=i16 --prefix="$PREFIX" \
+    --program-prefix=i16 --prefix="$PREFIX-djgpp" \
     --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale \
     --disable-gdb --disable-libdecnumber --disable-readline --disable-sim \
     --disable-nls 2>&1 | tee build.log
+  # The binutils include a facility to allow `ar' and `ranlib' to be invoked
+  # as the same executable, and likewise for `objcopy' and `strip'.  However,
+  # this facility is disabled in the source.  Do a hack to re-enable it.
+  mkdir -p binutils
+  cp ../binutils-ia16/binutils/maybe-ranlib.c binutils/is-ranlib.c
+  cp ../binutils-ia16/binutils/maybe-ranlib.c binutils/not-ranlib.c
+  cp ../binutils-ia16/binutils/maybe-strip.c binutils/is-strip.c
+  cp ../binutils-ia16/binutils/maybe-strip.c binutils/not-strip.c
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 \
     | tee -a build.log
-  make $PARALLEL install prefix=$PREFIX-djgpp 2>&1 | tee -a build.log
-  # We do not really need these...
-  rm -f "$PREFIX-djgpp"/bin/i16ld.bfd.exe \
-	"$PREFIX-djgpp"/ia16-elf/bin/ld.bfd.exe
+  make $PARALLEL install prefix="$PREFIX-djgpp-binutils" \
+    datadir="$PREFIX-djgpp-binutils"/ia16-elf \
+    infodir="$PREFIX-djgpp-binutils"/ia16-elf/info \
+    localedir="$PREFIX-djgpp-binutils"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
+  pushd "$PREFIX-djgpp-binutils"
+  # Remove these, since they seriously disagree with MS-DOS's 8.3 file
+  # naming scheme.  We should not really need them anyway.
+  #
+  # Also remove the info hierarchy root, to avoid clashes.
+  rm -f bin/i16ld.bfd.exe ia16-elf/bin/ld.bfd.exe ia16-elf/info/dir
+  # Turn `ranlib' into a DJGPP-style "symbolic link" to `ar'.  Ditto for
+  # `objcopy' and `strip'.
+  #
+  # Also rename `i16objcopy.exe' to fit in 8.3 (else the new `i16strip.exe'
+  # "symlink" may not find it...).
+  djgpp_symlink bin/i16ar.exe bin/i16ranlib.exe
+  djgpp_symlink ia16-elf/bin/ar.exe ia16-elf/bin/ranlib.exe
+  djgpp_symlink bin/i16objco.exe bin/i16strip.exe
+  djgpp_symlink ia16-elf/bin/objcopy.exe ia16-elf/bin/strip.exe
+  mv bin/i16objcopy.exe bin/i16objco.exe
+  popd
+  # Now (really) hard-link everything into the grand unified directory.
+  cp -lrf "$PREFIX-djgpp-binutils"/* "$PREFIX-djgpp"
 fi
 
 if in_list gcc-djgpp BUILDLIST; then
@@ -483,29 +537,42 @@ if in_list gcc-djgpp BUILDLIST; then
   OLDPATH=$PATH
   export PATH=$PREFIX-djgpp/bin:$PATH
   ../gcc-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
-    --program-prefix=i16 --prefix="$PREFIX" \
-    --datadir="$PREFIX-djgpp"/ia16-elf \
+    --program-prefix=i16 --with-gcc-major-version-only \
+    --prefix="$PREFIX-djgpp" --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale --disable-libssp \
-    --enable-languages=$LANGUAGES --with-gmp="$PREFIX-djgpp-prereqs" \
+    --enable-languages=$LANGUAGESDJGPP --with-gmp="$PREFIX-djgpp-prereqs" \
     --with-mpfr="$PREFIX-djgpp-prereqs" --with-mpc="$PREFIX-djgpp-prereqs" \
-    $EXTRABUILD2OPTS --with-isl="$PREFIX-djgpp-prereqs" 2>&1 | tee build.log
+    $EXTRABUILD2OPTSDJGPP --with-isl="$PREFIX-djgpp-prereqs" 2>&1 \
+    | tee build.log
   # `-Wno-narrowing' suppresses this error at configuration time (for now):
   #	"checking whether byte ordering is bigendian... unknown
   #	 configure: error: unknown endianness
   #	 presetting ac_cv_c_bigendian=no (or yes) will help"
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2 -Wno-narrowing' \
     'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
-  make $PARALLEL install prefix=$PREFIX-djgpp 2>&1 | tee -a build.log
-  # Give names which are more DOS-compatible to some of the user-invocable
-  # programs.
-  mv "$PREFIX-djgpp"/bin/i16g++.exe "$PREFIX-djgpp"/bin/i16gxx.exe
-  mv "$PREFIX-djgpp"/bin/i16c++.exe "$PREFIX-djgpp"/bin/i16cxx.exe
-  # Update the names of the man pages too...
-  mv "$PREFIX-djgpp"/share/man/man1/i16g++.1 \
-     "$PREFIX-djgpp"/share/man/man1/i16gxx.1
-  # And...
-  rm -f "$PREFIX-djgpp"/bin/ia16-elf-gcc-6.3.0.exe
-  export PATH=$OLDPATH
+  make $PARALLEL install prefix="$PREFIX-djgpp-gcc" \
+    datadir="$PREFIX-djgpp-gcc"/ia16-elf \
+    infodir="$PREFIX-djgpp-gcc"/ia16-elf/info \
+    localedir="$PREFIX-djgpp-gcc"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
+  # Give names which are more DOS-compatible to some of the user-invocable
+  # programs.  Update the man pages' names too.
+  pushd "$PREFIX-djgpp-gcc"
+  if [[ ",$LANGUAGESDJGPP," = *,c++,* ]]; then
+    mv bin/i16g++.exe bin/i16gxx.exe
+    mv bin/i16c++.exe bin/i16cxx.exe
+    djgpp_symlink bin/i16gxx.exe bin/i16cxx.exe
+    mv share/man/man1/i16g++.1 share/man/man1/i16gxx.1
+  fi
+  # Remove the fsf-funding(7), gfdl(7), and gpl(7) man pages --- they might
+  # clash with those from a host (DJGPP's) GCC installation.  And remove the
+  # info hierarchy root.
+  rm -f share/man/man7/fsf-funding.7 share/man/man7/gfdl.7 \
+	share/man/man7/gpl.7 ia16-elf/info/dir
+  # And...
+  rm -f bin/ia16-elf-gcc-6.30.exe
+  popd
+  export PATH=$OLDPATH
+  cp -lrf "$PREFIX-djgpp-gcc"/* "$PREFIX-djgpp"
 fi
