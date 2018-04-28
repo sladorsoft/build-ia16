@@ -136,7 +136,7 @@ if in_list binutils BUILDLIST; then
   # Copy the source tree over, but do not include .git* or untracked files.
   (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | xz -9v \
     >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
-  pushd redist-ppa/"$bu_pdir"
+  pushd redist-ppa/"$distro"/"$bu_pdir"
   # We do not really need to do this unpacking here:
   #	tar xJf ../"$bu_dir".orig.tar.xz --strip-components=1
   # ...but we do need to tell debuild later to ignore all the "removed" files
