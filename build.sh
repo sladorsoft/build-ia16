@@ -462,12 +462,9 @@ if in_list prereqs-djgpp BUILDLIST; then
 fi
 
 djgpp_symlink () {
-  rm -f "$2"
   "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubify -g "$2"
-  # Set argv[0], because "i16ranlib.exe" does not really fit into 8.3, and
-  # we need the whole "ranlib" part around in argv[0].
   "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubedit "$2" \
-    runfile="`basename "$1" .exe`" argv0="`basename "$2" .exe`"
+    runfile="`basename "$1" .exe`"
   chmod +x "$2"
 }
 
@@ -511,15 +508,24 @@ if in_list binutils-djgpp BUILDLIST; then
   # Also remove the info hierarchy root, to avoid clashes.
   rm -f bin/i16ld.bfd.exe ia16-elf/bin/ld.bfd.exe ia16-elf/info/dir
   # Turn `ranlib' into a DJGPP-style "symbolic link" to `ar'.  Ditto for
-  # `objcopy' and `strip'.
-  #
-  # Also rename `i16objcopy.exe' to fit in 8.3 (else the new `i16strip.exe'
-  # "symlink" may not find it...).
-  djgpp_symlink bin/i16ar.exe bin/i16ranlib.exe
+  # `objcopy' and `strip'.  Also compress all executables in ia16-elf/bin/.
+  rm -f ia16-elf/bin/ranlib.exe ia16-elf/bin/strip.exe
+  upx -9 ia16-elf/bin/*.exe
   djgpp_symlink ia16-elf/bin/ar.exe ia16-elf/bin/ranlib.exe
-  djgpp_symlink bin/i16objco.exe bin/i16strip.exe
   djgpp_symlink ia16-elf/bin/objcopy.exe ia16-elf/bin/strip.exe
-  mv bin/i16objcopy.exe bin/i16objco.exe
+  # Replace bin/i16as.exe etc. with programs that hand over to ia16-elf/bin/
+  # as.exe etc.  Also compress all executables in bin/.
+  rm -f bin/i16butil.exe
+  for f in ar as ld nm objcopy objdump ranlib readelf strip; do
+    rm -f bin/i16"$f".exe
+  done
+  upx -9 bin/*.exe
+  i586-pc-msdosdjgpp-gcc -Os -o bin/i16butil.exe \
+    ../djgpp-fdos-pkging/i16butil.c
+  upx -9 bin/i16butil.exe
+  for f in ar as ld nm objcopy objdump ranlib readelf strip; do
+    djgpp_symlink bin/i16butil.exe bin/i16"$f".exe
+  done
   popd
   # Now (really) hard-link everything into the grand unified directory.
   cp -lrf "$PREFIX-djgpp-binutils"/* "$PREFIX-djgpp"
@@ -556,9 +562,14 @@ if in_list gcc-djgpp BUILDLIST; then
     infodir="$PREFIX-djgpp-gcc"/ia16-elf/info \
     localedir="$PREFIX-djgpp-gcc"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
+  pushd "$PREFIX-djgpp-gcc"
+  # We do not need this.
+  rm -f bin/ia16-elf-gcc-?.exe
+  # Compress remaining executables.
+  upx -9 bin/*.exe libexec/gcc/ia16-elf/?/*.exe \
+	 libexec/gcc/ia16-elf/?/install-tools/*.exe
   # Give names which are more DOS-compatible to some of the user-invocable
   # programs.  Update the man pages' names too.
-  pushd "$PREFIX-djgpp-gcc"
   if [[ ",$LANGUAGESDJGPP," = *,c++,* ]]; then
     mv bin/i16g++.exe bin/i16gxx.exe
     mv bin/i16c++.exe bin/i16cxx.exe
@@ -570,8 +581,6 @@ if in_list gcc-djgpp BUILDLIST; then
   # info hierarchy root.
   rm -f share/man/man7/fsf-funding.7 share/man/man7/gfdl.7 \
 	share/man/man7/gpl.7 ia16-elf/info/dir
-  # And...
-  rm -f bin/ia16-elf-gcc-6.30.exe
   popd
   export PATH=$OLDPATH
   cp -lrf "$PREFIX-djgpp-gcc"/* "$PREFIX-djgpp"
