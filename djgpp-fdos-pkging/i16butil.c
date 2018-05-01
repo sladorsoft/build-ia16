@@ -14,11 +14,20 @@
 #include <strings.h>
 #include <unistd.h>
 
+#define P(name)		{ sizeof(name) - 1 < 5 ? sizeof(name) - 1 : 5, \
+			  name }
+
 int main(int argc, char **argv, char **envp)
 {
-	static const char * const progs[] = { "ar", "as", "ld", "nm",
-	    "objcopy", "objdump", "ranlib", "readelf", "strip", NULL };
-	const char *base = argv[0], *p, * const *prog;
+	typedef struct {
+		size_t cmp_len;
+		char name[8];
+	} prog_t;
+	static const prog_t progs[] =
+		{ P("ar"), P("as"), P("ld"), P("nm"), P("objcopy"),
+		  P("objdump"), P("ranlib"), P("readelf"), P("strip"), P("") };
+	const prog_t *prog;
+	const char *base = argv[0], *p;
 	size_t dir_len;
 	char *q;
 	setlocale(LC_CTYPE, "POSIX");	/* for strncasecmp(...) */
@@ -29,11 +38,11 @@ int main(int argc, char **argv, char **envp)
 	memcpy(new_path, argv[0], dir_len);
 	if (strncasecmp(base, "i16", 3) == 0)
 		base += 3;
-	for (prog = progs; *prog; ++prog) {
-		if (strncasecmp(base, *prog, 5) == 0) {
+	for (prog = progs; prog->cmp_len; ++prog) {
+		if (strncasecmp(base, prog->name, prog->cmp_len) == 0) {
 			q = new_path + dir_len;
 			q = stpcpy(q, "../ia16-elf/bin/");
-			q = stpcpy(q, *prog);
+			q = stpcpy(q, prog->name);
 			stpcpy(q, ".exe");
 			argv[0] = new_path;
 			execve(new_path, argv, envp);
