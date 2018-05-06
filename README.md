@@ -27,8 +27,8 @@
             │      ./build.sh extra ...           │
             ├◂────────────┘                       │
             ├─────────────┐                       │
-            │             ▾                       │
-            ▾      ./redist-ppa.sh all            │
+            │             ▾                       ▾
+            ▾      ./redist-ppa.sh all    ./redist-djgpp.sh
           «END» ◂─────────┴◂──────────────────────┘
 
 A pre-compiled [Ubuntu Personal Package Archive](https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/) is now available.

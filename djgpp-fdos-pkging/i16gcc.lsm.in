@@ -1,0 +1,14 @@
+Begin3
+Title:           IA-16 GCC
+Version:         @gcc_ver@
+Entered-date:    @date@
+Description:     GNU C compiler for ia16-elf target (on 32-bit DJGPP host)
+Keywords:        gcc, compiler, c, c99, c11, djgpp, ia16, elf
+Author:
+Maintained-by:
+Primary-site:    https://github.com/tkchia/build-ia16/releases/
+Alternate-site:
+Original-site:   https://github.com/tkchia/gcc-ia16/
+Platforms:       DOS, Linux
+Copying-policy:  GNU General Public License, version 3 or later
+End

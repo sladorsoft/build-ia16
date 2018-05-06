@@ -1,0 +1,15 @@
+Begin3
+Title:           IA-16 GNU Binutils
+Version:         @bu_ver@
+Entered-date:    @date@
+Description:     GNU binary utilities, for ia16-elf target (on 32-bit DJGPP
+                 host)
+Keywords:        gcc, compiler, binutils, as, ld, djgpp, ia16, elf
+Author:
+Maintained-by:
+Primary-site:    https://github.com/tkchia/build-ia16/releases/
+Alternate-site:
+Original-site:   https://github.com/tkchia/binutils-ia16/
+Platforms:       DOS, Linux
+Copying-policy:  GNU General Public License, version 3 or later
+End
