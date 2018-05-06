@@ -35,11 +35,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|extra|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp)
+    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|extra|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -50,7 +50,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test extra redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test extra redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -455,8 +455,12 @@ if in_list prereqs-djgpp BUILDLIST; then
   # Instead of copying over everything in $PREFIX/ia16-elf/{lib, include} ---
   # including any C++ libraries --- just install Newlib into the DJGPP tree.
   # Create a separate tree dedicated to Newlib, then hard link everything.
+  #
+  # Remove libg.a for each multilib --- it is just a copy of the corresponding
+  # libc.a .
   pushd build-newlib
   make install prefix="$PREFIX-djgpp-newlib"
+  find "$PREFIX-djgpp-newlib" -name libg.a -print0 | xargs -0 rm -f
   cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
   popd
 fi
@@ -502,7 +506,7 @@ if in_list binutils-djgpp BUILDLIST; then
     localedir="$PREFIX-djgpp-binutils"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
   pushd "$PREFIX-djgpp-binutils"
-  # Remove these, since they seriously disagree with MS-DOS's 8.3 file
+  # Remove *ld.bfd.exe, since they seriously disagree with MS-DOS's 8.3 file
   # naming scheme.  We should not really need them anyway.
   #
   # Also remove the info hierarchy root, to avoid clashes.
@@ -563,8 +567,11 @@ if in_list gcc-djgpp BUILDLIST; then
     localedir="$PREFIX-djgpp-gcc"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
   pushd "$PREFIX-djgpp-gcc"
-  # We do not need this.
-  rm -f bin/ia16-elf-gcc-?.exe
+  # We do not need the copy of the GCC driver with a long name.
+  #
+  # Also remove internationalization stuff for now (I may put this back
+  # later if someone really needs/wants it).
+  rm -rf bin/ia16-elf-gcc-?.exe ia16-elf/locale
   # Compress remaining executables.
   upx -9 bin/*.exe libexec/gcc/ia16-elf/?/*.exe \
 	 libexec/gcc/ia16-elf/?/install-tools/*.exe
@@ -584,4 +591,13 @@ if in_list gcc-djgpp BUILDLIST; then
   popd
   export PATH=$OLDPATH
   cp -lrf "$PREFIX-djgpp-gcc"/* "$PREFIX-djgpp"
+fi
+
+if in_list redist-djgpp BUILDLIST; then
+  echo
+  echo "*****************************************************"
+  echo "* Making redistributable DJGPP packages for FreeDOS *"
+  echo "*****************************************************"
+  echo
+  ./redist-djgpp.sh
 fi
