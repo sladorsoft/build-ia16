@@ -8,6 +8,7 @@ export HERE="$(cd "$SCRIPTDIR" && pwd)"
 PREFIX="$HERE/prefix"
 REDIST="$HERE/redist"
 REDIST_PPA="$HERE/redist-ppa"
+REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
 
@@ -91,7 +92,7 @@ if in_list clean BUILDLIST; then
   echo "* Cleaning *"
   echo "************"
   echo
-  rm -rf "$PREFIX" "$REDIST" "$REDIST_PPA"
+  rm -rf "$PREFIX" "$REDIST" "$REDIST_PPA" "$REDIST_DJGPP"
   mkdir -p "$PREFIX/bin"
 fi
 
