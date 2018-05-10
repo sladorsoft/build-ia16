@@ -405,7 +405,7 @@ if in_list clean-djgpp BUILDLIST; then
   echo "******************"
   echo
   rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-binutils" \
-	 "$PREFIX-djgpp-gcc"
+	 "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
   mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" \
 	   "$PREFIX-djgpp-binutils/bin" "$PREFIX-djgpp-gcc/bin"
 fi
