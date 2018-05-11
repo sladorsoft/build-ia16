@@ -36,7 +36,8 @@ decide_gcc_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcc.lsm.in >redist-djgpp/appinfo/i16gcc.lsm
 ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/djgpp
-(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel -x '*lto*')
+(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel)
+(cd redist-djgpp && zip -d i16gcc.zip '*LTO*')
 rm redist-djgpp/appinfo/*.lsm
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gclto.lsm.in >redist-djgpp/appinfo/i16gclto.lsm
