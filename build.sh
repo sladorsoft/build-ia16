@@ -421,9 +421,11 @@ if in_list prereqs-djgpp BUILDLIST; then
   rm -rf build-gmp-djgpp
   mkdir build-gmp-djgpp
   pushd build-gmp-djgpp
+  # This installation of GMP will probably not need to multiply
+  # super-humongous integers, so we can disable the use of FFT...
   ../gmp-6.1.2/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
-    --disable-shared 2>&1 | tee build.log
+    --disable-shared --disable-fft 2>&1 | tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
@@ -484,13 +486,16 @@ if in_list binutils-djgpp BUILDLIST; then
   pushd build-binutils-djgpp
   # Use a short program prefix "i16" to try to keep the filename component
   # unique for the first 8 characters.
+  #
+  # Also, to save installation space, disable support for plugins, localized
+  # messages, and LTO --- for now.
   ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
     --program-prefix=i16 --prefix="$PREFIX-djgpp" \
     --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale \
     --disable-gdb --disable-libdecnumber --disable-readline --disable-sim \
-    --disable-nls 2>&1 | tee build.log
+    --disable-nls --disable-plugins --disable-lto 2>&1 | tee build.log
   # The binutils include a facility to allow `ar' and `ranlib' to be invoked
   # as the same executable, and likewise for `objcopy' and `strip'.  However,
   # this facility is disabled in the source.  Do a hack to re-enable it.
@@ -547,11 +552,16 @@ if in_list gcc-djgpp BUILDLIST; then
   pushd build-djgpp
   OLDPATH=$PATH
   export PATH=$PREFIX-djgpp/bin:$PATH
+  # As above, use the prefix "i16", and disable plugins, NLS, and LTO.
+  #
+  # Note: the switch here is --disable-plugin.  The Binutils use
+  # --disable-plugins.  (!)
   ../gcc-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
     --program-prefix=i16 --with-gcc-major-version-only \
     --prefix="$PREFIX-djgpp" --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale --disable-libssp \
+    --disable-nls --disable-plugin --disable-lto \
     --enable-languages=$LANGUAGESDJGPP --with-gmp="$PREFIX-djgpp-prereqs" \
     --with-mpfr="$PREFIX-djgpp-prereqs" --with-mpc="$PREFIX-djgpp-prereqs" \
     $EXTRABUILD2OPTSDJGPP --with-isl="$PREFIX-djgpp-prereqs" 2>&1 \
@@ -569,10 +579,7 @@ if in_list gcc-djgpp BUILDLIST; then
   popd
   pushd "$PREFIX-djgpp-gcc"
   # We do not need the copy of the GCC driver with a long name.
-  #
-  # Also remove internationalization stuff for now (I may put this back
-  # later if someone really needs/wants it).
-  rm -rf bin/ia16-elf-gcc-?.exe ia16-elf/locale
+  rm -rf bin/ia16-elf-gcc-?.exe
   # Compress remaining executables.
   upx -9 bin/*.exe libexec/gcc/ia16-elf/?/*.exe \
 	 libexec/gcc/ia16-elf/?/install-tools/*.exe
