@@ -22,6 +22,14 @@ sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16butil.lsm.in >redist-djgpp/appinfo/i16butil.lsm
 ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/djgpp
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel)
+(cd redist-djgpp && \
+  zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
+rm redist-djgpp/appinfo/*.lsm
+sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
+  djgpp-fdos-pkging/i16budoc.lsm.in >redist-djgpp/appinfo/i16budoc.lsm
+(cd redist-djgpp && \
+  find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
+    xargs -0 zip -9rkX i16budoc.zip)
 rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/djgpp/*
 
 decide_newlib_ver_and_dirs
@@ -37,11 +45,21 @@ sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcc.lsm.in >redist-djgpp/appinfo/i16gcc.lsm
 ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/djgpp
 (cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel)
-(cd redist-djgpp && zip -d i16gcc.zip '*LTO*')
+(cd redist-djgpp && \
+  zip -d i16gcc.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/' \
+		    '*/LTO-WRAP.EXE')
 rm redist-djgpp/appinfo/*.lsm
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
-  djgpp-fdos-pkging/i16gclto.lsm.in >redist-djgpp/appinfo/i16gclto.lsm
+  djgpp-fdos-pkging/i16gcdoc.lsm.in >redist-djgpp/appinfo/i16gcdoc.lsm
 (cd redist-djgpp && \
-  find -L . \( -name '*.lsm' -o -name '*lto*' \) -print0 | \
-    xargs -0 zip -9rkX i16gclto.zip)
+  find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
+    xargs -0 zip -9rkX i16gcdoc.zip)
+rm redist-djgpp/appinfo/*.lsm
+if (cd redist-djgpp && zip -d i16gcc.zip '*LTO*' &>/dev/null); then
+  sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
+    djgpp-fdos-pkging/i16gclto.lsm.in >redist-djgpp/appinfo/i16gclto.lsm
+  (cd redist-djgpp && \
+    find -L . \( -name '*.lsm' -o -name '*lto*' \) -print0 | \
+      xargs -0 zip -9rkX i16gclto.zip)
+fi
 rm -r redist-djgpp/appinfo redist-djgpp/devel
