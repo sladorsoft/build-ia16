@@ -59,7 +59,18 @@ if $WITHCXX; then
   LANGUAGES="c,c++"
   # Exclude the "dual ABI" backward compatibility stuff --- including it makes
   # it harder than it already is to fit the text section into 64 KiB.
-  EXTRABUILD2OPTS="--with-newlib --disable-libstdcxx-dual-abi"
+  #
+  # Also disable the use of external template instantiations.  The default
+  # instantiations in libstdc++-v3/src/ are too coarse-grained --- e.g. 
+  # libstdc++-v3/src/c++11/istream-inst.cc instantiates both std::istream
+  # and std::wistream (!), _and_ also throws in several <iomanip>
+  # manipulators for good measure (!!).  If we disable these, then each
+  # module in a user's program will only instantiate those functions that
+  # the program really needs.  The trade-off is that the intermediate object
+  # files may be larger and duplicate code (which should be merged at link
+  # time).
+  EXTRABUILD2OPTS="--with-newlib --disable-libstdcxx-dual-abi ` \
+    `--disable-extern-template"
 else
   LANGUAGES="c"
   EXTRABUILD2OPTS=
@@ -67,7 +78,8 @@ fi
 
 if $WITHCXXDJGPP; then
   LANGUAGESDJGPP="c,c++"
-  EXTRABUILD2OPTSDJGPP="--with-newlib --disable-libstdcxx-dual-abi"
+  EXTRABUILD2OPTSDJGPP="--with-newlib --disable-libstdcxx-dual-abi ` \
+    `--disable-extern-template"
 else
   LANGUAGESDJGPP="c"
   EXTRABUILD2OPTSDJGPP=
