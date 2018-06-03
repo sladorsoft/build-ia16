@@ -57,6 +57,8 @@ fi
 
 if $WITHCXX; then
   LANGUAGES="c,c++"
+  # Remember to sync this with ppa-pkging/build2/rules !
+  #
   # Exclude the "dual ABI" backward compatibility stuff --- including it makes
   # it harder than it already is to fit the text section into 64 KiB.
   #
@@ -70,7 +72,7 @@ if $WITHCXX; then
   # files may be larger and duplicate code (which should be merged at link
   # time).
   EXTRABUILD2OPTS="--with-newlib --disable-libstdcxx-dual-abi ` \
-    `--disable-extern-template"
+    `--disable-extern-template --disable-wchar_t"
 else
   LANGUAGES="c"
   EXTRABUILD2OPTS=
@@ -79,7 +81,7 @@ fi
 if $WITHCXXDJGPP; then
   LANGUAGESDJGPP="c,c++"
   EXTRABUILD2OPTSDJGPP="--with-newlib --disable-libstdcxx-dual-abi ` \
-    `--disable-extern-template"
+    `--disable-extern-template --disable-wchar_t"
 else
   LANGUAGESDJGPP="c"
   EXTRABUILD2OPTSDJGPP=
