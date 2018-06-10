@@ -10,7 +10,7 @@ cd $(dirname "$0")
 our_dir="`pwd`"
 
 rm -rf redist-djgpp
-mkdir -p redist-djgpp/appinfo redist-djgpp/devel/djgpp
+mkdir -p redist-djgpp/appinfo redist-djgpp/devel/i16gnu
 
 export TZ=UTC0
 date="`date +%Y-%m-%d`"
@@ -20,7 +20,7 @@ date="`date +%Y-%m-%d`"
 decide_binutils_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16butil.lsm.in >redist-djgpp/appinfo/i16butil.lsm
-ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/djgpp
+ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/i16gnu
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
@@ -30,20 +30,20 @@ sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
 (cd redist-djgpp && \
   find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
     xargs -0 zip -9rkX i16budoc.zip)
-rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/djgpp/*
+rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/*
 
 decide_newlib_ver_and_dirs
 # Use a short version number inside the .lsm .
 sed -e "s|@date@|$date|" -e "s|@nl_ver@|$nl_uver-$nl_date|" \
   djgpp-fdos-pkging/i16newli.lsm.in >redist-djgpp/appinfo/i16newli.lsm
-ln -s "$our_dir"/prefix-djgpp-newlib/* redist-djgpp/devel/djgpp
+ln -s "$our_dir"/prefix-djgpp-newlib/* redist-djgpp/devel/i16gnu
 (cd redist-djgpp && zip -9rkX i16newli.zip appinfo devel)
-rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/djgpp/*
+rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/*
 
 decide_gcc_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcc.lsm.in >redist-djgpp/appinfo/i16gcc.lsm
-ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/djgpp
+ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/i16gnu
 (cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel)
 (cd redist-djgpp && \
   zip -d i16gcc.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/' \
