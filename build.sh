@@ -106,7 +106,8 @@ if in_list clean BUILDLIST; then
   echo "* Cleaning *"
   echo "************"
   echo
-  rm -rf "$PREFIX" "$REDIST" "$REDIST_PPA" "$REDIST_DJGPP"
+  rm -rf "$PREFIX" "$REDIST" "$REDIST_PPA" "$REDIST_DJGPP" \
+    build build2 build-* log_filter log_compare
   mkdir -p "$PREFIX/bin"
 fi
 
