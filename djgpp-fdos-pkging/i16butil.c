@@ -48,9 +48,9 @@ int main(int argc, char **argv, char **envp)
 			execve(new_path, argv, envp);
 			fprintf(stderr, "Cannot run %s: %s\n", new_path,
 			    strerror(errno));
-			return 1;
+			return 127;
 		}
 	}
 	putc(168, stderr);
-	return 1;
+	return 127;
 }
