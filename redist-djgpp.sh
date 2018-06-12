@@ -21,7 +21,12 @@ decide_binutils_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16butil.lsm.in >redist-djgpp/appinfo/i16butil.lsm
 ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/i16gnu
-(cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel)
+mkdir -p redist-djgpp/links
+for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
+  prog="`basename "$path" .exe | cut -c1-8`"
+  echo 'devel\i16gnu\bin\'"$prog.exe" >redist-djgpp/links/"$prog.bat"
+done
+(cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
 rm redist-djgpp/appinfo/*.lsm
@@ -30,7 +35,7 @@ sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
 (cd redist-djgpp && \
   find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
     xargs -0 zip -9rkX i16budoc.zip)
-rm redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/*
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* redist-djgpp/links
 
 decide_newlib_ver_and_dirs
 # Use a short version number inside the .lsm .
@@ -44,11 +49,16 @@ decide_gcc_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcc.lsm.in >redist-djgpp/appinfo/i16gcc.lsm
 ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/i16gnu
-(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel)
+mkdir redist-djgpp/links
+for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
+  prog="`basename "$path" .exe | cut -c1-8`"
+  echo 'devel\i16gnu\bin\'"$prog.exe" >redist-djgpp/links/"$prog.bat"
+done
+(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel links)
 (cd redist-djgpp && \
   zip -d i16gcc.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/' \
 		    '*/LTO-WRAP.EXE')
-rm redist-djgpp/appinfo/*.lsm
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/links
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcdoc.lsm.in >redist-djgpp/appinfo/i16gcdoc.lsm
 (cd redist-djgpp && \
