@@ -71,8 +71,11 @@ if $WITHCXX; then
   # the program really needs.  The trade-off is that the intermediate object
   # files may be larger and duplicate code (which should be merged at link
   # time).
+  #
+  # And, disable verbose std::terminate () error messages, which require quite
+  # a hefty amount of code to handle.
   EXTRABUILD2OPTS="--with-newlib --disable-libstdcxx-dual-abi ` \
-    `--disable-extern-template --disable-wchar_t"
+    `--disable-extern-template --disable-wchar_t --disable-libstdcxx-verbose"
 else
   LANGUAGES="c"
   EXTRABUILD2OPTS=
@@ -81,7 +84,7 @@ fi
 if $WITHCXXDJGPP; then
   LANGUAGESDJGPP="c,c++"
   EXTRABUILD2OPTSDJGPP="--with-newlib --disable-libstdcxx-dual-abi ` \
-    `--disable-extern-template --disable-wchar_t"
+    `--disable-extern-template --disable-wchar_t --disable-libstdcxx-verbose"
 else
   LANGUAGESDJGPP="c"
   EXTRABUILD2OPTSDJGPP=
