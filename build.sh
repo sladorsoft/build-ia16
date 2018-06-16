@@ -292,12 +292,12 @@ fi
 
 if in_list extra BUILDLIST; then
   echo
-  echo "***********************************"
-  echo "* Building extra stuff (PDCurses) *"
-  echo "***********************************"
+  echo "*******************************************"
+  echo "* Building extra stuff (PDCurses, ubasic) *"
+  echo "*******************************************"
   echo
   [ -f pdcurses/.git/config ] || \
-    git clone git@github.com:tkchia/PDCurses.git pdcurses
+    git clone https://github.com/tkchia/PDCurses.git pdcurses
   rm -rf build-pdcurses
   mkdir build-pdcurses
   pushd build-pdcurses
@@ -306,6 +306,14 @@ if in_list extra BUILDLIST; then
     tee -a build.log
   cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
   cp -a ../pdcurses/curses.h "$PREFIX"/ia16-elf/include
+  popd
+  [ -f ubasic-ia16/.git/config ] || \
+    git clone https://github.com/tkchia/ubasic-ia16.git
+  rm -rf build-ubasic
+  mkdir build-ubasic
+  pushd build-ubasic
+  make $PARALLEL -f ../ubasic-ia16/Makefile.ia16 VPATH=../ubasic-ia16 2>&1 | \
+    tee -a build.log
   popd
 fi
 
