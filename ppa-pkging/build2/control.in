@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: TK Chia <tkchia@gmx.com>
 Build-Depends: debhelper (>=9), binutils-ia16-elf (>= @bu_ver@),
  libnewlib-ia16-elf (>= @nl_ver@), autotools-dev, gcc (>= 4), g++ (>= 4),
- libc6-dev, texinfo, bison, flex, libisl-dev (>= 0.14), libisl-dev (<<
- 0.17), libmpc-dev (>= 0.8.1), libmpfr-dev (>= 2.4.2), libgmp-dev (>=
- 4.3.2), gettext, dejagnu, quilt, python3:any, file, lsb-release, zlib1g-dev
+ libc6-dev, texinfo, bison, flex, libisl-dev (>= 0.14), libmpc-dev (>= 0.8.1),
+ libmpfr-dev (>= 2.4.2), libgmp-dev (>= 4.3.2), gettext, dejagnu, quilt,
+ python3:any, file, lsb-release, zlib1g-dev
 Standards-Version: 3.9.6
 Homepage: https://github.com/tkchia/gcc-ia16
 Vcs-Git: https://github.com/tkchia/gcc-ia16.git
