@@ -30,10 +30,10 @@ done
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
 rm redist-djgpp/appinfo/*.lsm
-sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
+sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16budoc.lsm.in >redist-djgpp/appinfo/i16budoc.lsm
 (cd redist-djgpp && \
-  find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
+  find -L . \( -name '*.1' -o -name '*.info' -o -name '*.lsm' \) -print0 | \
     xargs -0 zip -9rkX i16budoc.zip)
 rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* redist-djgpp/links
 
@@ -62,7 +62,7 @@ rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/links
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcdoc.lsm.in >redist-djgpp/appinfo/i16gcdoc.lsm
 (cd redist-djgpp && \
-  find -L . \( -name '*.1' -o -name '*.info' \) -print0 | \
+  find -L . \( -name '*.1' -o -name '*.info' -o -name '*.lsm' \) -print0 | \
     xargs -0 zip -9rkX i16gcdoc.zip)
 rm redist-djgpp/appinfo/*.lsm
 if (cd redist-djgpp && zip -d i16gcc.zip '*LTO*' &>/dev/null); then
