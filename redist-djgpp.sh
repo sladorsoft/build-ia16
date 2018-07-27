@@ -39,12 +39,28 @@ decide_binutils_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16butil.lsm.in >redist-djgpp/appinfo/i16butil.lsm
 ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/i16gnu
-mkdir -p redist-djgpp/links
+mkdir -p redist-djgpp/links redist-djgpp/source/i16butil
 for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
   prog="`basename "$path" .exe | cut -c1-8`"
   echo 'devel\i16gnu\bin\'"$prog.exe" >redist-djgpp/links/"$prog.bat"
 done
-(cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links)
+(
+  cat <<'FIN'
+This is a patch against the official GNU Binutils 2.27.  You can find Binutils
+2.27 via http://ftp.gnu.org/gnu/binutils, http://ftpmirror.gnu.org, and
+elsewhere.  The SHA-512 checksum for binutils-2.27.tar.bz2 is
+  cf276f84 93531236 1a2ca077 e04d0b46 9d23a3ae d979d8ba 5d92ea59 0904ffb2
+  c2e7ed12 cc842822 bfc40283 6be86f47 9660cef3 791aa62f 3753d8a1 a6f564cb.
+===========================================================================
+FIN
+  # There is a slight error in the packaging of the official 2.27 tarball:
+  # `configure' and `configure.ac' are not in sync.  The Git repository
+  # however gets it right.  We bridge the difference with a tiny patch.
+  cat djgpp-fdos-pkging/binutils-2.27-ac.diff
+  # And...
+  git -C binutils-ia16 diff binutils-2_27
+) >redist-djgpp/source/i16butil/i16butil.dif
+(cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links source)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
 rm redist-djgpp/appinfo/*.lsm
