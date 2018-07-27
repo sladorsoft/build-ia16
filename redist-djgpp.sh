@@ -64,8 +64,8 @@ sed -e "s|@date@|$date|" -e "s|@nl_ver@|$nl_uver-$nl_date|" \
   djgpp-fdos-pkging/i16newli.lsm.in >redist-djgpp/appinfo/i16newli.lsm
 ln -s "$our_dir"/prefix-djgpp-newlib/* redist-djgpp/devel/i16gnu
 mkdir -p redist-djgpp/source/i16newli
-git -C newlib-ia16 archive --prefix=newlib-ia16/ -v HEAD | xz -9 \
-  >redist-djgpp/source/i16newli/i16newli.txz
+git -C newlib-ia16 archive --format=zip --prefix=newlib-ia16/ -0 -v HEAD \
+  >redist-djgpp/source/i16newli/i16newli.zip
 (cd redist-djgpp && zip -9rkX i16newli.zip appinfo devel source)
 rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
   redist-djgpp/source/*
@@ -75,16 +75,27 @@ decide_gcc_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
   djgpp-fdos-pkging/i16gcc.lsm.in >redist-djgpp/appinfo/i16gcc.lsm
 ln -s "$our_dir"/prefix-djgpp-gcc/* redist-djgpp/devel/i16gnu
-mkdir redist-djgpp/links
+mkdir -p redist-djgpp/links redist-djgpp/source/i16gcc
 for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
   prog="`basename "$path" .exe | cut -c1-8`"
   echo 'devel\i16gnu\bin\'"$prog.exe" >redist-djgpp/links/"$prog.bat"
 done
-(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel links)
+(
+  cat <<'FIN'
+This is a patch against the official GCC 6.3.0.  You can find GCC 6.3.0 via
+https://gcc.gnu.org/mirrors.html, http://ftpmirror.gnu.org, and elsewhere.
+The SHA-512 checksum for gcc-6.3.0.tar.bz2 is
+  234dd9b1 bdc9a9c6 e352216a 7ef4ccad c6c07f15 6006a597 59c5e0e6 a69f0abc
+  dc14630e ff11e382 6dd6ba59 33a8faa4 3043f3d1 d62df6bd 5ab1e828 62f9bf78.
+===========================================================================
+FIN
+  git -C gcc-ia16 diff 4b5e15daff8b54440e3fda451c318ad31e532fab
+) >redist-djgpp/source/i16gcc/i16gcc.dif
+(cd redist-djgpp && zip -9rkX i16gcc.zip appinfo devel links source)
 (cd redist-djgpp && \
   zip -d i16gcc.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/' \
 		    '*/LTO-WRAP.EXE')
-rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/links
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/links redist-djgpp/source/*
 repack i16gcc
 #
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \
