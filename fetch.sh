@@ -21,6 +21,8 @@ wget https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 tar -xzf mpc-1.0.3.tar.gz
 wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2
 tar -xjf isl-0.16.1.tar.bz2
+git clone git@gitlab.com:tkchia/libi86.git || \
+    git clone https://gitlab.com/tkchia/libi86.git  # GitLab, not GitHub
 git clone git@github.com:tkchia/PDCurses.git pdcurses || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
 git clone git@github.com:tkchia/ubasic-ia16.git || \

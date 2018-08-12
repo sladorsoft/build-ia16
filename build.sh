@@ -292,21 +292,34 @@ fi
 
 if in_list extra BUILDLIST; then
   echo
-  echo "*******************************************"
-  echo "* Building extra stuff (PDCurses, ubasic) *"
-  echo "*******************************************"
+  echo "***************************************************"
+  echo "* Building extra stuff (libi86, PDCurses, ubasic) *"
+  echo "***************************************************"
   echo
+  [ -f libi86/.git/config ] || \
+    git clone https://gitlab.com/tkchia/libi86.git
+  rm -rf build-libi86
+  mkdir build-libi86
+  pushd build-libi86
+  ../libi86/configure --host=ia16-elf --prefix="$PREFIX"/ia16-elf 2>&1 | \
+    tee build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
+  popd
+  #
   [ -f pdcurses/.git/config ] || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
   rm -rf build-pdcurses
   mkdir build-pdcurses
   pushd build-pdcurses
   make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
-    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a worm.exe xmas.exe 2>&1 | \
-    tee -a build.log
+    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a 2>&1 | tee -a build.log
+  make -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
+    CC="$PREFIX/bin/ia16-elf-gcc" worm.exe xmas.exe 2>&1 | tee -a build.log
   cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
   cp -a ../pdcurses/curses.h "$PREFIX"/ia16-elf/include
   popd
+  #
   [ -f ubasic-ia16/.git/config ] || \
     git clone https://github.com/tkchia/ubasic-ia16.git
   rm -rf build-ubasic
