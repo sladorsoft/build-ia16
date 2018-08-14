@@ -18,13 +18,13 @@
             ▾                       │             ▾
     ./build.sh gcc2 ──────┐         │     ./build.sh clean-djgpp
             │             ▾         │             ▾
-            │      ./build.sh sim   │     ./build.sh prereqs-djgpp
+            │      ./build.sh extra │     ./build.sh prereqs-djgpp
+            ├◂────────────┘         │             ▾
+            ├─────────────┐         │     ./build.sh binutils-djgpp
             │             ▾         │             ▾
-            │      ./build.sh test ─┘     ./build.sh binutils-djgpp
-            ├◂────────────┘                       ▾
-            ├─────────────┐               ./build.sh gcc-djgpp
-            │             ▾                       │
-            │      ./build.sh extra ...           │
+            │      ./build.sh sim   │     ./build.sh gcc-djgpp
+            │             ▾         │             │
+            │      ./build.sh test ─┘             │
             ├◂────────────┘                       │
             ├─────────────┐                       │
             │             ▾                       ▾

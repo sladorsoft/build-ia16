@@ -36,11 +36,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|gcc2|sim|test|extra|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|gcc2|extra|sim|test|redist|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "extra" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "extra" "sim" "test" "redist" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib gcc2 sim test extra redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib gcc2 extra sim test redist debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -229,6 +229,46 @@ if in_list gcc2 BUILDLIST; then
   popd
 fi
 
+if in_list extra BUILDLIST; then
+  echo
+  echo "***************************************************"
+  echo "* Building extra stuff (libi86, PDCurses, ubasic) *"
+  echo "***************************************************"
+  echo
+  [ -f libi86/.git/config ] || \
+    git clone https://gitlab.com/tkchia/libi86.git
+  rm -rf build-libi86
+  mkdir build-libi86
+  pushd build-libi86
+  ../libi86/configure --host=ia16-elf --prefix="$PREFIX"/ia16-elf 2>&1 | \
+    tee build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
+  popd
+  #
+  [ -f pdcurses/.git/config ] || \
+    git clone https://github.com/tkchia/PDCurses.git pdcurses
+  rm -rf build-pdcurses
+  mkdir build-pdcurses
+  pushd build-pdcurses
+  make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
+    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a 2>&1 | tee -a build.log
+  make -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
+    CC="$PREFIX/bin/ia16-elf-gcc" worm.exe xmas.exe 2>&1 | tee -a build.log
+  cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
+  cp -a ../pdcurses/curses.h "$PREFIX"/ia16-elf/include
+  popd
+  #
+  [ -f ubasic-ia16/.git/config ] || \
+    git clone https://github.com/tkchia/ubasic-ia16.git
+  rm -rf build-ubasic
+  mkdir build-ubasic
+  pushd build-ubasic
+  make $PARALLEL -f ../ubasic-ia16/Makefile.ia16 VPATH=../ubasic-ia16 2>&1 | \
+    tee -a build.log
+  popd
+fi
+
 if in_list sim BUILDLIST; then
   echo
   echo "*************************"
@@ -287,46 +327,6 @@ if in_list test BUILDLIST; then
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
-  popd
-fi
-
-if in_list extra BUILDLIST; then
-  echo
-  echo "***************************************************"
-  echo "* Building extra stuff (libi86, PDCurses, ubasic) *"
-  echo "***************************************************"
-  echo
-  [ -f libi86/.git/config ] || \
-    git clone https://gitlab.com/tkchia/libi86.git
-  rm -rf build-libi86
-  mkdir build-libi86
-  pushd build-libi86
-  ../libi86/configure --host=ia16-elf --prefix="$PREFIX"/ia16-elf 2>&1 | \
-    tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
-  make $PARALLEL install 2>&1 | tee -a build.log
-  popd
-  #
-  [ -f pdcurses/.git/config ] || \
-    git clone https://github.com/tkchia/PDCurses.git pdcurses
-  rm -rf build-pdcurses
-  mkdir build-pdcurses
-  pushd build-pdcurses
-  make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
-    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a 2>&1 | tee -a build.log
-  make -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
-    CC="$PREFIX/bin/ia16-elf-gcc" worm.exe xmas.exe 2>&1 | tee -a build.log
-  cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
-  cp -a ../pdcurses/curses.h "$PREFIX"/ia16-elf/include
-  popd
-  #
-  [ -f ubasic-ia16/.git/config ] || \
-    git clone https://github.com/tkchia/ubasic-ia16.git
-  rm -rf build-ubasic
-  mkdir build-ubasic
-  pushd build-ubasic
-  make $PARALLEL -f ../ubasic-ia16/Makefile.ia16 VPATH=../ubasic-ia16 2>&1 | \
-    tee -a build.log
   popd
 fi
 
