@@ -63,7 +63,7 @@ FIN
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links source)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
-rm redist-djgpp/appinfo/*.lsm
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/source/*
 repack i16butil
 #
 sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
