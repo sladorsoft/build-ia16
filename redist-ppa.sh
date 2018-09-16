@@ -118,7 +118,11 @@ if in_list binutils BUILDLIST; then
   decide_binutils_ver_and_dirs
   mkdir -p redist-ppa/"$distro"/"$bu_pdir"
   # Copy the source tree over, but do not include .git* or untracked files.
-  (cd binutils-ia16 && git archive --prefix="$bu_dir"/ HEAD) | xz -9v \
+  git -C binutils-ia16 ls-files -z | \
+    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
+    xargs -0 tar cf - -C binutils-ia16 --transform "s?^?$bu_dir/?" \
+      --no-recursion | \
+    xz -9v \
     >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$bu_pdir"
   # We do not really need to do this unpacking here:
@@ -174,21 +178,17 @@ if in_list gcc1 BUILDLIST; then
   # Copy the source tree over, but do not include .git* or untracked files.
   #
   # Also exclude the _huge_ testsuite, and language support other than for C
-  # and C++.  (C++ is needed for gcc/c-family/cilk.c to build...)  This is a
-  # bit hard to do with `git archive' alone --- without dirtying the
-  # original source tree --- so rope in GNU tar for the task.
+  # and C++.  (C++ is needed for gcc/c-family/cilk.c to build...)
   #
   # Also take out the boehm-gc/ and libffi/ directories, which we do not
   # really need at this stage.  Keep gcc/fortran/, gcc/go/, and gcc/java/
   # around so that libbacktrace/ will not be built for ia16-elf (!).
-  (cd gcc-ia16 && \
-   git archive --prefix="$g1_dir"/ HEAD | \
-   tar --delete --wildcards \
-    "$g1_dir"/gotools "$g1_dir"/libada "$g1_dir"/libgfortran "$g1_dir"/libgo \
-    "$g1_dir"/libjava "$g1_dir"/libobjc "$g1_dir"/libsanitizer \
-    "$g1_dir"/libstdc++-v3 "$g1_dir"/gcc/testsuite "$g1_dir"/gcc/ada \
-    "$g1_dir"/gnattools "$g1_dir"/gcc/objc "$g1_dir"/boehm-gc \
-    "$g1_dir"/libffi "$g1_dir/gcc/ChangeLog*") | \
+  git -C gcc-ia16 ls-files -z | \
+    sed -z -n '/^\(gotools\/\|libada\/\|libgfortran\/\|libgo\/\|libjava\/'` \
+      `'\|libobjc\/\|libsanitizer\/\|libstdc++-v3\/\|boehm-gc\|libffi'` \
+      `'\|gcc\/\(testsuite\/\|ada\/\|objc\/\|ChangeLog\)\|\.git\)/! '` \
+      `'{ /\/\.git/! p }' | \
+    xargs -0 tar cf - -C gcc-ia16 --transform "s?^?$g1_dir/?" --no-recursion |\
     xz -9v \
     >redist-ppa/"$distro"/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g1_pdir"
@@ -222,7 +222,11 @@ if in_list newlib BUILDLIST; then
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
   mkdir -p redist-ppa/"$distro"/"$nl_pdir"
-  (cd newlib-ia16 && git archive --prefix="$nl_dir"/ HEAD) | xz -9v \
+  git -C newlib-ia16 ls-files -z | \
+    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
+    xargs -0 tar cf - -C newlib-ia16 --transform "s?^?$nl_dir/?" \
+      --no-recursion | \
+    xz -9v \
     >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$nl_pdir"
   dh_make -s -p "$nl_pdir" -n -f ../"$nl_dir".orig.tar.xz -y
@@ -257,10 +261,10 @@ if in_list gcc2 BUILDLIST; then
   mkdir -p redist-ppa/"$distro"/"$g2_pdir"
   # Copy the source tree over, except for .git* files, untracked files, and
   # the bigger testsuites.
-  (cd gcc-ia16 && \
-   git archive --prefix="$g2_dir"/ HEAD | \
-   tar --delete --wildcards "$g2_dir"/libjava/testsuite \
-    "$g2_dir"/gcc/testsuite "$g2_dir"/libgomp/testsuite) | \
+  git -C gcc-ia16 ls-files -z | \
+    sed -z -n '/^\(\(libjava\|gcc\|libgomp\)\/testsuite\/\|\.git\)/! '` \
+      `'{ /\/\.git/! p }' | \
+    xargs -0 tar cf - -C gcc-ia16 --transform "s?^?$g2_dir/?" --no-recursion |\
     xz -9v \
     >redist-ppa/"$distro"/"$g2_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g2_pdir"
