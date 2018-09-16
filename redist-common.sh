@@ -28,6 +28,10 @@ decide_gcc_ver_and_dirs () {
     --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$gcc_uver" -a -n "$gcc_date" ]
   gcc_ver="$gcc_uver"-"$gcc_date"
+  # Messy temporary hack to work around a Launchpad restriction...
+  if [ 20180915.16 = "$gcc_date" ]; then
+    gcc_ver="$gcc_ver.0"
+  fi
   gcc_pver="$gcc_ver"-ppa"$ppa_no~$distro"
   g2_pver="$gcc_pver"
   g1_dir=gcc-bootstraps-ia16-elf_"$gcc_ver"
@@ -36,7 +40,7 @@ decide_gcc_ver_and_dirs () {
   g2_pdir=gcc-ia16-elf_"$gcc_pver"
   gs_dir=gcc-stubs-ia16-elf_"$gcc_ver"
   gs_pdir=gcc-stubs-ia16-elf_"$gcc_pver"
-  # Messy temporary hack to work around a Launchpad restriction...
+  # Another messy temporary hack.
   if [ 20180210 = "$gcc_date" -o 20180215 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
     g2_pver="$g2_ver"-ppa"$ppa_no~$distro"
