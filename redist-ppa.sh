@@ -120,8 +120,8 @@ if in_list binutils BUILDLIST; then
   # Copy the source tree over, but do not include .git* or untracked files.
   git -C binutils-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
-    xargs -0 tar cf - -C binutils-ia16 --transform "s?^?$bu_dir/?" \
-      --no-recursion | \
+    (cd binutils-ia16 && \
+     tar cf - -T --null --transform "s?^?$bu_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$bu_pdir"
@@ -188,7 +188,8 @@ if in_list gcc1 BUILDLIST; then
       `'\|libobjc\/\|libsanitizer\/\|libstdc++-v3\/\|boehm-gc\|libffi'` \
       `'\|gcc\/\(testsuite\/\|ada\/\|objc\/\|ChangeLog\)\|\.git\)/! '` \
       `'{ /\/\.git/! p }' | \
-    xargs -0 tar cf - -C gcc-ia16 --transform "s?^?$g1_dir/?" --no-recursion |\
+    (cd gcc-ia16 && \
+     tar cf - --null -T - --transform "s?^?$g1_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g1_pdir"
@@ -224,8 +225,8 @@ if in_list newlib BUILDLIST; then
   mkdir -p redist-ppa/"$distro"/"$nl_pdir"
   git -C newlib-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
-    xargs -0 tar cf - -C newlib-ia16 --transform "s?^?$nl_dir/?" \
-      --no-recursion | \
+    (cd newlib-ia16 && \
+     tar cf - -T --null --transform "s?^?$nl_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$nl_pdir"
@@ -264,7 +265,8 @@ if in_list gcc2 BUILDLIST; then
   git -C gcc-ia16 ls-files -z | \
     sed -z -n '/^\(\(libjava\|gcc\|libgomp\)\/testsuite\/\|\.git\)/! '` \
       `'{ /\/\.git/! p }' | \
-    xargs -0 tar cf - -C gcc-ia16 --transform "s?^?$g2_dir/?" --no-recursion |\
+    (cd gcc-ia16 && \
+     tar cf - --null -T - --transform "s?^?$g2_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$g2_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g2_pdir"
