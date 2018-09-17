@@ -121,7 +121,7 @@ if in_list binutils BUILDLIST; then
   git -C binutils-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd binutils-ia16 && \
-     tar cf - -T --null --transform "s?^?$bu_dir/?" --no-recursion) | \
+     tar cf - --null -T - --transform "s?^?$bu_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$bu_pdir"
@@ -185,9 +185,9 @@ if in_list gcc1 BUILDLIST; then
   # around so that libbacktrace/ will not be built for ia16-elf (!).
   git -C gcc-ia16 ls-files -z | \
     sed -z -n '/^\(gotools\/\|libada\/\|libgfortran\/\|libgo\/\|libjava\/'` \
-      `'\|libobjc\/\|libsanitizer\/\|libstdc++-v3\/\|boehm-gc\|libffi'` \
-      `'\|gcc\/\(testsuite\/\|ada\/\|objc\/\|ChangeLog\)\|\.git\)/! '` \
-      `'{ /\/\.git/! p }' | \
+      `'\|libobjc\/\|libsanitizer\/\|libstdc++-v3\/\|boehm-gc\/\|libffi\/'` \
+      `'\|gnattools\/\|gcc\/\(testsuite\/\|ada\/\|objc\/\|ChangeLog\)'` \
+      `'\|\.git\)/! { /\/\.git/! p }' | \
     (cd gcc-ia16 && \
      tar cf - --null -T - --transform "s?^?$g1_dir/?" --no-recursion) | \
     xz -9v \
@@ -226,7 +226,7 @@ if in_list newlib BUILDLIST; then
   git -C newlib-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd newlib-ia16 && \
-     tar cf - -T --null --transform "s?^?$nl_dir/?" --no-recursion) | \
+     tar cf - --null -T - --transform "s?^?$nl_dir/?" --no-recursion) | \
     xz -9v \
     >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$nl_pdir"

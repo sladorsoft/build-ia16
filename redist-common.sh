@@ -30,7 +30,7 @@ decide_gcc_ver_and_dirs () {
   gcc_ver="$gcc_uver"-"$gcc_date"
   # Messy temporary hack to work around a Launchpad restriction...
   if [ 20180915.16 = "$gcc_date" ]; then
-    gcc_ver="$gcc_ver.1"
+    gcc_ver="$gcc_ver.2"
   fi
   gcc_pver="$gcc_ver"-ppa"$ppa_no~$distro"
   g2_pver="$gcc_pver"
