@@ -138,7 +138,7 @@ if in_list binutils BUILDLIST; then
   #     extract and include the user id information from $DEBSIGN_KEYID.
   #   * Include changelog entries for actual source changes.
   (
-    echo "binutils-ia16-elf ($bu_pver) $distro; urgency=low"
+    echo "binutils-ia16-elf ($bu_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
@@ -200,7 +200,7 @@ if in_list gcc1 BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-bootstraps-ia16-elf ($gcc_pver) $distro; urgency=low"
+    echo "gcc-bootstraps-ia16-elf ($gcc_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
@@ -238,7 +238,7 @@ if in_list newlib BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "libnewlib-ia16-elf ($nl_pver) $distro; urgency=low"
+    echo "libnewlib-ia16-elf ($nl_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
@@ -278,7 +278,7 @@ if in_list gcc2 BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-ia16-elf ($g2_pver) $distro; urgency=low"
+    echo "gcc-ia16-elf ($g2_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
@@ -307,7 +307,7 @@ if in_list stubs BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=low"
+    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
