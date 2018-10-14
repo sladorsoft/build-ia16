@@ -46,11 +46,11 @@ in_list () {
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|gcc1|newlib|gcc2|stubs)
+    clean|stubs|binutils|gcc1|newlib|gcc2)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "gcc1" "newlib" "gcc2" "stubs")
+      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "gcc2")
       ;;
     --distro=?*)
       distro="${1#--distro=}"
@@ -65,7 +65,7 @@ done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-ppa options:"
-  echo "--distro={trusty|xenial|...} clean binutils gcc1 newlib gcc2 stubs"
+  echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib gcc2"
   exit 1
 fi
 
@@ -107,6 +107,35 @@ fi
 
 . redist-common.sh
 
+
+if in_list stubs BUILDLIST; then
+  echo
+  echo "**************************"
+  echo "* Creating stub packages *"
+  echo "**************************"
+  echo
+  rm -rf redist-ppa/"$distro"/gcc-stubs-ia16-elf_*
+  decide_gcc_ver_and_dirs
+  mkdir -p redist-ppa/"$distro"/"$gs_pdir"
+  pushd redist-ppa/"$distro"/"$gs_pdir"
+  dh_make -s -p "$gs_pdir" -n -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../../ppa-pkging/build-stubs-gcc/* debian/
+  sed "s|@gcc_ver@|$gcc_ver|g" debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=medium"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild --no-tgz-check -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  cd ..
+  popd
+fi
 if in_list binutils BUILDLIST; then
   echo
   echo "**********************"
@@ -286,35 +315,6 @@ if in_list gcc2 BUILDLIST; then
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
   debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
-  cd ..
-  popd
-fi
-
-if in_list stubs BUILDLIST; then
-  echo
-  echo "**************************"
-  echo "* Creating stub packages *"
-  echo "**************************"
-  echo
-  rm -rf redist-ppa/"$distro"/gcc-stubs-ia16-elf_*
-  decide_gcc_ver_and_dirs
-  mkdir -p redist-ppa/"$distro"/"$gs_pdir"
-  pushd redist-ppa/"$distro"/"$gs_pdir"
-  dh_make -s -p "$gs_pdir" -n -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../../ppa-pkging/build-stubs-gcc/* debian/
-  sed "s|@gcc_ver@|$gcc_ver|g" debian/control.in >debian/control
-  rm debian/control.in
-  find debian -name '*~' -print0 | xargs -0 rm -f
-  (
-    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=medium"
-    echo
-    echo '  * Release.'
-    echo
-    echo " -- user <user@localhost.localdomain>  $curr_tm"
-  ) >debian/changelog
-  cp -a debian/docs debian/*.docs
-  debuild --no-tgz-check -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
