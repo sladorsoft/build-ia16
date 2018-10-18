@@ -29,6 +29,7 @@ repack () {
     (cd redist-djgpp/repack && 7za a -mm=lzma -mx=9 -tzip tmp.zip *)
     if [ "`wc -c <redist-djgpp/repack/tmp.zip`" -lt \
 	 "`wc -c <redist-djgpp/"$1".zip`" ]; then
+      mv -v redist-djgpp/"$1".zip redist-djgpp/"$1".deflated.zip
       mv -v redist-djgpp/repack/tmp.zip redist-djgpp/"$1".zip
     fi
     rm -rf redist-djgpp/repack
