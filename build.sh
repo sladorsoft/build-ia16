@@ -201,7 +201,7 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  CFLAGS_FOR_TARGET='-g -O2 -mseparate-code-segment -D_IEEE_LIBM' ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small 2>&1 | tee build.log
+  CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small --disable-newlib-fseek-optimization --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 | tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make install 2>&1 | tee -a build.log
   popd
