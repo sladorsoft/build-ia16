@@ -290,7 +290,7 @@ if in_list sim BUILDLIST; then
   mkdir build-dosemu
   pushd build-dosemu
   (cd ../dosemu && ./autogen.sh)
-  ../dosemu/default-configure --prefix="$PREFIX"
+  ../dosemu/configure --prefix="$PREFIX"
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
