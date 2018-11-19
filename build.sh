@@ -92,12 +92,12 @@ fi
 
 BIN=$HERE/prefix/bin
 if [[ ":$PATH:" != *":$BIN:"* ]]; then
-    export PATH="$BIN:${PATH:+"$PATH:"}"
+    export PATH="$BIN:${PATH:+"$PATH"}"
     echo Path set to $PATH
 fi
 DJGPP_BIN=$HERE/djgpp/bin
 if [[ ":$PATH:" != *":$DJGPP_BIN:"* ]]; then
-    export PATH="$DJGPP_BIN:${PATH:+"$PATH:"}"
+    export PATH="$DJGPP_BIN:${PATH:+"$PATH"}"
     echo Path set to $PATH
 fi
 
