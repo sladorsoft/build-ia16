@@ -240,6 +240,9 @@ if in_list extra BUILDLIST; then
   rm -rf build-libi86
   mkdir build-libi86
   pushd build-libi86
+  if [ -e ../libi86/autogen.sh ]; then
+    (cd ../libi86 && ./autogen.sh)
+  fi
   ../libi86/configure --host=ia16-elf --prefix="$PREFIX"/ia16-elf 2>&1 | \
     tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
