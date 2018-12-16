@@ -27,6 +27,11 @@ repack () {
     mkdir redist-djgpp/repack
     unzip -dredist-djgpp/repack redist-djgpp/"$1".zip
     (cd redist-djgpp/repack && 7za a -mm=lzma -mx=9 -tzip tmp.zip *)
+    (
+      echo ">> Packed by `basename "$0"` on $date."
+      echo ">> This package uses LZMA compression, which some unzip-programs"
+      echo ">> may not handle.  To view its contents, one way is to use 7-Zip."
+    ) | zip -z redist-djgpp/repack/tmp.zip
     if [ "`wc -c <redist-djgpp/repack/tmp.zip`" -lt \
 	 "`wc -c <redist-djgpp/"$1".zip`" ]; then
       mv -v redist-djgpp/"$1".zip redist-djgpp/"$1".deflated.zip
