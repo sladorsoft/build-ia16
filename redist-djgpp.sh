@@ -52,19 +52,16 @@ for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
 done
 (
   cat <<'FIN'
-This is a patch against the official GNU Binutils 2.27.  You can find Binutils
-2.27 via http://ftp.gnu.org/gnu/binutils, http://ftpmirror.gnu.org, and
-elsewhere.  The SHA-512 checksum for binutils-2.27.tar.bz2 is
-  cf276f84 93531236 1a2ca077 e04d0b46 9d23a3ae d979d8ba 5d92ea59 0904ffb2
-  c2e7ed12 cc842822 bfc40283 6be86f47 9660cef3 791aa62f 3753d8a1 a6f564cb.
+This is a patch against the official GNU Binutils 2.31.1.  You can find
+Binutils 2.31.1 via http://ftp.gnu.org/gnu/binutils, http://ftpmirror.gnu.org,
+and elsewhere.  The SHA-512 checksum for binutils-2.31.1.tar.xz is
+  0fca326f eb1d5f5f e505a827 b20237fe 3ec9c13e af7ec7e3 5847fd71 184f605b
+  a1cefe13 14b1b8f8 a29c0aa9 d8816284 9ee1c1a3 e70c2f74 07d88339 b17edb30.
 ===========================================================================
 FIN
-  # There is a slight error in the packaging of the official 2.27 tarball:
-  # `configure' and `configure.ac' are not in sync.  The Git repository
-  # however gets it right.  We bridge the difference with a tiny patch.
-  cat djgpp-fdos-pkging/binutils-2.27-ac.diff
+  xzcat djgpp-fdos-pkging/binutils-2.31.1-51b4f73a37.diff.xz
   # And...
-  git -C binutils-ia16 diff binutils-2_27
+  git -C binutils-ia16 diff 51b4f73a37c2e7eec31e932fc3c8dae879735f63
 ) >redist-djgpp/source/i16butil/i16butil.dif
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links source)
 (cd redist-djgpp && \
