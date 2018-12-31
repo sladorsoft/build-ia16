@@ -2,8 +2,7 @@ Begin3
 Title:           IA-16 GCC LTO engine
 Version:         @gcc_ver@
 Entered-date:    @date@
-Description:     GNU C compiler link-time optimization engine for ia16-elf
-                 target (on 32-bit DJGPP host)
+Description:     GNU C compiler link-time optimizer engine for ia16-elf target
 Keywords:        gcc, compiler, c, c99, c11, lto, djgpp, ia16, elf
 Author:
 Maintained-by:
