@@ -1,6 +1,6 @@
 Begin3
 Title:           IA-16 libi86
-Version:         @nl_ver@
+Version:         @li_ver@
 Entered-date:    @date@
 Description:     Non-standard C library routines, for use with IA-16 GCC
 Keywords:        gcc, compiler, libi86, djgpp, ia16, elf
