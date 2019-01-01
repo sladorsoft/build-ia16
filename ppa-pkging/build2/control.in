@@ -14,7 +14,8 @@ Vcs-Git: https://github.com/tkchia/gcc-ia16.git
 Package: gcc-ia16-elf
 Architecture: any
 Depends: binutils-ia16-elf (>= @bu_ver@), libnewlib-ia16-elf (>= @nl_ver@),
- libi86-ia16-elf (>= @li_ver@), ${shlibs:Depends}, ${misc:Depends}
+ ${shlibs:Depends}, ${misc:Depends}
+Suggests: libi86-ia16-elf (>= @li_ver@)
 Description: GNU C and C++ compilers for ia16-elf target
  Unofficial port of the GNU C and C++ compilers to the ia16-elf target ---
  for 16-bit Intel x86 CPUs, using ELF objects internally, and producing
