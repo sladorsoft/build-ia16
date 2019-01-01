@@ -36,11 +36,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|libi86|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "libi86" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib libi86 gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -207,6 +207,34 @@ if in_list newlib BUILDLIST; then
   popd
 fi
 
+if in_list libi86 BUILDLIST; then
+  echo
+  echo "*******************"
+  echo "* Building libi86 *"
+  echo "*******************"
+  echo
+  [ -f libi86/.git/config ] || \
+    git clone https://gitlab.com/tkchia/libi86.git
+  # Remove some internal headers that I added at some point in time and later
+  # made redundant again...  -- tkchia 20181231
+  rm -f "$PREFIX"/ia16-elf/include/libi86/internal/int86.h \
+	"$PREFIX"/ia16-elf/include/libi86/internal/farptr.h
+  # Then...
+  rm -rf build-libi86
+  mkdir build-libi86
+  pushd build-libi86
+  if [ -e ../libi86/autogen.sh ]; then
+    (cd ../libi86 && ./autogen.sh)
+  fi
+  ../libi86/configure --host=ia16-elf --prefix="$PREFIX" \
+		      --exec-prefix="$PREFIX"/ia16-elf 2>&1 | \
+    tee build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make check 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
+  popd
+fi
+
 if in_list gcc2 BUILDLIST; then
   echo
   echo "************************"
@@ -231,29 +259,10 @@ fi
 
 if in_list extra BUILDLIST; then
   echo
-  echo "***************************************************"
-  echo "* Building extra stuff (libi86, PDCurses, ubasic) *"
-  echo "***************************************************"
+  echo "*******************************************"
+  echo "* Building extra stuff (PDCurses, ubasic) *"
+  echo "*******************************************"
   echo
-  [ -f libi86/.git/config ] || \
-    git clone https://gitlab.com/tkchia/libi86.git
-  # Remove some internal headers that I added at some point in time and later
-  # made redundant again...  -- tkchia 20181231
-  rm -f "$PREFIX"/ia16-elf/include/libi86/internal/int86.h \
-	"$PREFIX"/ia16-elf/include/libi86/internal/farptr.h
-  # Then...
-  rm -rf build-libi86
-  mkdir build-libi86
-  pushd build-libi86
-  if [ -e ../libi86/autogen.sh ]; then
-    (cd ../libi86 && ./autogen.sh)
-  fi
-  ../libi86/configure --host=ia16-elf --prefix="$PREFIX"/ia16-elf 2>&1 | \
-    tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
-  make $PARALLEL install 2>&1 | tee -a build.log
-  popd
-  #
   [ -f pdcurses/.git/config ] || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
   rm -rf build-pdcurses
@@ -451,9 +460,9 @@ if in_list clean-djgpp BUILDLIST; then
   echo "* Cleaning DJGPP *"
   echo "******************"
   echo
-  rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-binutils" \
-	 "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
-  mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" \
+  rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
+	 "$PREFIX-djgpp-binutils" "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
+  mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
 	   "$PREFIX-djgpp-binutils/bin" "$PREFIX-djgpp-gcc/bin"
 fi
 
@@ -512,6 +521,12 @@ if in_list prereqs-djgpp BUILDLIST; then
   make install prefix="$PREFIX-djgpp-newlib"
   find "$PREFIX-djgpp-newlib" -name libg.a -print0 | xargs -0 rm -f
   cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
+  popd
+  # Similarly, install libi86 into the DJGPP tree.
+  pushd build-libi86
+  make install prefix="$PREFIX-djgpp-libi86" \
+	       exec_prefix="$PREFIX-djgpp-libi86"/ia16-elf
+  cp -lrf "$PREFIX-djgpp-libi86"/* "$PREFIX-djgpp"
   popd
 fi
 

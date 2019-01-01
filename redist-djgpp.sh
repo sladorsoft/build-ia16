@@ -44,7 +44,7 @@ repack () {
 decide_binutils_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@bu_ver@|$bu_ver|" \
   djgpp-fdos-pkging/i16butil.lsm.in >redist-djgpp/appinfo/i16butil.lsm
-ln -s "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/i16gnu
+cp -a "$our_dir"/prefix-djgpp-binutils/* redist-djgpp/devel/i16gnu
 mkdir -p redist-djgpp/links redist-djgpp/source/i16butil
 for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
   prog="`basename "$path" .exe | cut -c1-8`"
@@ -63,6 +63,15 @@ FIN
   # And...
   git -C binutils-ia16 diff 51b4f73a37c2e7eec31e932fc3c8dae879735f63
 ) >redist-djgpp/source/i16butil/i16butil.dif
+# I am not quite sure how to handle the elf_i386.xdce, elf_i386.xswe, etc.
+# linker scripts yet --- we cannot have two separate files elf_i386.xdc and
+# elf_i386.xdce in the same ldscripts/ directory under MS-DOS's 8.3 filename
+# restrictions.
+#
+# Currently I exclude (most of) the `d' and `s' scripts, since `d' corresponds
+# to the `-pie' linker option, and `-s' to the `-shared' option, neither of
+# which make much sense (yet) in the IA-16 context.
+rm -f -v redist-djgpp/devel/i16gnu/ia16-elf/lib/ldscripts/elf_i386.x[ds][^e]*
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links source)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
@@ -84,11 +93,25 @@ sed -e "s|@date@|$date|" -e "s|@nl_ver@|$nl_uver-$nl_date|" \
 ln -s "$our_dir"/prefix-djgpp-newlib/* redist-djgpp/devel/i16gnu
 mkdir -p redist-djgpp/source/i16newli
 git -C newlib-ia16 archive --format=zip --prefix=newlib-ia16/ -0 -v HEAD \
-  >redist-djgpp/source/i16newli/i16newli.zip
+  >redist-djgpp/source/i16newli/newlib.zip
 (cd redist-djgpp && zip -9rkX i16newli.zip appinfo devel source)
 rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
   redist-djgpp/source/*
 repack i16newli
+
+decide_libi86_ver_and_dirs
+# Again, use a short version number inside the .lsm .
+sed -e "s|@date@|$date|" -e "s|@li_ver@|$li_uver|" \
+  djgpp-fdos-pkging/i16lbi86.lsm.in >redist-djgpp/appinfo/i16lbi86.lsm
+ln -s "$our_dir"/prefix-djgpp-libi86/* redist-djgpp/devel/i16gnu
+mkdir -p redist-djgpp/source/i16lbi86
+git -C libi86 archive --format=zip --prefix=libi86/ -0 -v HEAD \
+  >redist-djgpp/source/i16lbi86/libi86.zip
+(cd redist-djgpp && zip -9rkX i16lbi86.zip appinfo devel source)
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
+  redist-djgpp/source/*
+# Do not repack libi86 with LZMA for now --- fdnpkg has some problem unpacking
+# the LZMA'd version.
 
 decide_gcc_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@gcc_ver@|$gcc_ver|" \

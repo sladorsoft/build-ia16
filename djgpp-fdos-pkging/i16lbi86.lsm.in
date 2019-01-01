@@ -1,0 +1,14 @@
+Begin3
+Title:           IA-16 libi86
+Version:         @nl_ver@
+Entered-date:    @date@
+Description:     Non-standard C library routines, for use with IA-16 GCC
+Keywords:        gcc, compiler, libi86, djgpp, ia16, elf
+Author:
+Maintained-by:
+Primary-site:    https://github.com/tkchia/build-ia16/releases/
+Alternate-site:
+Original-site:   https://gitlab.com/tkchia/libi86/
+Platforms:       DOS, Linux
+Copying-policy:  GNU General Public License, version 3 or later
+End

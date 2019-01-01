@@ -1,0 +1,19 @@
+Source: libi86-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9), autotools-dev, binutils-ia16-elf (>=
+ @bu_ver@), gcc-bootstraps-ia16-elf (>= @gcc_ver@), libnewlib-ia16-elf (>=
+ @nl_ver@), quilt, xz-utils
+Standards-Version: 3.9.6
+Homepage: https://gitlab.com/tkchia/libi86
+Vcs-Git: https://gitlab.com/tkchia/libi86.git
+
+Package: libi86-ia16-elf
+Architecture: any
+Depends: libnewlib-ia16-elf (>= @nl_ver@), ${shlibs:Depends}, ${misc:Depends}
+Suggests: gcc-ia16-elf
+Description: Non-standard C library routines, for ia16-elf target
+ Implementation of some non-standard C library facilities (e.g. <conio.h>),
+ as commonly used in classical MS-DOS programs, for the ia16-elf (16-bit
+ Intel x86 CPUs) target.

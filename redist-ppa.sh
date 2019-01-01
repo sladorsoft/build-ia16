@@ -46,11 +46,11 @@ in_list () {
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|stubs|binutils|gcc1|newlib|gcc2)
+    clean|stubs|binutils|gcc1|newlib|libi86|gcc2)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "gcc2")
+      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "libi86" "gcc2")
       ;;
     --distro=?*)
       distro="${1#--distro=}"
@@ -65,7 +65,8 @@ done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-ppa options:"
-  echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib gcc2"
+  echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib" \
+       "libi86 gcc2"
   exit 1
 fi
 
@@ -278,6 +279,44 @@ if in_list newlib BUILDLIST; then
   popd
 fi
 
+if in_list libi86 BUILDLIST; then
+  echo
+  echo "********************"
+  echo "* Packaging libi86 *"
+  echo "********************"
+  echo
+  rm -rf redist-ppa/"$distro"/libi86-ia16-elf_*
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  decide_newlib_ver_and_dirs
+  decide_libi86_ver_and_dirs
+  mkdir -p redist-ppa/"$distro"/"$li_pdir"
+  git -C libi86 ls-files -z | \
+    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
+    (cd libi86 && \
+     tar cf - --null -T - --transform "s?^?$li_dir/?" --no-recursion) | \
+    xz -9v \
+    >redist-ppa/"$distro"/"$li_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$li_pdir"
+  dh_make -s -p "$li_pdir" -n -f ../"$li_dir".orig.tar.xz -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../../ppa-pkging/build-libi86/* debian/
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
+      -e "s|@nl_ver@|$nl_ver|g" debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "libi86-ia16-elf ($li_pver) $distro; urgency=medium"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  popd
+fi
+
 if in_list gcc2 BUILDLIST; then
   echo
   echo "*************************"
@@ -288,6 +327,7 @@ if in_list gcc2 BUILDLIST; then
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
+  decide_libi86_ver_and_dirs
   mkdir -p redist-ppa/"$distro"/"$g2_pdir"
   # Copy the source tree over, except for .git* files, untracked files, and
   # the bigger testsuites.
@@ -302,8 +342,8 @@ if in_list gcc2 BUILDLIST; then
   dh_make -s -p "$g2_pdir" -n -f ../"$g2_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build2/* debian/
-  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" debian/control.in \
-    >debian/control
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
+      -e "s|@li_ver@|$li_ver|g" debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (

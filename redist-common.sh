@@ -11,8 +11,8 @@ decide_binutils_ver_and_dirs () {
   # I factored out this logic as a function, as several build tasks use it.
   bu_uver="`cat binutils-ia16/bfd/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
-  bu_date="`cd binutils-ia16 && git log -n1 --oneline --date=short-local \
-    --format='%ad' | sed 's/-//g'`"
+  bu_date="`cd binutils-ia16 && git log -n1 --oneline --date=iso-strict-local \
+    --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$bu_uver" -a -n "$bu_date" ]
   bu_ver="$bu_uver"-"$bu_date"
   bu_pver="$bu_ver"-ppa"$ppa_no~$distro"
@@ -64,4 +64,17 @@ decide_newlib_ver_and_dirs () {
   nl_pver="$nl_ver"-ppa"$ppa_no~$distro"
   nl_dir=libnewlib-ia16-elf_"$nl_ver"
   nl_pdir=libnewlib-ia16-elf_"$nl_pver"
+}
+
+decide_libi86_ver_and_dirs () {
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  li_uver="`cat libi86/configure | \
+    sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
+  [ -n "$li_uver" ]
+  # Include the GCC and binutils versions inside the libi86 version.
+  li_ver="$li_uver"-stage1gcc"$gcc_ver"-binutils"$bu_ver"
+  li_pver="$li_ver"-ppa"$ppa_no~$distro"
+  li_dir=libi86-ia16-elf_"$li_ver"
+  li_pdir=libi86-ia16-elf_"$li_pver"
 }

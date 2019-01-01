@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+
+	# launchpad.net specifies options which make sense when compiling to
+	# an Ubuntu host, but not so much sense when cross-compiling to an
+	# ia16-elf host.  In particular, the stack protector library (-lssp)
+	# may not be available when we try to build libi86.  -- tkchia
+export CFLAGS := $(filter-out -fstack-protector%,$(CFLAGS))
+export CPPFLAGS := $(filter-out -D_FORTIFY_SOURCE%,$(CPPFLAGS))
+export LDFLAGS :=
+
+%:
+	exec dh $@ --parallel --builddirectory=build
+
+override_dh_update_autotools_config:
+	# Nope, do not touch config.sub or config.guess .
+
+override_dh_auto_configure:
+	dh_auto_configure -O--parallel -- \
+	    --host=ia16-elf --exec-prefix=/usr/ia16-elf
