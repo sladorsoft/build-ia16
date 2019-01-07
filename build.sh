@@ -216,8 +216,9 @@ if in_list libi86 BUILDLIST; then
   [ -f libi86/.git/config ] || \
     git clone https://gitlab.com/tkchia/libi86.git
   # Remove some internal headers that I added at some point in time and later
-  # made redundant again...  -- tkchia 20181231
-  rm -f "$PREFIX"/ia16-elf/include/libi86/internal/int86.h \
+  # made redundant (or build-internal) again...  -- tkchia 20190101
+  rm -f "$PREFIX"/ia16-elf/include/libi86/internal/conio.h \
+	"$PREFIX"/ia16-elf/include/libi86/internal/int86.h \
 	"$PREFIX"/ia16-elf/include/libi86/internal/farptr.h
   # Then...
   rm -rf build-libi86
