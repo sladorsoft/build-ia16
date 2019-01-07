@@ -35,4 +35,4 @@
 
 A pre-compiled [Ubuntu Personal Package Archive](https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/) is now available.
 
-There are also [binary packages for the toolchain for FreeDOS](https://github.com/tkchia/build-ia16/releases).  The toolchain requires a 32-bit machine (i.e. 80386 or above), but it will produce 16-bit code.
+There are also binary FreeDOS packages [for the toolchain](https://github.com/tkchia/build-ia16/releases) and [for `libi86`](https://github.com/tkchia/libi86/releases).  The toolchain requires a 32-bit machine (i.e. 80386 or above), but it will produce 16-bit code.
