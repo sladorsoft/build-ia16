@@ -231,7 +231,9 @@ if in_list libi86 BUILDLIST; then
 		      --exec-prefix="$PREFIX"/ia16-elf 2>&1 | \
     tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
-  make check 2>&1 | tee -a build.log
+  if dosemu --version >/dev/null 2>/dev/null; then
+    make check 2>&1 | tee -a build.log
+  fi
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
 fi
