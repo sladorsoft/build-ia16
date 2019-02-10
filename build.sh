@@ -297,32 +297,14 @@ if in_list sim BUILDLIST; then
   echo
 
   # This script used to build dosemu2, but not anymore (dosemu2 is getting a
-  # bit too complex to build).  Clean away any old dosemu sources, builds,
-  # or installations...
+  # bit too complex to build).
   #
   # To try out dosemu2, you can either use Andrew Bird et al.'s Ubuntu PPA
   # (https://launchpad.net/~dosemu2/+archive/ubuntu/ppa) or my selection of
   # the more stable packages (https://launchpad.net/~tkchia/+archive/ubuntu/
   # dosemu-on-travis-ci).
-  if [ -e "$PREFIX"/bin/dosemu -o -e "$PREFIX"/lib/dosemu -o \
-       -e "$PREFIX"/share/doc/dosemu2 -o -e "$PREFIX"/share/dosemu ]; then
-    rm -rfv dosemu build-dosemu \
-	    "$PREFIX"/bin/dosemu "$PREFIX"/bin/dosemu.bin \
-	    "$PREFIX"/bin/dosdebug \
-	    "$PREFIX"/lib/dosemu \
-	    "$PREFIX"/etc/dosemu \
-	    "$PREFIX"/share/doc/dosemu2 \
-	    "$PREFIX"/share/man/man1/dosemu.bin.1 \
-	    "$PREFIX"/share/man/man1/dosemu.1 \
-	    "$PREFIX"/share/man/man1/mkfatimage16.1 \
-	    "$PREFIX"/share/man/man1/dosdebug.1 \
-	    "$PREFIX"/share/man/ru/man1/dosemu.bin.1 \
-	    "$PREFIX"/share/man/ru/man1/dosemu.1 \
-	    "$PREFIX"/share/man/ru/man1/xdosemu.1 \
-	    "$PREFIX"/share/man/ru/man1/mkfatimage16.1 \
-	    "$PREFIX"/share/man/ru/man1/dosdebug.1 \
-	    "$PREFIX"/share/dosemu
-  fi
+  #
+  # Alternatively, use the "original" dosemu 1.x.
 
   if [ -e 86sim/86sim.cpp ]; then
     [ -e 86sim/86sim ] && rm 86sim/86sim
