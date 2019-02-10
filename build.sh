@@ -124,8 +124,8 @@ if in_list binutils BUILDLIST; then
   mkdir build-binutils
   pushd build-binutils
   ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
-  make $PARALLEL install 2>&1 | tee -a build.log
+  script -c "make $PARALLEL" -a build.log
+  script -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -180,8 +180,8 @@ if in_list gcc1 BUILDLIST; then
   pushd build
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
-  make $PARALLEL 2>&1 | tee -a build.log
-  make $PARALLEL 2>&1 install | tee -a build.log
+  script -c "make $PARALLEL" -a build.log
+  script -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -202,8 +202,8 @@ if in_list newlib BUILDLIST; then
   mkdir build-newlib
   pushd build-newlib
   CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small --disable-newlib-fseek-optimization --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 | tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
-  make install 2>&1 | tee -a build.log
+  script -c "make $PARALLEL" -a build.log
+  script -c "make install" -a build.log
   popd
 fi
 
@@ -230,11 +230,11 @@ if in_list libi86 BUILDLIST; then
   ../libi86/configure --host=ia16-elf --prefix="$PREFIX" \
 		      --exec-prefix="$PREFIX"/ia16-elf 2>&1 | \
     tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
+  script -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
-    make check 2>&1 | tee -a build.log
+    script -c "make check" -a build.log
   fi
-  make $PARALLEL install 2>&1 | tee -a build.log
+  script -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -255,8 +255,8 @@ if in_list gcc2 BUILDLIST; then
   mkdir build2
   pushd build2
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --with-isl="$PREFIX-isl" 2>&1 | tee build.log
-  make $PARALLEL 2>&1 | tee -a build.log
-  make $PARALLEL install 2>&1 | tee -a build.log
+  script -c "make $PARALLEL" -a build.log
+  script -c "make $PARALLEL install" -a build.log
   popd
 fi
 
