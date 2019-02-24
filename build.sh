@@ -636,12 +636,12 @@ if in_list gcc-djgpp BUILDLIST; then
   #	"checking whether byte ordering is bigendian... unknown
   #	 configure: error: unknown endianness
   #	 presetting ac_cv_c_bigendian=no (or yes) will help"
-  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2 -Wno-narrowing' \
-    'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
-  make $PARALLEL install prefix="$PREFIX-djgpp-gcc" \
-    datadir="$PREFIX-djgpp-gcc"/ia16-elf \
-    infodir="$PREFIX-djgpp-gcc"/ia16-elf/info \
-    localedir="$PREFIX-djgpp-gcc"/ia16-elf/locale 2>&1 | tee -a build.log
+  script -c "make $PARALLEL 'CFLAGS=-s -O2' \
+    'CXXFLAGS=-s -O2 -Wno-narrowing' 'BOOT_CFLAGS=-s -O2' 2>&1" -a build.log
+  script -c "make $PARALLEL install prefix='$PREFIX-djgpp-gcc' \
+    datadir='$PREFIX-djgpp-gcc'/ia16-elf \
+    infodir='$PREFIX-djgpp-gcc'/ia16-elf/info \
+    localedir='$PREFIX-djgpp-gcc'/ia16-elf/locale" -a build.log
   popd
   pushd "$PREFIX-djgpp-gcc"
   # We do not need the copy of the GCC driver with a long name.
