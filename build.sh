@@ -124,8 +124,8 @@ if in_list binutils BUILDLIST; then
   mkdir build-binutils
   pushd build-binutils
   ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -140,7 +140,7 @@ if in_list binutils-debug BUILDLIST; then
   pushd build-binutils-debug
   ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -154,8 +154,8 @@ if in_list isl BUILDLIST; then
   mkdir build-isl
   pushd build-isl
   ../isl-0.16.1/configure --prefix="$PREFIX-isl" --disable-shared 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -180,8 +180,8 @@ if in_list gcc1 BUILDLIST; then
   pushd build
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -202,8 +202,8 @@ if in_list newlib BUILDLIST; then
   mkdir build-newlib
   pushd build-newlib
   CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small --disable-newlib-fseek-optimization --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make install" -a build.log
   popd
 fi
 
@@ -230,11 +230,11 @@ if in_list libi86 BUILDLIST; then
   ../libi86/configure --host=ia16-elf --prefix="$PREFIX" \
 		      --exec-prefix="$PREFIX"/ia16-elf 2>&1 | \
     tee build.log
-  script -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
-    script -c "make check" -a build.log
+    script -e -c "make check" -a build.log
   fi
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -255,8 +255,8 @@ if in_list gcc2 BUILDLIST; then
   mkdir build2
   pushd build2
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --with-isl="$PREFIX-isl" 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
 fi
 
@@ -396,29 +396,29 @@ if in_list prereqs-windows BUILDLIST; then
   mkdir build-gmp-windows
   pushd build-gmp-windows
   ../gmp-6.1.2/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-mpfr-windows
   mkdir build-mpfr-windows
   pushd build-mpfr-windows
   ../mpfr-3.1.5/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-mpc-windows
   mkdir build-mpc-windows
   pushd build-mpc-windows
   ../mpc-1.0.3/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-isl-windows
   mkdir build-isl-windows
   pushd build-isl-windows
   ../isl-0.16.1/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-prereqs" 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   mkdir "$PREFIX-windows/ia16-elf"
   cp -R "$PREFIX/ia16-elf/lib" "$PREFIX-windows/ia16-elf"
@@ -486,8 +486,8 @@ if in_list prereqs-djgpp BUILDLIST; then
   ../gmp-6.1.2/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --disable-shared --disable-fft 2>&1 | tee build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-mpfr-djgpp
   mkdir build-mpfr-djgpp
@@ -495,8 +495,8 @@ if in_list prereqs-djgpp BUILDLIST; then
   ../mpfr-3.1.5/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-mpc-djgpp
   mkdir build-mpc-djgpp
@@ -505,15 +505,15 @@ if in_list prereqs-djgpp BUILDLIST; then
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" \
     --disable-shared 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-isl-djgpp
   mkdir build-isl-djgpp
   pushd build-isl-djgpp
   ../isl-0.16.1/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | tee -a build.log
-  script -c "make $PARALLEL" -a build.log
-  script -c "make $PARALLEL install" -a build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
   popd
   # Instead of copying over everything in $PREFIX/ia16-elf/{lib, include} ---
   # including any C++ libraries --- just install Newlib into the DJGPP tree.
@@ -636,9 +636,9 @@ if in_list gcc-djgpp BUILDLIST; then
   #	"checking whether byte ordering is bigendian... unknown
   #	 configure: error: unknown endianness
   #	 presetting ac_cv_c_bigendian=no (or yes) will help"
-  script -c "make $PARALLEL 'CFLAGS=-s -O2' \
+  script -e -c "make $PARALLEL 'CFLAGS=-s -O2' \
     'CXXFLAGS=-s -O2 -Wno-narrowing' 'BOOT_CFLAGS=-s -O2' 2>&1" -a build.log
-  script -c "make $PARALLEL install prefix='$PREFIX-djgpp-gcc' \
+  script -e -c "make $PARALLEL install prefix='$PREFIX-djgpp-gcc' \
     datadir='$PREFIX-djgpp-gcc'/ia16-elf \
     infodir='$PREFIX-djgpp-gcc'/ia16-elf/info \
     localedir='$PREFIX-djgpp-gcc'/ia16-elf/locale" -a build.log
