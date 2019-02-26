@@ -227,9 +227,9 @@ if in_list libi86 BUILDLIST; then
   if [ -e ../libi86/autogen.sh ]; then
     (cd ../libi86 && ./autogen.sh)
   fi
-  ../libi86/configure --host=ia16-elf --prefix="$PREFIX" \
-		      --exec-prefix="$PREFIX"/ia16-elf 2>&1 | \
-    tee build.log
+  script -e -c "../libi86/configure --host=ia16-elf --prefix='$PREFIX' \
+				    --exec-prefix='$PREFIX'/ia16-elf" \
+	 -a build.log
   script -e -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
     script -e -c "make check" -a build.log
