@@ -4,6 +4,10 @@
 # (http://wiki.freedos.org/wiki/index.php/Package) which can work with an
 # installation of DJGPP (http://www.ibiblio.org/pub/micro/pc-stuff/freedos/
 # files/distributions/1.2/repos/pkg-html/djgpp.html).
+#
+# Before running this script, the toolchain binaries need to be compiled using
+# a command like the following:
+#	./build.sh clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp
 
 set -e -o pipefail
 cd $(dirname "$0")
