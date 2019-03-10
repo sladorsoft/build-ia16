@@ -16,3 +16,8 @@ override_dh_auto_configure:
 	    --enable-newlib-global-atexit --enable-newlib-reent-small \
 	    --disable-newlib-fseek-optimization \
 	    --disable-newlib-unbuf-stream-opt --enable-target-optspace
+
+override_dh_strip:
+	# Not needed for now.  Note that stock GNU Binutils's strip(1) will
+	# fail on the new (March 2019) Newlib libraries, as it does not
+	# understand the IA16-specific segment relocations.
