@@ -198,6 +198,10 @@ if in_list newlib BUILDLIST; then
     echo 'Please rebuild gcc1.'
     exit 1
   fi
+  # Remove some ELKS linker scripts under their old names.
+  find "$PREFIX" -name elks-combined.ld -print0 | xargs -0 rm -rf
+  find "$PREFIX" -name elks-separate.ld -print0 | xargs -0 rm -rf
+  # Then...
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
@@ -247,7 +251,9 @@ if in_list gcc2 BUILDLIST; then
   if [ -e "$PREFIX"/ia16-elf/lib/i80286 -o \
        -e "$PREFIX"/ia16-elf/lib/wide-types -o \
        -e "$PREFIX"/ia16-elf/lib/rtd/frame-pointer -o \
-       -e "$PREFIX"/ia16-elf/lib/any_186/frame-pointer ]; then
+       -e "$PREFIX"/ia16-elf/lib/any_186/frame-pointer -o \
+       -e "$PREFiX"/ia16-elf/lib/elks-combined.ld -o \
+       -e "$PREFIX"/ia16-elf/lib/elks-separate.ld ]; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
   fi
