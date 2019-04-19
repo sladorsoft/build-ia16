@@ -36,11 +36,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|libi86|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|libi86|elks-libc|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "libi86" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "libi86" "elks-libc" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib libi86 gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib libi86 elks-libc gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -239,6 +239,27 @@ if in_list libi86 BUILDLIST; then
     script -e -c "make check" -a build.log
   fi
   script -e -c "make $PARALLEL install" -a build.log
+  popd
+fi
+
+if in_list elks-libc BUILDLIST; then
+  echo
+  echo "**********************"
+  echo "* Building elks-libc *"
+  echo "**********************"
+  echo
+  # (1) The ELKS source tree is not downloaded on default by fetch.sh, since
+  #	it is quite big and we may not always need it.
+  # (2) gcc-ia16 does not yet have integrated support for linking ELKS
+  #	programs with elks-libc.  -- tkchia 20190419
+  [ -f elks/.git/config ] || \
+    git clone https://github.com/tkchia/elks.git
+  pushd elks
+  mkdir -p cross
+  script -e -c ". tools/env.sh && make defconfig" -a build.log
+  script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
+  script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
+  # TODO: install in $PREFIX...  -- tkchia 20190419
   popd
 fi
 
