@@ -259,7 +259,30 @@ if in_list elks-libc BUILDLIST; then
   script -e -c ". tools/env.sh && make defconfig" -a build.log
   script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
   script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
-  # TODO: install in $PREFIX...  -- tkchia 20190419
+  mkdir -p "$PREFIX"/ia16-elf/lib/elkslibc/
+  cp -v libc/libc.a libc/crt0.o elks/elks-raw.ld elks/elks-small.ld \
+     elks/elks-tiny.ld "$PREFIX"/ia16-elf/lib/elkslibc/
+  # FIXME: The installation process for multilibs other than the default is
+  # not really fixed yet.  -- tkchia 20190420
+  "$PREFIX"/bin/ia16-elf-gcc -print-multi-lib | \
+  (
+    save_ifs="$IFS"
+    while read -r line; do
+      IFS=';'
+      set -- $line
+      IFS="$save_ifs"
+      dir="$1"
+      case "$dir" in
+	'.;')
+	  ;;  # default multilib was handled above
+	*)
+	  mkdir -p "$PREFIX"/ia16-elf/lib/"$dir"/elkslibc/
+	  cp -v libc/build-ml/"$dir"/libc.a libc/build-ml/"$dir"/crt0.o \
+		"$PREFIX"/ia16-elf/lib/"$dir"/elkslibc/
+	  ;;
+      esac
+    done
+  )
   popd
 fi
 
@@ -492,9 +515,11 @@ if in_list clean-djgpp BUILDLIST; then
   echo "******************"
   echo
   rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
-	 "$PREFIX-djgpp-binutils" "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
+	 "$PREFIX-djgpp-elkslibc" "$PREFIX-djgpp-binutils" \
+	 "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
   mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
-	   "$PREFIX-djgpp-binutils/bin" "$PREFIX-djgpp-gcc/bin"
+	   "$PREFIX-djgpp-elkslibc" "$PREFIX-djgpp-binutils/bin" \
+	   "$PREFIX-djgpp-gcc/bin"
 fi
 
 if in_list prereqs-djgpp BUILDLIST; then
@@ -554,11 +579,41 @@ if in_list prereqs-djgpp BUILDLIST; then
   cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
   popd
   # Similarly, install libi86 into the DJGPP tree.
-  pushd build-libi86
-  make install prefix="$PREFIX-djgpp-libi86" \
-	       exec_prefix="$PREFIX-djgpp-libi86"/ia16-elf
-  cp -lrf "$PREFIX-djgpp-libi86"/* "$PREFIX-djgpp"
-  popd
+  if [ -f build-libi86/.git/config ]; then
+    pushd build-libi86
+    make install prefix="$PREFIX-djgpp-libi86" \
+		 exec_prefix="$PREFIX-djgpp-libi86"/ia16-elf
+    cp -lrf "$PREFIX-djgpp-libi86"/* "$PREFIX-djgpp"
+    popd
+  fi
+  # And elks-libc.
+  if [ -f elks/.git/config ]; then
+    pushd elks
+    mkdir -p "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/
+    cp -v libc/libc.a libc/crt0.o elks/elks-raw.ld elks/elks-small.ld \
+      elks/elks-tiny.ld "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/
+    # See elks-libc build code above...
+    "$PREFIX"/bin/ia16-elf-gcc -print-multi-lib | \
+    (
+      save_ifs="$IFS"
+      while read -r line; do
+	IFS=';'
+	set -- $line
+	IFS="$save_ifs"
+	dir="$1"
+	case "$dir" in
+	  '.;')
+	    ;;  # default multilib was handled above
+	  *)
+	    mkdir -p "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/"$dir"/elkslibc/
+	    cp -v libc/build-ml/"$dir"/libc.a libc/build-ml/"$dir"/crt0.o \
+		  "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/"$dir"/elkslibc/
+	    ;;
+	esac
+      done
+    )
+    popd
+  fi
 fi
 
 djgpp_symlink () {
