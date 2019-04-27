@@ -159,21 +159,65 @@ if in_list isl BUILDLIST; then
   popd
 fi
 
+obsolete_gcc_multilibs_installed () {
+  [ -e "$PREFIX"/ia16-elf/lib/i80286 -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/i80286 -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/i80286 -o \
+    -e "$PREFIX"/ia16-elf/lib/any_186 -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/any_186 -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/any_186 -o \
+    -e "$PREFIX"/ia16-elf/lib/wide-types -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/wide-types -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/wide-types -o \
+    -e "$PREFIX"/ia16-elf/lib/frame-pointer -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/frame-pointer -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/frame-pointer -o \
+    -e "$PREFIX"/ia16-elf/lib/rtd/elkslibc -o \
+    -e "$PREFIX"/ia16-elf/lib/regparmcall/elkslibc ]
+}
+
+obsolete_newlib_multilibs_installed () {
+  [ -e "$PREFIX"/ia16-elf/lib/elks-combined.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/elks-separate.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/libelks.a -o \
+    -e "$PREFIX"/ia16-elf/lib/elks-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/rtd/libelks.a -o \
+    -e "$PREFIX"/ia16-elf/lib/rtd/elks-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/regparmcall/libelks.a -o \
+    -e "$PREFIX"/ia16-elf/lib/regparmcall/elks-crt0.o ]
+}
+
+obsolete_multilibs_installed () {
+  obsolete_gcc_multilibs_installed || obsolete_newlib_multilibs_installed
+}
+
 if in_list gcc1 BUILDLIST; then
   echo
   echo "************************"
   echo "* Building stage 1 GCC *"
   echo "************************"
   echo
-  # Check for any previously installed `i80286', `wide-types', or
-  # `{rtd, any_186}/frame-pointer' multilibs, and clean them away...
-  if [ -e "$PREFIX"/ia16-elf/lib/i80286 -o \
-       -e "$PREFIX"/ia16-elf/lib/wide-types -o \
-       -e "$PREFIX"/ia16-elf/lib/rtd/frame-pointer -o \
-       -e "$PREFIX"/ia16-elf/lib/any_186/frame-pointer ]; then
-    find "$PREFIX" -name i80286 -print0 | xargs -0 rm -rf
-    find "$PREFIX" -name wide-types -print0 | xargs -0 rm -rf
-    find "$PREFIX" -name frame-pointer -print0 | xargs -0 rm -rf
+  # Check for any previously installed `i80286', `wide-types', or `frame-
+  # pointer' multilibs, as well as "old style" `elkslibc' libraries, and clean
+  # them away...
+  if obsolete_gcc_multilibs_installed; then
+    set +e
+    find "$PREFIX"/ia16-elf/lib -name i80286 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name i80286 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name i80286 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name any_186 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name any_186 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name any_186 -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name wide-types -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name wide-types -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name wide-types -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name frame-pointer -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name frame-pointer -print0 \
+      | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name frame-pointer -print0 \
+      | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name elkslibc -print0 | xargs -0 rm -rf
+    set -e
   fi
   rm -rf build
   mkdir build
@@ -191,21 +235,30 @@ if in_list newlib BUILDLIST; then
   echo "* Building Newlib C library *"
   echo "*****************************"
   echo
-  if [ -e "$PREFIX"/ia16-elf/lib/i80286 -o \
-       -e "$PREFIX"/ia16-elf/lib/wide-types -o \
-       -e "$PREFIX"/ia16-elf/lib/rtd/frame-pointer -o \
-       -e "$PREFIX"/ia16-elf/lib/any_186/frame-pointer ]; then
+  if obsolete_gcc_multilibs_installed; then
     echo 'Please rebuild gcc1.'
     exit 1
   fi
-  # Remove some ELKS linker scripts under their old names.
-  find "$PREFIX" -name elks-combined.ld -print0 | xargs -0 rm -rf
-  find "$PREFIX" -name elks-separate.ld -print0 | xargs -0 rm -rf
+  if obsolete_newlib_multilibs_installed; then
+    set +e
+    find "$PREFIX" -name elks-combined.ld -print0 | xargs -0 rm -rf
+    find "$PREFIX" -name elks-separate.ld -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name libelks.a -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name elks-crt0.o -print0 | xargs -0 rm -rf
+    set -e
+  fi
   # Then...
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small --disable-newlib-fseek-optimization --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 | tee build.log
+  CC_FOR_TARGET="$HERE/newlib-ia16/libgloss/ia16/ia16-elf-gcc-wrapper.sh" \
+    CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' \
+    ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
+      --disable-newlib-wide-orient --enable-newlib-nano-malloc \
+      --disable-newlib-multithread --enable-newlib-global-atexit \
+      --enable-newlib-reent-small --disable-newlib-fseek-optimization \
+      --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 \
+      | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
   popd
@@ -219,6 +272,10 @@ if in_list libi86 BUILDLIST; then
   echo
   [ -f libi86/.git/config ] || \
     git clone https://gitlab.com/tkchia/libi86.git
+  if obsolete_multilibs_installed; then
+    echo 'Please rebuild gcc1 and newlib.'
+    exit 1
+  fi
   # Remove some internal headers that I added at some point in time and later
   # made redundant (or build-internal) again...  -- tkchia 20190101
   rm -f "$PREFIX"/ia16-elf/include/libi86/internal/conio.h \
@@ -232,8 +289,7 @@ if in_list libi86 BUILDLIST; then
     (cd ../libi86 && ./autogen.sh)
   fi
   script -e -c "../libi86/configure --host=ia16-elf --prefix='$PREFIX' \
-				    --exec-prefix='$PREFIX'/ia16-elf" \
-	 -a build.log
+				    --exec-prefix='$PREFIX'/ia16-elf" build.log
   script -e -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
     script -e -c "make check" -a build.log
@@ -248,41 +304,21 @@ if in_list elks-libc BUILDLIST; then
   echo "* Building elks-libc *"
   echo "**********************"
   echo
-  # (1) The ELKS source tree is not downloaded on default by fetch.sh, since
-  #	it is quite big and we may not always need it.
-  # (2) gcc-ia16 does not yet have integrated support for linking ELKS
-  #	programs with elks-libc.  -- tkchia 20190419
+  # The ELKS source tree is not downloaded on default by fetch.sh, since it
+  # is quite big and we may not always need it.  -- tkchia 20190426
   [ -f elks/.git/config ] || \
     git clone https://github.com/tkchia/elks.git
+  if obsolete_multilibs_installed; then
+    echo 'Please rebuild gcc1 and newlib.'
+    exit 1
+  fi
   pushd elks
   mkdir -p cross
-  script -e -c ". tools/env.sh && make defconfig" -a build.log
+  script -e -c ". tools/env.sh && make defconfig" build.log
   script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
   script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
-  mkdir -p "$PREFIX"/ia16-elf/lib/elkslibc/
-  cp -v libc/libc.a libc/crt0.o elks/elks-raw.ld elks/elks-small.ld \
-     elks/elks-tiny.ld "$PREFIX"/ia16-elf/lib/elkslibc/
-  # FIXME: The installation process for multilibs other than the default is
-  # not really fixed yet.  -- tkchia 20190420
-  "$PREFIX"/bin/ia16-elf-gcc -print-multi-lib | \
-  (
-    save_ifs="$IFS"
-    while read -r line; do
-      IFS=';'
-      set -- $line
-      IFS="$save_ifs"
-      dir="$1"
-      case "$dir" in
-	'.;')
-	  ;;  # default multilib was handled above
-	*)
-	  mkdir -p "$PREFIX"/ia16-elf/lib/"$dir"/elkslibc/
-	  cp -v libc/build-ml/"$dir"/libc.a libc/build-ml/"$dir"/crt0.o \
-		"$PREFIX"/ia16-elf/lib/"$dir"/elkslibc/
-	  ;;
-      esac
-    done
-  )
+  script -e -c ". tools/env.sh && cd libc \
+		&& make -j4 PREFIX='$PREFIX' install" -a build.log
   popd
 fi
 
@@ -292,12 +328,7 @@ if in_list gcc2 BUILDLIST; then
   echo "* Building stage 2 GCC *"
   echo "************************"
   echo
-  if [ -e "$PREFIX"/ia16-elf/lib/i80286 -o \
-       -e "$PREFIX"/ia16-elf/lib/wide-types -o \
-       -e "$PREFIX"/ia16-elf/lib/rtd/frame-pointer -o \
-       -e "$PREFIX"/ia16-elf/lib/any_186/frame-pointer -o \
-       -e "$PREFiX"/ia16-elf/lib/elks-combined.ld -o \
-       -e "$PREFIX"/ia16-elf/lib/elks-separate.ld ]; then
+  if obsolete_multilibs_installed; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
   fi
@@ -322,7 +353,7 @@ if in_list extra BUILDLIST; then
   mkdir build-pdcurses
   pushd build-pdcurses
   make $PARALLEL -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
-    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a 2>&1 | tee -a build.log
+    CC="$PREFIX/bin/ia16-elf-gcc" pdcurses.a 2>&1 | tee build.log
   make -f ../pdcurses/dos/gccdos16.mak PDCURSES_SRCDIR=../pdcurses \
     CC="$PREFIX/bin/ia16-elf-gcc" worm.exe xmas.exe 2>&1 | tee -a build.log
   cp -a pdcurses.a "$PREFIX"/ia16-elf/lib/libpdcurses.a
@@ -335,7 +366,7 @@ if in_list extra BUILDLIST; then
   mkdir build-ubasic
   pushd build-ubasic
   make $PARALLEL -f ../ubasic-ia16/Makefile.ia16 VPATH=../ubasic-ia16 2>&1 | \
-    tee -a build.log
+    tee build.log
   popd
 fi
 
@@ -546,7 +577,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   pushd build-mpfr-djgpp
   ../mpfr-3.1.5/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
-    --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee -a build.log
+    --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
@@ -556,14 +587,14 @@ if in_list prereqs-djgpp BUILDLIST; then
   ../mpc-1.0.3/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" \
-    --disable-shared 2>&1 | tee -a build.log
+    --disable-shared 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
   rm -rf build-isl-djgpp
   mkdir build-isl-djgpp
   pushd build-isl-djgpp
-  ../isl-0.16.1/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | tee -a build.log
+  ../isl-0.16.1/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
