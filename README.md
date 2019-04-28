@@ -14,13 +14,12 @@
             ▾
     ./build.sh gcc1 ◂───────────────┐
             ▾                       │
-    ./build.sh newlib               │
-            ▾                       │
-    ./build.sh libi86 ────┐         │
+    ./build.sh newlib ────┐         │
             │             ▾         │
             │  ./build.sh elks-libc │
             ├◂────────────┘         │
-            ├─────────────────────────────────────┐
+            ▾                       │
+    ./build.sh libi86 ────────────────────────────┐
             ▾                       │             ▾
     ./build.sh gcc2 ──────┐         │     ./build.sh clean-djgpp
             │             ▾         │             ▾
