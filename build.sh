@@ -621,29 +621,10 @@ if in_list prereqs-djgpp BUILDLIST; then
   # And elks-libc.
   if [ -f elks/.git/config ]; then
     pushd elks
-    mkdir -p "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/
-    cp -v libc/libc.a libc/crt0.o elks/elks-raw.ld elks/elks-small.ld \
-      elks/elks-tiny.ld "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/
-    # See elks-libc build code above...
-    "$PREFIX"/bin/ia16-elf-gcc -print-multi-lib | \
-    (
-      save_ifs="$IFS"
-      while read -r line; do
-	IFS=';'
-	set -- $line
-	IFS="$save_ifs"
-	dir="$1"
-	case "$dir" in
-	  '.;')
-	    ;;  # default multilib was handled above
-	  *)
-	    mkdir -p "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/"$dir"/elkslibc/
-	    cp -v libc/build-ml/"$dir"/libc.a libc/build-ml/"$dir"/crt0.o \
-		  "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/"$dir"/elkslibc/
-	    ;;
-	esac
-      done
-    )
+    (. tools/env.sh \
+     && cd libc \
+     && make -j4 PREFIX="$PREFIX-djgpp-elkslibc" install)
+    cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi
 fi
