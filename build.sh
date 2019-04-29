@@ -314,7 +314,7 @@ if in_list libi86 BUILDLIST; then
   fi
   script -e -c "../libi86/configure --host=ia16-elf --prefix='$PREFIX' \
 				    --exec-prefix='$PREFIX'/ia16-elf \
-				    --disable-elks" build.log
+				    --disable-elks-libc" build.log
   script -e -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
     script -e -c "make check" -a build.log

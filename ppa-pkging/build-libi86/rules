@@ -18,7 +18,7 @@ override_dh_update_autotools_config:
 
 override_dh_auto_configure:
 	dh_auto_configure -O--parallel -- \
-	    --host=ia16-elf --exec-prefix=/usr/ia16-elf --disable-elks
+	    --host=ia16-elf --exec-prefix=/usr/ia16-elf --disable-elks-libc
 
 override_dh_strip:
 	# Not needed for now.
