@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/elks-libc-gcc-ia16-elf)
+
+%:
+	exec dh $@
+
+override_dh_auto_clean:
+	-. tools/env.sh && make clean
+
+override_dh_auto_configure:
+	mkdir -p cross include
+	. tools/env.sh && make defconfig
+
+override_dh_auto_build:
+	. tools/env.sh && cd libc && make all
+
+override_dh_auto_test:
+	# Unimplemented.
+
+override_dh_auto_install:
+	. tools/env.sh && cd libc && make PREFIX='$(DESTDIR)/usr' install

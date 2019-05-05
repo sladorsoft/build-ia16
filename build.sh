@@ -279,7 +279,7 @@ if in_list elks-libc BUILDLIST; then
     exit 1
   fi
   pushd elks
-  mkdir -p cross
+  mkdir -p cross include
   script -e -c ". tools/env.sh && make defconfig" build.log
   script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
   script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log

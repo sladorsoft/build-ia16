@@ -1,0 +1,16 @@
+Source: elks-libc-gcc-ia16-elf
+Section: devel
+Priority: optional
+Maintainer: TK Chia <tkchia@gmx.com>
+Build-Depends: debhelper (>=9), autotools-dev, binutils-ia16-elf (>=
+ @bu_ver@), gcc-bootstraps-ia16-elf (>= @gcc_ver@), quilt, xz-utils,
+ libncurses-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/tkchia/elks
+Vcs-Git: https://github.com/tkchia/elks.git
+
+Package: elks-libc-gcc-ia16-elf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: gcc-ia16-elf
+Description: Native C library for ELKS, for use with GCC IA-16 toolchain

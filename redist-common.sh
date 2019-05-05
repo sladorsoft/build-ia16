@@ -66,6 +66,25 @@ decide_newlib_ver_and_dirs () {
   nl_pdir=libnewlib-ia16-elf_"$nl_pver"
 }
 
+decide_elks_libc_ver_and_dirs () {
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  el_uver="`cat elks/libc/Makefile.inc | \
+    sed -n "/^VERSION *=/ { s/^.*= *//; s/^elks-//; s/ *$//; p; q; }" || :`"
+  el_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
+    --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
+  [ -n "$el_uver" -a -n "$el_date" ]
+  # Include the GCC and binutils versions inside the elks-libc version.
+  el_ver="$el_uver"-"$el_date"-stage1gcc"$gcc_ver"-binutils"$bu_ver"
+  # Yet another messy hack.
+  if [ 20190505.14 = "$el_date" ]; then
+    el_ver="$el_uver"-"$el_date".7-stage1gcc"$gcc_ver"-binutils"$bu_ver"
+  fi
+  el_pver="$el_ver"-ppa"$ppa_no~$distro"
+  el_dir=elks-libc-gcc-ia16-elf_"$el_ver"
+  el_pdir=elks-libc-gcc-ia16-elf_"$el_pver"
+}
+
 decide_libi86_ver_and_dirs () {
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs

@@ -46,11 +46,12 @@ in_list () {
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|stubs|binutils|gcc1|newlib|libi86|gcc2)
+    clean|stubs|binutils|gcc1|newlib|elks-libc|libi86|gcc2)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "libi86" "gcc2")
+      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "elks-libc" \
+		 "libi86" "gcc2")
       ;;
     --distro=?*)
       distro="${1#--distro=}"
@@ -66,7 +67,7 @@ done
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-ppa options:"
   echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib" \
-       "libi86 gcc2"
+       "elks-libc libi86 gcc2"
   exit 1
 fi
 
@@ -195,9 +196,9 @@ if in_list gcc1 BUILDLIST; then
   echo "*************************"
   echo
   # Package up gcc-ia16 as a source package.  My current idea is that this
-  # `gcc-bootstraps-ia16-elf' package will only be used to build newlib, and
-  # then it can be safely jettisoned.  So I try to pack as little stuff as
-  # possible into the `.orig' tarball.
+  # `gcc-bootstraps-ia16-elf' package will only be used to build newlib and
+  # elks-libc, and then it can be safely jettisoned.  So I try to pack as
+  # little stuff as possible into the `.orig' tarball.
   #
   # (The resulting tarball is still pretty big though (20+ MiB).  There is
   # likely a better way...)
@@ -269,6 +270,43 @@ if in_list newlib BUILDLIST; then
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
     echo "libnewlib-ia16-elf ($nl_pver) $distro; urgency=medium"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  popd
+fi
+
+if in_list elks-libc BUILDLIST; then
+  echo
+  echo "***********************"
+  echo "* Packaging elks-libc *"
+  echo "***********************"
+  echo
+  rm -rf redist-ppa/"$distro"/elks-libc-gcc-ia16-elf_*
+  decide_binutils_ver_and_dirs
+  decide_gcc_ver_and_dirs
+  decide_elks_libc_ver_and_dirs
+  mkdir -p redist-ppa/"$distro"/"$el_pdir"
+  git -C elks ls-files -z | \
+    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
+    (cd elks && \
+     tar cf - --null -T - --transform "s?^?$el_dir/?" --no-recursion) | \
+    xz -9v \
+    >redist-ppa/"$distro"/"$el_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$el_pdir"
+  dh_make -s -p "$el_pdir" -n -f ../"$el_dir".orig.tar.xz -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../../ppa-pkging/build-elks-libc/* debian/
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
+    debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "elks-libc-gcc-ia16-elf ($el_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
