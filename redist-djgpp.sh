@@ -103,8 +103,24 @@ rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
   redist-djgpp/source/*
 repack i16newli
 
-decide_libi86_ver_and_dirs
+decide_elks_libc_ver_and_dirs
 # Again, use a short version number inside the .lsm .
+sed -e "s|@date@|$date|" -e "s|@el_ver@|$el_uver-$el_date|" \
+  djgpp-fdos-pkging/i16elklc.lsm.in >redist-djgpp/appinfo/i16elklc.lsm
+ln -s "$our_dir"/prefix-djgpp-elkslibc/* redist-djgpp/devel/i16gnu
+# Workaround.  See prereqs-djgpp in build.sh.
+(cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/include/linuxmt && \
+ rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
+mkdir -p redist-djgpp/source/i16elklc
+git -C elks archive --format=zip --prefix=elks/ -0 -v HEAD \
+  >redist-djgpp/source/i16elklc/elks.zip
+(cd redist-djgpp && zip -9rkX i16elklc.zip appinfo devel source)
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
+  redist-djgpp/source/*
+repack i16elklc
+
+decide_libi86_ver_and_dirs
+# Yet again, use a short version number inside the .lsm .
 sed -e "s|@date@|$date|" -e "s|@li_ver@|$li_uver|" \
   djgpp-fdos-pkging/i16lbi86.lsm.in >redist-djgpp/appinfo/i16lbi86.lsm
 ln -s "$our_dir"/prefix-djgpp-libi86/* redist-djgpp/devel/i16gnu

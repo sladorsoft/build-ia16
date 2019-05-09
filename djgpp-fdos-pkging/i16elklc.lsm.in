@@ -1,0 +1,14 @@
+Begin3
+Title:           elks-libc
+Version:         @el_ver@
+Entered-date:    @date@
+Description:     Native libc for ELKS OS, for cross-compiling with GCC IA-16
+Keywords:        gcc, compiler, elks-libc, djgpp, ia16, elf
+Author:
+Maintained-by:
+Primary-site:    https://github.com/tkchia/build-ia16/releases/
+Alternate-site:
+Original-site:   https://github.com/tkchia/elks/
+Platforms:       DOS, Linux
+Copying-policy:  GNU Library General Public License, version 2 or later
+End

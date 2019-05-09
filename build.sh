@@ -611,7 +611,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
   popd
   # Similarly, install libi86 into the DJGPP tree.
-  if [ -f build-libi86/.git/config ]; then
+  if [ -f libi86/.git/config ]; then
     pushd build-libi86
     make install prefix="$PREFIX-djgpp-libi86" \
 		 exec_prefix="$PREFIX-djgpp-libi86"/ia16-elf
@@ -619,11 +619,21 @@ if in_list prereqs-djgpp BUILDLIST; then
     popd
   fi
   # And elks-libc.
+  #
+  # To work around MS-DOS's 8.3 file name restriction, we mash <linuxmt/
+  # minix_fs.h> and <linuxmt/minix_fs_sb.h> into a single include file. 
+  # Ditto for <linuxmt/msdos_fs*.h>.
+  #
+  # When redist-djgpp.sh creates a FreeDOS package for elks-libc, it can pack
+  # only the combined files and exclude the original files.
   if [ -f elks/.git/config ]; then
     pushd elks
     (. tools/env.sh \
      && cd libc \
      && make -j4 PREFIX="$PREFIX-djgpp-elkslibc" install)
+    cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/linuxmt
+    cat minix_fs.h minix_fs_sb.h >minix_fs_combined.h
+    cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h >msdos_fs_combined.h
     cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi
