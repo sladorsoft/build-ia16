@@ -225,7 +225,7 @@ if in_list gcc1 BUILDLIST; then
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
   script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  script -e -c "make install" -a build.log
   popd
 fi
 
@@ -338,7 +338,7 @@ if in_list gcc2 BUILDLIST; then
   pushd build2
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --with-isl="$PREFIX-isl" 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  script -e -c "make install" -a build.log
   popd
 fi
 
