@@ -99,9 +99,16 @@ mkdir -p redist-djgpp/source/i16newli
 git -C newlib-ia16 archive --format=zip --prefix=newlib-ia16/ -0 -v HEAD \
   >redist-djgpp/source/i16newli/newlib.zip
 (cd redist-djgpp && zip -9rkX i16newli.zip appinfo devel source)
-rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
-  redist-djgpp/source/*
+(cd redist-djgpp && zip -d i16newli.zip '*/ELK*' '*/LIBELK*')
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/source/*
 repack i16newli
+#
+sed -e "s|@date@|$date|" -e "s|@nl_ver@|$nl_uver-$nl_date|" \
+  djgpp-fdos-pkging/i16nlelk.lsm.in >redist-djgpp/appinfo/i16nlelk.lsm
+(cd redist-djgpp && \
+  find -L . \( -name 'elk*' -o -name 'libelk*' -o -name '*.lsm' \) -print0 | \
+    xargs -0 zip -9rkX i16nlelk.zip)
+rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/*
 
 decide_elks_libc_ver_and_dirs
 # Again, use a short version number inside the .lsm .

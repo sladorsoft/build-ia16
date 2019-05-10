@@ -1,0 +1,14 @@
+Begin3
+Title:           IA-16 Newlib support libraries for ELKS
+Version:         @nl_ver@
+Entered-date:    @date@
+Description:     Libraries to build ELKS OS programs with GCC IA-16 and Newlib
+Keywords:        gcc, compiler, elks, newlib, libelks, djgpp, ia16, elf
+Author:
+Maintained-by:
+Primary-site:    https://github.com/tkchia/build-ia16/releases/
+Alternate-site:
+Original-site:   https://github.com/tkchia/newlib-ia16/
+Platforms:       DOS, Linux
+Copying-policy:  GNU General Public License, version 3 or later
+End

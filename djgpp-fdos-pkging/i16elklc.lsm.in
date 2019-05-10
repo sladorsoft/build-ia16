@@ -1,5 +1,5 @@
 Begin3
-Title:           elks-libc
+Title:           IA-16 elks-libc
 Version:         @el_ver@
 Entered-date:    @date@
 Description:     Native libc for ELKS OS, for cross-compiling with GCC IA-16
