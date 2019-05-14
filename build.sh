@@ -184,7 +184,9 @@ obsolete_newlib_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/rtd/libelks.a -o \
     -e "$PREFIX"/ia16-elf/lib/rtd/elks-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/regparmcall/libelks.a -o \
-    -e "$PREFIX"/ia16-elf/lib/regparmcall/elks-crt0.o ]
+    -e "$PREFIX"/ia16-elf/lib/regparmcall/elks-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-mt.a -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms.a ]
 }
 
 obsolete_multilibs_installed () {
@@ -245,6 +247,8 @@ if in_list newlib BUILDLIST; then
     find "$PREFIX" -name elks-separate.ld -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name libelks.a -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name elks-crt0.o -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dpm-mt.a -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dpm-ms.a -print0 | xargs -0 rm -rf
     set -e
   fi
   # Then...
