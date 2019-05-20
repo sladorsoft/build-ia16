@@ -630,14 +630,29 @@ if in_list prereqs-djgpp BUILDLIST; then
   #
   # When redist-djgpp.sh creates a FreeDOS package for elks-libc, it can pack
   # only the combined files and exclude the original files.
+  #
+  # Also make a copy of GCC's <stddef.h> and <stdarg.h>, since the GCC specs
+  # have some trouble locating this file when `-melks-libc' is in effect
+  # (due to `-nostdinc').  FIXME: remove the need for this hack.
   if [ -f elks/.git/config ]; then
     pushd elks
     (. tools/env.sh \
      && cd libc \
      && make -j4 PREFIX="$PREFIX-djgpp-elkslibc" install)
     cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/linuxmt
-    cat minix_fs.h minix_fs_sb.h >minix_fs_combined.h
-    cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h >msdos_fs_combined.h
+    (
+      echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
+      echo '   <linuxmt/minix_fs_sb.h>. */'
+      cat minix_fs.h minix_fs_sb.h 
+    ) >minix_fs_combined.h
+    (
+      echo '/* Automatically combined from <linuxmt/msdos_fs.h>,'
+      echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
+      cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
+    ) >msdos_fs_combined.h
+    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
+       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/
     cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi
