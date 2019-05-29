@@ -15,7 +15,9 @@ override_dh_auto_configure:
 	    --enable-newlib-nano-malloc --disable-newlib-multithread \
 	    --enable-newlib-global-atexit --enable-newlib-reent-small \
 	    --disable-newlib-fseek-optimization \
-	    --disable-newlib-unbuf-stream-opt --enable-target-optspace
+	    --disable-newlib-unbuf-stream-opt --enable-target-optspace \
+	    --enable-newlib-iconv \
+	    --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni
 
 override_dh_strip:
 	# Not needed for now.  Note that stock GNU Binutils's strip(1) will

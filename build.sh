@@ -255,13 +255,15 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM' \
+  CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM ' \
     ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
       --disable-elks-libc \
       --disable-newlib-wide-orient --enable-newlib-nano-malloc \
       --disable-newlib-multithread --enable-newlib-global-atexit \
       --enable-newlib-reent-small --disable-newlib-fseek-optimization \
-      --disable-newlib-unbuf-stream-opt --enable-target-optspace 2>&1 \
+      --disable-newlib-unbuf-stream-opt --enable-target-optspace \
+      --enable-newlib-iconv \
+      --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni 2>&1 \
       | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
