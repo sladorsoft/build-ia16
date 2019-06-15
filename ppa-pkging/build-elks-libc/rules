@@ -20,4 +20,4 @@ override_dh_auto_test:
 	# Unimplemented.
 
 override_dh_auto_install:
-	. tools/env.sh && cd libc && make PREFIX='$(DESTDIR)/usr' install
+	. tools/env.sh && cd libc && make DESTDIR='$(DESTDIR)/usr' install

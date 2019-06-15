@@ -290,7 +290,7 @@ if in_list elks-libc BUILDLIST; then
   script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
   script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
   script -e -c ". tools/env.sh && cd libc \
-		&& make -j4 PREFIX='$PREFIX' install" -a build.log
+		&& make -j4 DESTDIR='$PREFIX' install" -a build.log
   popd
 fi
 
