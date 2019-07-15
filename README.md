@@ -9,6 +9,10 @@
             │  ./build.sh binutils-debug
             ▾             │
     ./build.sh binutils ◂─┘
+            ├─────────────┐
+            │             ▾
+            │  ./build.sh nasm
+            ├◂────────────┘
             ▾
     ./build.sh isl
             ▾
