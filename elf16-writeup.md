@@ -1,16 +1,16 @@
-# Proposed ELF i386 relocation types to support 16-bit x86 segmented addressing
+# New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 28 July 2019 version)
+(TK Chia — 4 Aug 2019 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils<sup>[4]</sup>.  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[5]</sup> programs whose code and data may span multiple segments.
 
-The `R_386_SEGMENT16` relocation is stable enough and already used in existing code.  The rest of the ABI is evolving and subject to change.
+The `R_386_OZSEG16` relocation (a.k.a. `R_386_SEGMENT16`) is stable enough and already used in existing code.  The rest of the ABI is evolving and subject to change.
 
 ## Discussion: modelling IA-16 segments in GNU Binutils
 
 In IA-16 segmented code, program memory is grouped into _segments_, each segment being a contiguous slice of the system's flat address space.  Each memory item is addressed as an _offset_ into a segment which contains it: thus, a Segment(_S_)`:`Offset(_S_) pair.  There are at least two general ways to model Segment`:`Offset addressing under ELF.
 
-### Old default relocation scheme
+### Default (LMA ≠ VMA) relocation scheme
 
 Binutils's binary file descriptor (BFD) engine allows each output segment to have both a _virtual address_ (VMA) and a _load address_ (LMA).  This gives rise to a simplistic way to represent separate IA-16 segments: as output segments in BFD with distinct LMAs but overlapping VMAs (corresponding to in-segment offsets).
 
@@ -19,18 +19,32 @@ An instruction and relocation sequence to load a far pointer to a variable `foo`
        0:	b8 00 00             	mov    $0x0,%ax
     			1: R_386_16	foo
        3:	ba 00 00             	mov    $0x0,%dx
-    			4: R_386_SEGMENT16	foo
+    			4: R_386_OZSEG16	foo
 
-### Alternative relocation scheme
+### New `segelf` relocation scheme
 
-H. Peter Anvin has outlined<sup>[6]</sup> a different Segment`:`Offset modelling scheme.  This is not yet fully implemented.
+H. Peter Anvin has proposed a different Segment`:`Offset modelling scheme<sup>[6]</sup> (_q. v._ for more information).  This scheme relies only on VMAs.  In this scheme, for each symbol _S_, there should be a matching symbol _S_`!` giving the VMA of _S_'s IA-16 segment base.
+
+An instruction and relocation sequence to load a far pointer to a variable `foo` in `%dx:%ax` might look like this:
+
+       0:	b8 00 00             	mov    $0x0,%ax
+    			1: R_386_16	foo
+    			1: R_386_SUB16	foo!
+       3:	ba 00 00             	mov    $0x0,%dx
+    			4: R_386_SEG16	foo!
+			
+This scheme is partly supported by my fork of the Binutils linker; it can also be enabled in my Binutils assembler, with the option `--32-segelf`.  However, it is not yet supported by my GCC fork.<sup>[7]</sup>
 
 ## The new relocation types
 
-Relocation type name   | Value | Field  | Calculation
----------------------- | :---: | :----: | -----------
-`R_386_SEGMENT16`      |   80  | word16 | _A_ + _M_(_Z_(_S_) + _B_)
-`R_386_RELSEG16`       |   81  | word16 | _A_ + (_Z_(_S_) `>>` 4)
+Relocation type name   | Value | Field  | Calculation                   | Remarks
+---------------------- | :---: | :----: | ----------------------------- | :------
+`R_386_SEG16`          |   45  | word16 | _M_((_A_ `<<` 4) + _S_ + _B_) | Used by Anvin's `segelf` scheme
+`R_386_SUB16`          |   46  | word16 | _A_ - _S_                     | Used by Anvin's `segelf` scheme
+`R_386_SUB32`          |   47  | word32 | _A_ - _S_                     | Used by Anvin's `segelf` scheme
+`R_386_SEGRELATIVE`    |   48  | word16 | _M_((_A_ `<<` 4) + _B_)       | Used by Anvin's `segelf` scheme
+`R_386_OZSEG16`        |   80  | word16 | _A_ + _M_(_Z_(_S_) + _B_)     | Used by the LMA ≠ VMA scheme
+`R_386_OZRELSEG16`     |   81  | word16 | _A_ + (_Z_(_S_) `>>` 4)       | Used by the LMA ≠ VMA scheme
 
 Definitions:
 
@@ -39,13 +53,12 @@ Definitions:
   * _H_: the LMA or VMA in the program image which will end up at address _B_ at runtime.  (This is a bit of a hack, to allow linker scripts to synthesize non-ELF file format headers at link time.)  _H_ is computed as
     * the LMA of the end of a section named `.msdos_mz_hdr`, if any;
     * or zero.
-  * _Z_(_S_): an address for "IA-16 offset 0" in _S_'s output section _X_.  This is computed as
-    * the LMA corresponding to VMA 0 of _X_, minus _H_.
-  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[7]</sup> this will simply shift the address right by 4 bits.
+  * _Z_(_S_): an address for "IA-16 offset 0" in _S_'s output section _X_.  This is computed as the LMA corresponding to VMA 0 of _X_, minus _H_.
+  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[8]</sup> this will simply shift the address right by 4 bits.
 
-`R_386_SEGMENT16` corresponds to a segment relocation in an MS-DOS `MZ` executable header;<sup>[8]</sup> I hope to generalize it to segment relocations in other executable formats.
+`R_386_OZSEG16` corresponds to a segment relocation in an MS-DOS `MZ` executable header;<sup>[9]</sup> I hope to generalize it to segment relocations in other executable formats.
 
-Currently, programs that only use the `R_386_SEGMENT16` and `R_386_RELSEG16` relocations, and no special section types, may be linked directly as `binary` format files.
+Currently, programs that only use the `R_386_OZSEG16` and `R_386_OZRELSEG16` relocations, and no special section types, may be linked directly as `binary` format files.
 
 ## Sample linker script
 
@@ -115,6 +128,8 @@ A script for producing an MS-DOS `MZ` executable with separate text and data seg
 
 <sup>[6] H. P. Anvin.  ABI for 16-bit real mode segmented code in ELF.  2019.  [`https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt`](https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt)</sup>
 
-<sup>[7] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+<sup>[4] [`https://github.com/tkchia/gcc-ia16`](https://github.com/tkchia/binutils-ia16).  Forked from Jenner's `gcc-ia16` port at [`https://github.com/crtc-demos/gcc-ia16`](https://github.com/crtc-demos/gcc-ia16).</sup>
 
-<sup>[8] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
+<sup>[8] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+
+<sup>[9] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
