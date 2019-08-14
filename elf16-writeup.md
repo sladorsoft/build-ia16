@@ -1,6 +1,6 @@
 # New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 14 Aug 2019 version)
+(TK Chia — 15 Aug 2019 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
@@ -39,14 +39,14 @@ The `segelf` scheme can also be enabled in (my forked) GCC, through a `-msegelf`
 
 ## The new relocation types
 
-Relocation type name   | Value | Field  | Calculation                   | Remarks
----------------------- | :---: | :----: | ----------------------------- | :------
-`R_386_SEG16`          |   45  | word16 | _M_((_A_ `<<` 4) + _S_ + _B_) | Used by Anvin's `segelf` scheme
-`R_386_SUB16`          |   46  | word16 | _A_ - _S_                     | Used by Anvin's `segelf` scheme
-`R_386_SUB32`          |   47  | word32 | _A_ - _S_                     | Used by Anvin's `segelf` scheme
-`R_386_SEGRELATIVE`    |   48  | word16 | _M_((_A_ `<<` 4) + _B_)       | Used by Anvin's `segelf` scheme
-`R_386_OZSEG16`        |   80  | word16 | _A_ + _M_(_Z_(_S_) + _B_)     | Used by the LMA ≠ VMA scheme
-`R_386_OZRELSEG16`     |   81  | word16 | _A_ + (_Z_(_S_) `>>` 4)       | Used by the LMA ≠ VMA scheme
+Relocation type name   | Value | Field  | Calculation                                 | Remarks
+---------------------- | :---: | :----: | ------------------------------------------- | :------
+`R_386_SEG16`          |   45  | word16 | _M_((_A_ `<<` 4) + _S_ + _B_)<sup>[8]</sup> | Used by Anvin's `segelf` scheme
+`R_386_SUB16`          |   46  | word16 | _A_ - _S_                                   | Used by Anvin's `segelf` scheme
+`R_386_SUB32`          |   47  | word32 | _A_ - _S_                                   | Used by Anvin's `segelf` scheme
+`R_386_SEGRELATIVE`    |   48  | word16 | _M_((_A_ `<<` 4) + _B_)                     | Used by Anvin's `segelf` scheme
+`R_386_OZSEG16`        |   80  | word16 | _A_ + _M_(_Z_(_S_) + _B_)                   | Used by the LMA ≠ VMA scheme
+`R_386_OZRELSEG16`     |   81  | word16 | _A_ + (_Z_(_S_) `>>` 4)                     | Used by the LMA ≠ VMA scheme
 
 Definitions:
 
@@ -56,11 +56,11 @@ Definitions:
     * the LMA of the end of a section named `.msdos_mz_hdr`, if any;
     * or zero.
   * _Z_(_S_): an address for "IA-16 offset 0" in _S_'s output section _X_.  This is computed as the LMA corresponding to VMA 0 of _X_, minus _H_.
-  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[8]</sup> this will simply shift the address right by 4 bits.
+  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[9]</sup> this will simply shift the address right by 4 bits.
 
-An `R_386_OZSEG16` or `R_386_SEG16` corresponds to a segment relocation in an MS-DOS `MZ` executable header.<sup>[9]</sup>  I hope to generalize these relocations' implementations to other executable formats.  The linker will only try to synthesize `MZ` relocations from ELF relocations if there will be an `.msdos_mz_hdr` section in the output program.
+An `R_386_OZSEG16` or `R_386_SEG16` corresponds to a segment relocation in an MS-DOS `MZ`<sup>[10]</sup> executable header.  The linker will only try to synthesize `MZ` relocations from ELF relocations if there will be an `.msdos_mz_hdr` section in the output program.  I hope to generalize the synthesizing of relocations to other executable formats.
 
-Currently, programs that only use the `R_386_OZSEG16` and `R_386_OZRELSEG16` relocations, and no special section types, may be linked directly as `binary` format files.
+Currently, programs that only use the `R_386_OZSEG16` and `R_386_OZRELSEG16` relocations may be linked directly as `binary` format files.
 
 ## Sample linker script
 
@@ -133,6 +133,8 @@ A script for producing an MS-DOS `MZ` executable with separate text and data seg
 
 <sup>[7] H. P. Anvin.  ABI for 16-bit real mode segmented code in ELF.  2019.  [`https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt`](https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt)</sup>
 
-<sup>[8] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+<sup>[8] The ABI document says _A_ + (_S_ `>>` 4), i.e. _M_((_A_ `<<` 4) + _S_), but I believe this is incorrect.</sup>
 
-<sup>[9] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
+<sup>[9] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+
+<sup>[10] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
