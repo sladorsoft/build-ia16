@@ -18,6 +18,9 @@ override_dh_auto_configure:
 	    --disable-readline --disable-sim --disable-nls \
 	    --with-system-zlib --disable-static --enable-shared
 
+override_dh_auto_test:
+	# Do not run the test suite at this stage.
+
 override_dh_shlibdeps:
 	exec dh_shlibdeps -O--parallel -O--builddirectory=build \
 	    -l/usr/"$(our_host_platform)"/ia16-elf/lib
