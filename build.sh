@@ -204,7 +204,13 @@ obsolete_newlib_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/regparmcall/libelks.a -o \
     -e "$PREFIX"/ia16-elf/lib/regparmcall/elks-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/pmode/dpm-mt.a -o \
-    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms.a ]
+    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms.a -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-mt-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/libdos-com.a -o \
+    -e "$PREFIX"/ia16-elf/lib/dos-com-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/libdos-exe-small.a -o \
+    -e "$PREFIX"/ia16-elf/lib/dos-exe-small-crt0.o ]
 }
 
 obsolete_multilibs_installed () {
@@ -267,13 +273,21 @@ if in_list newlib BUILDLIST; then
     find "$PREFIX"/ia16-elf/lib -name elks-crt0.o -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name dpm-mt.a -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name dpm-ms.a -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dpm-mt-crt0.o -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dpm-ms-crt0.o -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name libdos-com.a -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dos-com-crt0.o -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name libdos-exe-small.a -print0 \
+      | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name dos-exe-small-crt0.o -print0 \
+      | xargs -0 rm -rf
     set -e
   fi
   # Then...
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  CFLAGS_FOR_TARGET='-g -Os -mseparate-code-segment -D_IEEE_LIBM ' \
+  CFLAGS_FOR_TARGET='-g -Os -D_IEEE_LIBM ' \
     ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
       --disable-elks-libc \
       --disable-newlib-wide-orient --enable-newlib-nano-malloc \
