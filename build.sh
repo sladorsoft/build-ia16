@@ -248,7 +248,9 @@ if in_list gcc1 BUILDLIST; then
   rm -rf build
   mkdir build
   pushd build
-  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-isl="$PREFIX-isl" 2>&1 | tee build.log
+  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
+    --without-headers --with-newlib --enable-languages=c --disable-libssp \
+    --disable-libquadmath --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
