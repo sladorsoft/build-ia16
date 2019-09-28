@@ -36,11 +36,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|nasm|isl|gcc1|newlib|elks-libc|libi86|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|elks-libc|libi86|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "nasm" "isl" "gcc1" "newlib" "elks-libc" "libi86" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "libi86" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils nasm isl gcc1 newlib elks-libc libi86 gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib elks-libc libi86 gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -124,24 +124,6 @@ if in_list binutils BUILDLIST; then
   mkdir build-binutils
   pushd build-binutils
   ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
-  popd
-fi
-
-if in_list nasm BUILDLIST; then
-  echo
-  echo "*****************"
-  echo "* Building nasm *"
-  echo "*****************"
-  echo
-  rm -rf build-nasm
-  mkdir build-nasm
-  pushd build-nasm
-  if [ -e ../nasm-elf16-oldseg/autogen.sh ]; then
-    (cd ../nasm-elf16-oldseg && ./autogen.sh)
-  fi
-  script -e -c "../nasm-elf16-oldseg/configure --prefix='$PREFIX'" build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
