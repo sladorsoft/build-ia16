@@ -376,7 +376,9 @@ if in_list gcc2 BUILDLIST; then
   rm -rf build2
   mkdir build2
   pushd build2
-  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --with-isl="$PREFIX-isl" 2>&1 | tee build.log
+  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp \
+    --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --disable-libquadmath \
+    --with-isl="$PREFIX-isl" 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
   popd
@@ -491,7 +493,9 @@ if in_list debug BUILDLIST; then
   rm -rf build-debug
   mkdir build-debug
   pushd build-debug
-  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-elf-as" $EXTRABUILD2OPTS 2>&1 | tee build.log
+  ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp \
+    --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-elf-as" \
+    --disable-libquadmath $EXTRABUILD2OPTS 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
   popd
 fi
@@ -573,7 +577,11 @@ if in_list gcc-windows BUILDLIST; then
   pushd build-windows
   OLDPATH=$PATH
   export PATH=$PREFIX-windows/bin:$PATH
-  ../gcc-ia16/configure --host=i686-w64-mingw32 --target=ia16-elf --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --with-mpc="$PREFIX-prereqs" $EXTRABUILD2OPTS --with-isl="$PREFIX-prereqs" 2>&1 | tee build.log
+  ../gcc-ia16/configure --host=i686-w64-mingw32 --target=ia16-elf \
+    --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES \
+    --disable-libquadmath --with-gmp="$PREFIX-prereqs" \
+    --with-mpfr="$PREFIX-prereqs" --with-mpc="$PREFIX-prereqs" \
+    $EXTRABUILD2OPTS --with-isl="$PREFIX-prereqs" 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-windows 2>&1 | tee -a build.log
   export PATH=$OLDPATH
@@ -787,7 +795,7 @@ if in_list gcc-djgpp BUILDLIST; then
     --prefix="$PREFIX-djgpp" --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale --enable-libssp \
-    --disable-nls --disable-plugin --disable-lto \
+    --disable-libquadmath --disable-nls --disable-plugin --disable-lto \
     --enable-languages=$LANGUAGESDJGPP --with-gmp="$PREFIX-djgpp-prereqs" \
     --with-mpfr="$PREFIX-djgpp-prereqs" --with-mpc="$PREFIX-djgpp-prereqs" \
     $EXTRABUILD2OPTSDJGPP --with-isl="$PREFIX-djgpp-prereqs" 2>&1 \

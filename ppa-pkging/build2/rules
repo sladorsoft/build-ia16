@@ -12,9 +12,10 @@ override_dh_auto_configure:
 	# See redist-ppa.sh .
 	exec dh_auto_configure -O--parallel -- \
 	    --target=ia16-elf --infodir=/usr/ia16-elf/info \
-	    --enable-libssp --enable-languages=c,c++ --with-newlib \
-	    --disable-libstdcxx-dual-abi --disable-extern-template \
-	    --disable-wchar_t --disable-libstdcxx-verbose
+	    --enable-libssp --disable-libquadmath --enable-languages=c,c++ \
+	    --with-newlib --disable-libstdcxx-dual-abi \
+	    --disable-extern-template --disable-wchar_t \
+	    --disable-libstdcxx-verbose
 
 override_dh_auto_build-arch:
 	dh_auto_build -a -O--parallel -O--builddirectory=build
