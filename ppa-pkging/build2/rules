@@ -26,3 +26,8 @@ override_dh_auto_build-arch:
 
 override_dh_auto_test:
 	# To be implemented...
+
+override_dh_strip:
+	# Not needed for now.  Note that stock GNU Binutils's strip(1) will
+	# fail on the new (September 2019) libgcc2, as it does not
+	# understand the IA16-specific segment relocations.
