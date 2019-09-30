@@ -25,6 +25,7 @@ override_dh_auto_test:
 	# Do not run the test suite at this stage.
 
 override_dh_strip:
-	# Not needed for now.  Note that stock GNU Binutils's strip(1) will
-	# fail on the new (September 2019) libgcc2, as it does not
-	# understand the IA16-specific segment relocations.
+	# Stock GNU Binutils's strip(1) will fail on the new (September
+	# 2019) libgcc2, as it does not understand the IA16-specific segment
+	# relocations.
+	dh_strip -X.a
