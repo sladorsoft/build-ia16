@@ -664,7 +664,7 @@ if in_list prereqs-djgpp BUILDLIST; then
     pushd elks
     (. tools/env.sh \
      && cd libc \
-     && make -j4 PREFIX="$PREFIX-djgpp-elkslibc" install)
+     && make -j4 DESTDIR="$PREFIX-djgpp-elkslibc" install)
     cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/linuxmt
     (
       echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
