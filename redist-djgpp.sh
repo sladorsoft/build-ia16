@@ -75,7 +75,10 @@ FIN
 # Currently I exclude (most of) the `d' and `s' scripts, since `d' corresponds
 # to the `-pie' linker option, and `-s' to the `-shared' option, neither of
 # which make much sense (yet) in the IA-16 context.
-rm -f -v redist-djgpp/devel/i16gnu/ia16-elf/lib/ldscripts/elf_i386.x[ds][^e]*
+#
+# Also, the elf_i386_msdos_mz.x* scripts are the same as the elf_i386.x* ones.
+rm -f -v redist-djgpp/devel/i16gnu/ia16-elf/lib/ldscripts/elf_i386.x[ds][^e]* \
+	 redist-djgpp/devel/i16gnu/ia16-elf/lib/ldscripts/elf_i386_msdos_mz.x*
 (cd redist-djgpp && zip -9rkX i16butil.zip appinfo devel links source)
 (cd redist-djgpp && \
   zip -d i16butil.zip '*.1' '*.INF' '*/MAN/' '*/MAN1/' '*/INFO/')
@@ -95,6 +98,10 @@ decide_newlib_ver_and_dirs
 sed -e "s|@date@|$date|" -e "s|@nl_ver@|$nl_uver-$nl_date|" \
   djgpp-fdos-pkging/i16newli.lsm.in >redist-djgpp/appinfo/i16newli.lsm
 ln -s "$our_dir"/prefix-djgpp-newlib/* redist-djgpp/devel/i16gnu
+# FIXME: find a way to support all the .cct files for Newlib iconv.
+rm -rf redist-djgpp/devel/i16gnu/share/iconv_data/cns*.cct \
+       redist-djgpp/devel/i16gnu/share/iconv_data/iso_8859*.cct \
+       redist-djgpp/devel/i16gnu/share/iconv_data/jis*.cct
 mkdir -p redist-djgpp/source/i16newli
 git -C newlib-ia16 archive --format=zip --prefix=newlib-ia16/ -0 -v HEAD \
   >redist-djgpp/source/i16newli/newlib.zip
