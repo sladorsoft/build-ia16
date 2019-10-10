@@ -368,9 +368,9 @@ fi
 
 if in_list extra BUILDLIST; then
   echo
-  echo "*******************************************"
-  echo "* Building extra stuff (PDCurses, ubasic) *"
-  echo "*******************************************"
+  echo "****************************************************"
+  echo "* Building extra stuff (PDCurses, ubasic, tinyasm) *"
+  echo "****************************************************"
   echo
   [ -f pdcurses/.git/config ] || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
@@ -392,6 +392,17 @@ if in_list extra BUILDLIST; then
   pushd build-ubasic
   make $PARALLEL -f ../ubasic-ia16/Makefile.ia16 VPATH=../ubasic-ia16 2>&1 | \
     tee build.log
+  popd
+  #
+  [ -f tinyasm/.git/config ] || \
+    git clone https://github.com/tkchia/tinyasm.git
+  pushd tinyasm
+  rm -rf tinyasm.exe TINYASM.EXE
+  (
+    set -e -x
+    "$PREFIX/bin/ia16-elf-gcc" -mcmodel=small -Os -mregparmcall \
+      -mnewlib-nano-stdio tinyasm.c ins.c -o tinyasm.exe
+  )
   popd
 fi
 

@@ -25,6 +25,8 @@ git clone git@github.com:tkchia/PDCurses.git pdcurses || \
     git clone https://github.com/tkchia/PDCurses.git pdcurses
 git clone git@github.com:tkchia/ubasic-ia16.git || \
     git clone https://github.com/tkchia/ubasic-ia16.git
+git clone git@github.com:tkchia/tinyasm.git || \
+    git clone https://github.com/tkchia/tinyasm.git
 wget https://github.com/andrewwutw/build-djgpp/releases/download/v2.8/` \
   `djgpp-linux64-gcc720.tar.bz2
 tar -xjf djgpp-linux64-gcc720.tar.bz2
