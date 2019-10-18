@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/gcc-ia16-elf)
 
 %:
 	exec dh $@ --parallel --builddirectory=build
@@ -32,3 +33,11 @@ override_dh_strip:
 	# 2019) libgcc2, as it does not understand the IA16-specific segment
 	# relocations.
 	dh_strip -X.a
+
+override_dh_installman:
+	dh_installman -O--parallel -O--builddirectory=build
+	# Add "extensions" to the names of the section 7 man pages so that
+	# they do not clash with the same man pages from other GCC ports.
+	set -e -x; \
+	for pg in '$(DESTDIR)'/usr/share/man/man7/*.7*; \
+		do mv "$$pg" "`echo "$$pg" | sed 's/\.7/.7gcc-ia16/'`"; done
