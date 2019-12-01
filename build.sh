@@ -36,11 +36,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|elks-libc|libi86|gcc2|extra|sim|test|redist-tar|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|elks-libc|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "libi86" "gcc2" "extra" "sim" "test" "redist-tar" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib elks-libc libi86 gcc2 extra sim test redist-tar debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib elks-libc libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -179,6 +179,11 @@ obsolete_gcc_multilibs_installed () {
 obsolete_newlib_multilibs_installed () {
   [ -e "$PREFIX"/ia16-elf/lib/elks-combined.ld -o \
     -e "$PREFIX"/ia16-elf/lib/elks-separate.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/elk-mtl.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/elk-mts.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/elk-mt.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/elk-mtl.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/elk-mts.ld -o \
     -e "$PREFIX"/ia16-elf/lib/libelks.a -o \
     -e "$PREFIX"/ia16-elf/lib/elks-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/rtd/libelks.a -o \
@@ -189,6 +194,8 @@ obsolete_newlib_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms.a -o \
     -e "$PREFIX"/ia16-elf/lib/pmode/dpm-mt-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/pmode/dpm-ms-crt0.o -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/libelks.a -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/elks-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/libdos-com.a -o \
     -e "$PREFIX"/ia16-elf/lib/dos-com-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/libdos-exe-small.a -o \
@@ -206,8 +213,8 @@ if in_list gcc1 BUILDLIST; then
   echo "************************"
   echo
   # Check for any previously installed `i80286', `wide-types', or `frame-
-  # pointer' multilibs, as well as "old style" `elkslibc' libraries, and clean
-  # them away...
+  # pointer' multilibs, Newlib/ELKS libraries, as well as "old style"
+  # `elkslibc' libraries, and clean them away...
   if obsolete_gcc_multilibs_installed; then
     set +e
     find "$PREFIX"/ia16-elf/lib -name i80286 -print0 | xargs -0 rm -rf
@@ -253,6 +260,9 @@ if in_list newlib BUILDLIST; then
     set +e
     find "$PREFIX" -name elks-combined.ld -print0 | xargs -0 rm -rf
     find "$PREFIX" -name elks-separate.ld -print0 | xargs -0 rm -rf
+    find "$PREFIX" -name 'elk-m[ts]'.ld -print0 | xargs -0 rm -rf
+    find "$PREFIX" -name 'elk-m[ts][sl]'.ld -print0 | xargs -0 rm -rf
+    find "$PREFIX" -name 'elk-m[ts]sl'.ld -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name libelks.a -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name elks-crt0.o -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name dpm-mt.a -print0 | xargs -0 rm -rf
@@ -466,15 +476,6 @@ if in_list test BUILDLIST; then
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
   popd
-fi
-
-if in_list redist-tar BUILDLIST; then
-  echo
-  echo "*********************************************"
-  echo "* Making (somewhat) redistributable tarball *"
-  echo "*********************************************"
-  echo
-  ./redist-tar.sh
 fi
 
 if in_list debug BUILDLIST; then
@@ -834,5 +835,5 @@ if in_list redist-djgpp BUILDLIST; then
   echo "* Making redistributable DJGPP packages for FreeDOS *"
   echo "*****************************************************"
   echo
-  ./redist-djgpp.sh
+  ./redist-djgpp.sh all
 fi
