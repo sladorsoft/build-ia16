@@ -33,7 +33,7 @@
             ├◂────────────┘                       │
             ├─────────────┐                       │
             │             ▾                       ▾
-            ▾  ./redist-ppa.sh all        ./redist-djgpp.sh
+            ▾  ./redist-ppa.sh all        ./redist-djgpp.sh all
           «END» ◂─────────┴◂──────────────────────┘
 
 A pre-compiled [Ubuntu Personal Package Archive](https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/) is now available.
