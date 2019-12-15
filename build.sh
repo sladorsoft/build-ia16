@@ -31,16 +31,30 @@ in_list () {
   return 1
 }
 
+either_in_list () {
+  local needle1=$1
+  local needle2=$2
+  local haystackname=$3
+  local -a haystack
+  eval "haystack=( "\${$haystackname[@]}" )"
+  for x in "${haystack[@]}"; do
+    if [ "$x" = "$needle1" -o "$x" = "$needle2" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 declare -a BUILDLIST
 BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|elks-libc|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|isl|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -51,7 +65,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib elks-libc libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils isl gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -296,12 +310,16 @@ if in_list newlib BUILDLIST; then
   popd
 fi
 
-if in_list elks-libc BUILDLIST; then
+if either_in_list elks-libc elksemu BUILDLIST; then
   echo
-  echo "**********************"
-  echo "* Building elks-libc *"
-  echo "**********************"
+  echo "**********************************"
+  echo "* Building elks-libc and elksemu *"
+  echo "**********************************"
   echo
+  # For now, specifying either the `elks-libc' or `elksemu' option will build
+  # both elks-libc and elksemu together.  However, I am leaving open the
+  # possibility of building them separately later.  -- tkchia 20191215
+  #
   # The ELKS source tree is not downloaded on default by fetch.sh, since it
   # is quite big and we may not always need it.  -- tkchia 20190426
   [ -f elks/.git/config ] || \
@@ -317,6 +335,9 @@ if in_list elks-libc BUILDLIST; then
   script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
   script -e -c ". tools/env.sh && cd libc \
 		&& make -j4 DESTDIR='$PREFIX' install" -a build.log
+  script -e -c ". tools/env.sh && cd elksemu && make clean" -a build.log
+  script -e -c ". tools/env.sh && cd elksemu && make PREFIX='$PREFIX'" \
+	 -a build.log
   popd
 fi
 
