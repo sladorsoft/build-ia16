@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/elksemu)
+
+%:
+	exec dh $@
+
+override_dh_auto_clean:
+	-. tools/env.sh && make clean
+
+override_dh_auto_configure:
+	mkdir -p cross include
+	. tools/env.sh && make defconfig
+
+override_dh_auto_build:
+	. tools/env.sh && cd elksemu && make
+
+override_dh_auto_test:
+	# Unimplemented.
+
+# Avoid using elksemu's own `make install' logic for now.
+override_dh_auto_install:
+	mkdir -p '$(DESTDIR)'/usr/lib '$(DESTDIR)'/usr/bin
+	cp elksemu/elksemu '$(DESTDIR)'/usr/lib/elksemu
+	ln -s ../lib/elksemu '$(DESTDIR)'/usr/bin/elksemu

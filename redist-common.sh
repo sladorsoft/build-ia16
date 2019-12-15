@@ -85,6 +85,25 @@ decide_elks_libc_ver_and_dirs () {
   el_pdir=elks-libc-gcc-ia16-elf_"$el_pver"
 }
 
+decide_elksemu_ver_and_dirs () {
+  # Use the ELKS version number rather than elks-libc's...
+  ee_uver="`awk 'BEGIN { v = p = s = 0; q = -1; FS = "[ \t]*[=#][ \t]*" }
+		 /^VERSION[ \t]*=/ { v = $2 }
+		 /^PATCHLEVEL[ \t]*=/ { p = $2 }
+		 /^SUBLEVEL[ \t]*=/ { s = $2 }
+		 /^PRE[ \t]*=/ { q = $2 }
+		 END { if (q != -1) print v "." p "." s "." q; else
+				    print v "." p "." s }' \
+	      elks/elks/Makefile-rules || :`"
+  ee_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
+    --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
+  [ -n "$ee_uver" -a -n "$ee_date" ]
+  ee_ver="$ee_uver"-"$ee_date"
+  ee_pver="$ee_ver"-ppa"$ppa_no~$distro"
+  ee_dir=elksemu_"$ee_ver"
+  ee_pdir=elksemu_"$ee_pver"
+}
+
 decide_libi86_ver_and_dirs () {
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs

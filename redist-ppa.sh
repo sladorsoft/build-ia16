@@ -46,12 +46,12 @@ in_list () {
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|stubs|binutils|gcc1|newlib|elks-libc|libi86|gcc2)
+    clean|stubs|binutils|gcc1|newlib|elks-libc|elksemu|libi86|gcc2)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
       BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "elks-libc" \
-		 "libi86" "gcc2")
+		 "elksemu" "libi86" "gcc2")
       ;;
     --distro=?*)
       distro="${1#--distro=}"
@@ -67,7 +67,7 @@ done
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-ppa options:"
   echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib" \
-       "elks-libc libi86 gcc2"
+       "elks-libc elksemu libi86 gcc2"
   exit 1
 fi
 
@@ -307,6 +307,42 @@ if in_list elks-libc BUILDLIST; then
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
     echo "elks-libc-gcc-ia16-elf ($el_pver) $distro; urgency=medium"
+    echo
+    echo '  * Release.'
+    echo
+    echo " -- user <user@localhost.localdomain>  $curr_tm"
+  ) >debian/changelog
+  cp -a debian/docs debian/*.docs
+  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  popd
+fi
+
+if in_list elksemu BUILDLIST; then
+  echo
+  echo "*********************"
+  echo "* Packaging elksemu *"
+  echo "*********************"
+  echo
+  rm -rf redist-ppa/"$distro"/elksemu_*
+  decide_elks_libc_ver_and_dirs
+  decide_elksemu_ver_and_dirs
+  mkdir -p redist-ppa/"$distro"/"$ee_pdir"
+  git -C elks ls-files -z | \
+    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
+    (cd elks && \
+     tar cf - --null -T - --transform "s?^?$ee_dir/?" --no-recursion) | \
+    xz -9v \
+    >redist-ppa/"$distro"/"$ee_dir".orig.tar.xz
+  pushd redist-ppa/"$distro"/"$ee_pdir"
+  dh_make -s -p "$ee_pdir" -n -f ../"$ee_dir".orig.tar.xz -y
+  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  cp -a ../../../ppa-pkging/build-elksemu/* debian/
+  sed -e "s|@el_ver@|$el_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
+      debian/control.in >debian/control
+  rm debian/control.in
+  find debian -name '*~' -print0 | xargs -0 rm -f
+  (
+    echo "elksemu ($ee_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
