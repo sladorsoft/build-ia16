@@ -17,9 +17,12 @@
 # There is a Personal Package Archive (PPA) for the source packages I have
 # created, at https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/ .
 #
-# For Ubuntu Trusty, the mainline version of libisl (0.12-2) is too old, so
-# I have copied over the libisl 0.16.1-1 from Jonathon F's PPA
-# (https://launchpad.net/%7Ejonathonf/+archive/ubuntu/gcc-5.3/+packages)
+# For very new versions of Ubuntu (e.g. 20.04, Focal), the libisl version
+# is too new (!) and no longer compatible with the GCC 6.3 code.  For now, I
+# leave out libisl as a dependency except for cases where it is known to
+# work.  For the older Ubuntu Trusty, the mainline libisl version (0.12-2)
+# is too old, so I have copied over the libisl 0.16.1-1 from Jonathon F's
+# PPA (https://launchpad.net/%7Ejonathonf/+archive/ubuntu/gcc-5.3/+packages)
 # into my PPA.
 #
 # TODO: create more fine-grained packages, e.g. rather than one big package
@@ -94,6 +97,13 @@ case "$distro" in
     echo "Bad distribution name (\`$distro')!"
     exit 1
     ;;
+esac
+
+case "$distro" in
+  trusty | xenial | bionic)
+    maybe_libisl_dev='libisl-dev (>= 0.14),';;
+  *)
+    maybe_libisl_dev=;;
 esac
 
 if in_list clean BUILDLIST; then
@@ -227,7 +237,8 @@ if in_list gcc1 BUILDLIST; then
   dh_make -s -p "$g1_pdir" -n -f ../"$g1_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build/* debian/
-  sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
+  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
+    debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
@@ -338,7 +349,7 @@ if in_list elksemu BUILDLIST; then
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-elksemu/* debian/
   sed -e "s|@el_ver@|$el_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
-      debian/control.in >debian/control
+    debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
@@ -417,7 +428,8 @@ if in_list gcc2 BUILDLIST; then
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
-      -e "s|@li_ver@|$li_ver|g" debian/control.in >debian/control
+      -e "s|@li_ver@|$li_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
+      debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
