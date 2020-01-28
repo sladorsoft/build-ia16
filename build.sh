@@ -11,6 +11,7 @@ REDIST_PPA="$HERE/redist-ppa"
 REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
+AUTOTESTPARALLEL="-j2"
 
 # Set this to false to disable C++ (speed up build a bit) for Linux and
 # Windows hosts.
@@ -370,7 +371,7 @@ if in_list libi86 BUILDLIST; then
 				    --disable-elks-libc" build.log
   script -e -c "make $PARALLEL" -a build.log
   if dosemu --version >/dev/null 2>/dev/null; then
-    script -e -c "make check" -a build.log
+    script -e -c "make check TESTSUITEFLAGS='$AUTOTESTPARALLEL'" -a build.log
   fi
   script -e -c "make $PARALLEL install" -a build.log
   popd
