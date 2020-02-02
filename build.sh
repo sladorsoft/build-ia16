@@ -51,11 +51,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|isl|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "isl" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils isl gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -124,7 +124,7 @@ if in_list clean BUILDLIST; then
   echo "* Cleaning *"
   echo "************"
   echo
-  rm -rf "$PREFIX" "$REDIST" "$REDIST_PPA" "$REDIST_DJGPP" \
+  rm -rf "$PREFIX" "$PREFIX"-* "$REDIST" "$REDIST_PPA" "$REDIST_DJGPP" \
     build build2 build-* log_filter log_compare
   mkdir -p "$PREFIX/bin"
 fi
@@ -159,16 +159,39 @@ if in_list binutils-debug BUILDLIST; then
   popd
 fi
 
-if in_list isl BUILDLIST; then
+if in_list prereqs BUILDLIST; then
   echo
-  echo "****************"
-  echo "* Building ISL *"
-  echo "****************"
+  echo "********************************"
+  echo "* Building host prerequisities *"
+  echo "********************************"
   echo
-  rm -rf build-isl prefix-isl
-  mkdir build-isl
+  rm -rf build-gmp "$PREFIX-gmp" \
+	 build-mpfr "$PREFIX-mpfr" \
+	 build-mpc "$PREFIX-mpc" \
+	 build-isl "$PREFIX-isl"
+  mkdir build-gmp build-mpfr build-mpc build-isl
+  pushd build-gmp
+  ../gmp-6.1.2/configure --prefix="$PREFIX-gmp" --disable-shared 2>&1 \
+    | tee build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
+  popd
+  pushd build-mpfr
+  ../mpfr-3.1.5/configure --prefix="$PREFIX-mpfr" \
+    --with-gmp="$PREFIX-gmp" --disable-shared 2>&1 | tee build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
+  popd
+  pushd build-mpc
+  ../mpc-1.0.3/configure --prefix="$PREFIX-mpc" \
+    --with-gmp="$PREFIX-gmp" --with-mpfr="$PREFIX-mpfr" --disable-shared 2>&1 \
+    | tee build.log
+  script -e -c "make $PARALLEL" -a build.log
+  script -e -c "make $PARALLEL install" -a build.log
+  popd
   pushd build-isl
-  ../isl-0.16.1/configure --prefix="$PREFIX-isl" --disable-shared 2>&1 | tee build.log
+  ../isl-0.16.1/configure --prefix="$PREFIX-isl" \
+    --with-gmp-prefix="$PREFIX-gmp"--disable-shared 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
@@ -254,7 +277,8 @@ if in_list gcc1 BUILDLIST; then
   pushd build
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
     --without-headers --with-newlib --enable-languages=c --disable-libssp \
-    --disable-libquadmath --with-isl="$PREFIX-isl" 2>&1 | tee build.log
+    --disable-libquadmath --with-gmp="$PREFIX-gmp" --with-mpc="$PREFIX-mpc" \
+    --with-mpfr="$PREFIX-mpfr" --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
@@ -392,7 +416,8 @@ if in_list gcc2 BUILDLIST; then
   pushd build2
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" --enable-libssp \
     --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --disable-libquadmath \
-    --with-isl="$PREFIX-isl" 2>&1 | tee build.log
+    --with-gmp="$PREFIX-gmp" --with-mpc="$PREFIX-mpc" \
+    --with-mpfr="$PREFIX-mpfr" --with-isl="$PREFIX-isl" 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
   popd

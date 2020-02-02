@@ -10,7 +10,7 @@
             ▾             │
     ./build.sh binutils ◂─┘
             ▾
-    ./build.sh isl
+    ./build.sh prereqs
             ▾
     ./build.sh gcc1 ◂───────────────┐
             ▾                       │
