@@ -191,7 +191,7 @@ if in_list prereqs BUILDLIST; then
   popd
   pushd build-isl
   ../isl-0.16.1/configure --prefix="$PREFIX-isl" \
-    --with-gmp-prefix="$PREFIX-gmp"--disable-shared 2>&1 | tee build.log
+    --with-gmp-prefix="$PREFIX-gmp" --disable-shared 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
