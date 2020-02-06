@@ -394,7 +394,10 @@ if in_list libi86 BUILDLIST; then
 				    --exec-prefix='$PREFIX'/ia16-elf \
 				    --disable-elks-libc" build.log
   script -e -c "make $PARALLEL" -a build.log
-  if dosemu --version >/dev/null 2>/dev/null; then
+  # Only run tests if dosemu exists and is the "original" dosemu.  dosemu2
+  # does not have a designated stable version yet, unfortunately.
+  if dosemu --version >/dev/null 2>/dev/null \
+     && dosemu -dumb -quiet exit >/dev/null 2>/dev/null; then
     script -e -c "make check TESTSUITEFLAGS='$AUTOTESTPARALLEL'" -a build.log
   fi
   script -e -c "make $PARALLEL install" -a build.log
