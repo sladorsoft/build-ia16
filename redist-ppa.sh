@@ -85,12 +85,14 @@ ppa_no="${ppa_no%?}"
 # If no target Ubuntu distribution is specified, obtain the code name for
 # whatever Linux distribution we are running on, or fall back on a wild
 # guess.
+if [ -z "$distro" ]
+  then distro="`lsb_release -c -s || :`"; fi
 if [ -z "$distro" ]; then
   distro="`sed -n '/^DISTRIB_CODENAME=[[:alnum:]]\+$/ { s/^.*=//; p; q; }' \
     /etc/lsb-release || :`"
-  if [ -z "$distro" ]
-    then distro=xenial; fi
 fi
+if [ -z "$distro" ]
+  then distro=xenial; fi
 
 case "$distro" in
   '' | *[^-0-9a-z]*)
@@ -144,7 +146,11 @@ if in_list stubs BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild --no-tgz-check -i -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  # `debuild' automatically passes `-rfakeroot -d' to `dpkg-buildpackage' on
+  # Ubuntu --- but not on Debian.  So specify these options.  E. C. Masloch
+  # reported this issue (https://github.com/tkchia/build-ia16/issues/12).
+  debuild --no-tgz-check -i -S -rfakeroot -d \
+    ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
@@ -195,7 +201,7 @@ if in_list binutils BUILDLIST; then
   #	respectively.  In practice though, debuild(1) actually just uses
   #	whatever name and e-mail address is in the changelog to serve as the
   #	key id.  So work around this.
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -249,7 +255,7 @@ if in_list gcc1 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
@@ -287,7 +293,7 @@ if in_list newlib BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -324,7 +330,7 @@ if in_list elks-libc BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -360,7 +366,7 @@ if in_list elksemu BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -398,7 +404,7 @@ if in_list libi86 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   popd
 fi
 
@@ -440,7 +446,7 @@ if in_list gcc2 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
   cd ..
   popd
 fi
