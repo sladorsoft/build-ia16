@@ -131,6 +131,11 @@ if in_list stubs BUILDLIST; then
   rm -rf redist-ppa/"$distro"/gcc-stubs-ia16-elf_*
   decide_gcc_ver_and_dirs
   mkdir -p redist-ppa/"$distro"/"$gs_pdir"
+  # Debian `debuild' hates hyphens in change log version numbers inside "3.0
+  # (native)" packages --- see https://github.com/tkchia/build-ia16/issues/12.
+  # So instead create a "3.0 (quilt)" package with a dummy source tarball. :-\
+  dd if=/dev/zero bs=1 count=1024 | xz -9 \
+    >redist-ppa/"$distro"/"$gs_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$gs_pdir"
   dh_make -s -p "$gs_pdir" -n -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
@@ -139,7 +144,7 @@ if in_list stubs BUILDLIST; then
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-stubs-ia16-elf ($gcc_pver) $distro; urgency=medium"
+    echo "gcc-stubs-ia16-elf ($gs_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo

@@ -38,9 +38,16 @@ decide_gcc_ver_and_dirs () {
   g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
   g2_dir=gcc-ia16-elf_"$gcc_ver"
   g2_pdir=gcc-ia16-elf_"$gcc_pver"
-  gs_dir=gcc-stubs-ia16-elf_"$gcc_ver"
-  gs_pdir=gcc-stubs-ia16-elf_"$gcc_pver"
+  gs_ver="$gcc_ver"
+  gs_pver="$gcc_pver"
   # Another messy temporary hack.
+  if [ 20200201.13 = "$gcc_date" ]; then
+    gs_ver="$gcc_ver".1
+    gs_pver="$gs_ver"-ppa"$ppa_no~$distro"
+  fi
+  gs_dir=gcc-stubs-ia16-elf_"$gs_ver"
+  gs_pdir=gcc-stubs-ia16-elf_"$gs_pver"
+  # Yet another messy temporary hack.
   if [ 20180210 = "$gcc_date" -o 20180215 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
     g2_pver="$g2_ver"-ppa"$ppa_no~$distro"
