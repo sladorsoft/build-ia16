@@ -108,6 +108,15 @@ case "$distro" in
     maybe_libisl_dev=;;
 esac
 
+# Create unsigned packages if $DEBSIGN_KEYID is undefined or blank;
+# otherwise create packages signed with the given key id.
+case "$DEBSIGN_KEYID" in
+  '')
+    signing=("-us" "-uc");;
+  *)
+    signing=("-k$DEBSIGN_KEYID");;
+esac
+
 if in_list clean BUILDLIST; then
   echo
   echo "************"
@@ -154,8 +163,7 @@ if in_list stubs BUILDLIST; then
   # `debuild' automatically passes `-rfakeroot -d' to `dpkg-buildpackage' on
   # Ubuntu --- but not on Debian.  So specify these options.  E. C. Masloch
   # reported this issue (https://github.com/tkchia/build-ia16/issues/12).
-  debuild --no-tgz-check -i -S -rfakeroot -d \
-    ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild --no-tgz-check -i -S -rfakeroot -d ${signing[@]}
   cd ..
   popd
 fi
@@ -206,7 +214,7 @@ if in_list binutils BUILDLIST; then
   #	respectively.  In practice though, debuild(1) actually just uses
   #	whatever name and e-mail address is in the changelog to serve as the
   #	key id.  So work around this.
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
@@ -260,7 +268,7 @@ if in_list gcc1 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   cd ..
   popd
 fi
@@ -298,7 +306,7 @@ if in_list newlib BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
@@ -335,7 +343,7 @@ if in_list elks-libc BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
@@ -371,7 +379,7 @@ if in_list elksemu BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
@@ -409,7 +417,7 @@ if in_list libi86 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
@@ -451,7 +459,7 @@ if in_list gcc2 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${DEBSIGN_KEYID+"-k$DEBSIGN_KEYID"}
+  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
   cd ..
   popd
 fi
