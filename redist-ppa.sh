@@ -181,7 +181,7 @@ if in_list binutils BUILDLIST; then
   git -C binutils-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd binutils-ia16 && \
-     tar cf - --null -T - --transform "s?^?$bu_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$bu_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$bu_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$bu_pdir"
@@ -249,7 +249,7 @@ if in_list gcc1 BUILDLIST; then
       `'\|gnattools\/\|gcc\/\(testsuite\/\|ada\/\|objc\/\|ChangeLog\)'` \
       `'\|\.git\)/! { /\/\.git/! p }' | \
     (cd gcc-ia16 && \
-     tar cf - --null -T - --transform "s?^?$g1_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$g1_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g1_pdir"
@@ -287,7 +287,7 @@ if in_list newlib BUILDLIST; then
   git -C newlib-ia16 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd newlib-ia16 && \
-     tar cf - --null -T - --transform "s?^?$nl_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$nl_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$nl_pdir"
@@ -324,7 +324,7 @@ if in_list elks-libc BUILDLIST; then
   git -C elks ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd elks && \
-     tar cf - --null -T - --transform "s?^?$el_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$el_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$el_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$el_pdir"
@@ -360,7 +360,7 @@ if in_list elksemu BUILDLIST; then
   git -C elks ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd elks && \
-     tar cf - --null -T - --transform "s?^?$ee_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$ee_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$ee_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$ee_pdir"
@@ -398,7 +398,7 @@ if in_list libi86 BUILDLIST; then
   git -C libi86 ls-files -z | \
     sed -z -n '/^\.git/! { /\/\.git/! p }' | \
     (cd libi86 && \
-     tar cf - --null -T - --transform "s?^?$li_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$li_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$li_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$li_pdir"
@@ -439,7 +439,7 @@ if in_list gcc2 BUILDLIST; then
     sed -z -n '/^\(\(libjava\|gcc\|libgomp\)\/testsuite\/\|\.git\)/! '` \
       `'{ /\/\.git/! p }' | \
     (cd gcc-ia16 && \
-     tar cf - --null -T - --transform "s?^?$g2_dir/?" --no-recursion) | \
+     tar cf - --no-recursion --null -T - --transform "s?^?$g2_dir/?") | \
     xz -9v \
     >redist-ppa/"$distro"/"$g2_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g2_pdir"
