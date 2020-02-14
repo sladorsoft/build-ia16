@@ -355,13 +355,13 @@ if either_in_list elks-libc elksemu BUILDLIST; then
   fi
   pushd elks
   mkdir -p cross include
-  script -e -c ". tools/env.sh && make defconfig" build.log
-  script -e -c ". tools/env.sh && cd libc && make clean" -a build.log
-  script -e -c ". tools/env.sh && cd libc && make -j4 all" -a build.log
-  script -e -c ". tools/env.sh && cd libc \
-		&& make -j4 DESTDIR='$PREFIX' install" -a build.log
-  script -e -c ". tools/env.sh && cd elksemu && make clean" -a build.log
-  script -e -c ". tools/env.sh && cd elksemu && make PREFIX='$PREFIX'" \
+  script -e -c ". env.sh && make defconfig" build.log
+  script -e -c ". env.sh && cd libc && make clean" -a build.log
+  script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
+  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
+	 -a build.log
+  script -e -c ". env.sh && cd elksemu && make clean" -a build.log
+  script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
   popd
 fi
@@ -724,7 +724,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   # (due to `-nostdinc').  FIXME: remove the need for this hack.
   if [ -f elks/.git/config ]; then
     pushd elks
-    (. tools/env.sh \
+    (. env.sh \
      && cd libc \
      && make -j4 DESTDIR="$PREFIX-djgpp-elkslibc" install)
     cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/linuxmt

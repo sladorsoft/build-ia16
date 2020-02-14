@@ -87,6 +87,9 @@ decide_elks_libc_ver_and_dirs () {
   if [ 20190505.14 = "$el_date" ]; then
     el_ver="$el_uver"-"$el_date".7-stage1gcc"$gcc_ver"-binutils"$bu_ver"
   fi
+  if [ 20200214.13 = "$el_date" ]; then
+    el_ver="$el_uver"-"$el_date".0-stage1gcc"$gcc_ver"-binutils"$bu_ver"
+  fi
   el_pver="$el_ver"-ppa"$ppa_no~$distro"
   el_dir=elks-libc-gcc-ia16-elf_"$el_ver"
   el_pdir=elks-libc-gcc-ia16-elf_"$el_pver"

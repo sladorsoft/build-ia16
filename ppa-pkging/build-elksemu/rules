@@ -7,14 +7,15 @@ DESTDIR ?= $(abspath debian/elksemu)
 	exec dh $@
 
 override_dh_auto_clean:
-	-. tools/env.sh && make clean
+	# `./' is needed or dash(1) may not search for current directory.
+	-. ./env.sh && make clean
 
 override_dh_auto_configure:
 	mkdir -p cross include
-	. tools/env.sh && make defconfig
+	. ./env.sh && make defconfig
 
 override_dh_auto_build:
-	. tools/env.sh && cd elksemu && make
+	. ./env.sh && cd elksemu && make
 
 override_dh_auto_test:
 	# Unimplemented.
