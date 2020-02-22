@@ -348,7 +348,7 @@ if either_in_list elks-libc elksemu BUILDLIST; then
   # The ELKS source tree is not downloaded on default by fetch.sh, since it
   # is quite big and we may not always need it.  -- tkchia 20190426
   [ -f elks/.git/config ] || \
-    git clone https://github.com/ghaerr/elks.git
+    git clone -b tkchia/devel https://github.com/tkchia/elks.git
   if obsolete_multilibs_installed; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
