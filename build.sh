@@ -353,7 +353,17 @@ if either_in_list elks-libc elksemu BUILDLIST; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
   fi
-  pushd elks
+  rm -rf build-elks
+  mkdir build-elks
+  # Instead of building inside the ELKS source tree, create a copy of it (with
+  # only the files under Git control) as a separate subdirectory, and build
+  # elks-libc and elksemu inside the copy.
+  #
+  # Copy the working tree versions of the files, not the committed versions.
+  #	-- tkchia 20200227
+  (cd elks && find . \! -type d -print0 | xargs -0 git ls-files --) | \
+    xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elks
+  pushd build-elks
   mkdir -p cross include
   script -e -c ". env.sh && make defconfig" build.log
   script -e -c ". env.sh && cd libc && make clean" -a build.log
