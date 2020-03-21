@@ -120,6 +120,9 @@ decide_libi86_ver_and_dirs () {
   li_uver="`cat libi86/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
   [ -n "$li_uver" ]
+  if [ 20200321 = "$li_uver" ]; then
+    li_uver=20200321.0
+  fi
   # Include the GCC and binutils versions inside the libi86 version.
   li_ver="$li_uver"-stage1gcc"$gcc_ver"-binutils"$bu_ver"
   li_pver="$li_ver"-ppa"$ppa_no~$distro"
