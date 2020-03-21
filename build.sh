@@ -51,11 +51,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|prereqs|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -701,6 +701,14 @@ if in_list prereqs-djgpp BUILDLIST; then
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
+fi
+
+if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
+  echo
+  echo "********************************************"
+  echo "* Installing remaining DJGPP prerequisites *"
+  echo "********************************************"
+  echo
   # Instead of copying over everything in $PREFIX/ia16-elf/{lib, include} ---
   # including any C++ libraries --- just install Newlib into the DJGPP tree.
   # Create a separate tree dedicated to Newlib, then hard link everything.
@@ -731,8 +739,9 @@ if in_list prereqs-djgpp BUILDLIST; then
   #
   # Also make a copy of GCC's <stddef.h> and <stdarg.h>, since the GCC specs
   # have some trouble locating this file when `-melks-libc' is in effect
-  # (due to `-nostdinc').  For DJGPP, we also need to copy <stdint.h> and
-  # <stdint-gcc.h>.  FIXME: remove the need for this hack.
+  # (due to `-nostdinc').  For DJGPP, we also need to copy <stdint-gcc.h> to
+  # the elks-libc include directories as <stdint.h>.  FIXME: remove the need
+  # for these hacks.
   if [ -f elks/.git/config ]; then
     pushd elks
     (. env.sh \
@@ -762,14 +771,14 @@ if in_list prereqs-djgpp BUILDLIST; then
     ) >msdos_fs_combined.h
     cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
        "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
        "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/
+    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
+       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/stdint.h
     cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
        "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
        "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/
+    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
+       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/stdint.h
     cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi
