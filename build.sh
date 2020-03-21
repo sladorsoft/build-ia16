@@ -731,7 +731,8 @@ if in_list prereqs-djgpp BUILDLIST; then
   #
   # Also make a copy of GCC's <stddef.h> and <stdarg.h>, since the GCC specs
   # have some trouble locating this file when `-melks-libc' is in effect
-  # (due to `-nostdinc').  FIXME: remove the need for this hack.
+  # (due to `-nostdinc').  For DJGPP, we also need to copy <stdint.h> and
+  # <stdint-gcc.h>.  FIXME: remove the need for this hack.
   if [ -f elks/.git/config ]; then
     pushd elks
     (. env.sh \
@@ -748,9 +749,27 @@ if in_list prereqs-djgpp BUILDLIST; then
       echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
       cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
     ) >msdos_fs_combined.h
+    cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/linuxmt
+    (
+      echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
+      echo '   <linuxmt/minix_fs_sb.h>. */'
+      cat minix_fs.h minix_fs_sb.h 
+    ) >minix_fs_combined.h
+    (
+      echo '/* Automatically combined from <linuxmt/msdos_fs.h>,'
+      echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
+      cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
+    ) >msdos_fs_combined.h
     cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
        "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
        "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/
+    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint.h)" \
+       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
+       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/
     cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi

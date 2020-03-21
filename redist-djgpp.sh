@@ -162,6 +162,8 @@ if in_list elks-libc BUILDLIST; then
   # Workaround.  See prereqs-djgpp in build.sh.
   (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/include/linuxmt && \
    rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
+  (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/rtd/include/linuxmt && \
+   rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
   mkdir -p redist-djgpp/source/i16elklc
   git -C elks archive --format=zip --prefix=elks/ -0 -v HEAD \
     >redist-djgpp/source/i16elklc/elks.zip
