@@ -1,4 +1,4 @@
-Source: binutils-ia16-elf
+Source: binutils-ia16-elf@ifstatic@
 Section: devel
 Priority: optional
 Maintainer: TK Chia <tkchia@gmx.com>
@@ -8,10 +8,10 @@ Standards-Version: 3.9.6
 Homepage: https://github.com/crtc-demos/binutils-ia16
 Vcs-Git: https://github.com/crtc-demos/binutils-ia16.git
 
-Package: binutils-ia16-elf
+Package: binutils-ia16-elf@ifstatic@
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: gcc-ia16-elf, libnewlib-ia16-elf
+Suggests: gcc-ia16-elf@ifstatic@, libnewlib-ia16-elf
 Description: GNU binary utilities, for ia16-elf target
  Unofficial port of GNU binutils to the ia16-elf target --- for 16-bit Intel
  x86 CPUs, using ELF objects internally, and producing MS-DOS executables ---

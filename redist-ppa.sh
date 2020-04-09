@@ -192,6 +192,13 @@ if in_list binutils BUILDLIST; then
   dh_make -s -p "$bu_pdir" -n -f ../"$bu_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-binutils/* debian/
+  sed "s|@ifstatic@||g" debian/control.in >debian/control
+  sed -e "s|@ifstatic_cflags@||g" -e "s|@ifstatic_ldflags@||g" \
+      -e "s|@ifstatic_libs@||g" \
+      -e "s|@disable_enable_static@|--disable-static|g" \
+      -e "s|@disable_enable_shared@|--enable-shared|g" \
+    debian/rules.in >debian/rules
+  rm debian/control.in debian/rules.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   # TODO:
   #   * Generate the most recent changelog entry in a saner way.  E.g. 

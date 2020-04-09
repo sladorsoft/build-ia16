@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
+export DEB_CFLAGS_APPEND += @ifstatic_cflags@
+export DEB_LDFLAGS_APPEND += @ifstatic_ldflags@
+export LIBS += @ifstatic_libs@
 
 our_host_platform := $(shell $(CC) -dumpmachine || uname -p || arch)
 
@@ -15,8 +18,8 @@ override_dh_auto_configure:
 	exec dh_auto_configure -O--parallel -- \
 	    --infodir=/usr/ia16-elf/info \
 	    --target=ia16-elf --disable-gdb --disable-libdecnumber \
-	    --disable-readline --disable-sim --disable-nls \
-	    --with-system-zlib --disable-static --enable-shared
+	    --disable-readline --disable-sim --disable-nls --with-system-zlib \
+	    @disable_enable_static@ @disable_enable_shared@
 
 override_dh_auto_test:
 	# Do not run the test suite at this stage.

@@ -16,8 +16,8 @@ decide_binutils_ver_and_dirs () {
   [ -n "$bu_uver" -a -n "$bu_date" ]
   bu_ver="$bu_uver"-"$bu_date"
   bu_pver="$bu_ver"-ppa"$ppa_no~$distro"
-  bu_dir=binutils-ia16-elf_"$bu_ver"
-  bu_pdir=binutils-ia16-elf_"$bu_pver"
+  bu_dir=binutils-ia16-elf"$1"_"$bu_ver"
+  bu_pdir=binutils-ia16-elf"$1"_"$bu_pver"
 }
 
 decide_gcc_ver_and_dirs () {
