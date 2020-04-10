@@ -36,8 +36,8 @@ decide_gcc_ver_and_dirs () {
   g2_pver="$gcc_pver"
   g1_dir=gcc-bootstraps-ia16-elf_"$gcc_ver"
   g1_pdir=gcc-bootstraps-ia16-elf_"$gcc_pver"
-  g2_dir=gcc-ia16-elf_"$gcc_ver"
-  g2_pdir=gcc-ia16-elf_"$gcc_pver"
+  g2_dir=gcc-ia16-elf"$1"_"$gcc_ver"
+  g2_pdir=gcc-ia16-elf"$1"_"$gcc_pver"
   gs_ver="$gcc_ver"
   gs_pver="$gcc_pver"
   # Another messy temporary hack.
@@ -51,14 +51,14 @@ decide_gcc_ver_and_dirs () {
   if [ 20180210 = "$gcc_date" -o 20180215 = "$gcc_date" ]; then
     g2_ver="$gcc_uver"-"$gcc_date".0
     g2_pver="$g2_ver"-ppa"$ppa_no~$distro"
-    g2_dir=gcc-ia16-elf_"$g2_ver"
-    g2_pdir=gcc-ia16-elf_"$g2_pver"
+    g2_dir=gcc-ia16-elf"$1"_"$g2_ver"
+    g2_pdir=gcc-ia16-elf"$1"_"$g2_pver"
   fi
 }
 
 decide_newlib_ver_and_dirs () {
-  decide_binutils_ver_and_dirs
-  decide_gcc_ver_and_dirs
+  decide_binutils_ver_and_dirs "$1"
+  decide_gcc_ver_and_dirs "$1"
   nl_uver="`cat newlib-ia16/newlib/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
   nl_date="`cd newlib-ia16 && git log -n1 --oneline --date=short-local \
@@ -74,8 +74,8 @@ decide_newlib_ver_and_dirs () {
 }
 
 decide_elks_libc_ver_and_dirs () {
-  decide_binutils_ver_and_dirs
-  decide_gcc_ver_and_dirs
+  decide_binutils_ver_and_dirs "$1"
+  decide_gcc_ver_and_dirs "$1"
   el_uver="`cat elks/libc/Makefile.inc | \
     sed -n "/^VERSION *=/ { s/^.*= *//; s/^elks-//; s/ *$//; p; q; }" || :`"
   el_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
@@ -115,8 +115,8 @@ decide_elksemu_ver_and_dirs () {
 }
 
 decide_libi86_ver_and_dirs () {
-  decide_binutils_ver_and_dirs
-  decide_gcc_ver_and_dirs
+  decide_binutils_ver_and_dirs "$1"
+  decide_gcc_ver_and_dirs "$1"
   li_uver="`cat libi86/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
   [ -n "$li_uver" ]

@@ -455,8 +455,12 @@ if in_list gcc2 BUILDLIST; then
   cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
       -e "s|@li_ver@|$li_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
-      debian/control.in >debian/control
-  rm debian/control.in
+      -e "s|@ifstatic@||g" debian/control.in >debian/control
+  sed -e "s|@ifstatic@||g" \
+      -e "s|@ifstatic_cflags@||g" -e "s|@ifstatic_ldflags@||g" \
+      -e "s|@disable_enable_shared@|--enable-shared|g" \
+    debian/rules.in >debian/rules
+  rm debian/control.in debian/rules.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
     echo "gcc-ia16-elf ($g2_pver) $distro; urgency=medium"

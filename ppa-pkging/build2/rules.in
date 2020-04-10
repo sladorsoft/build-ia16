@@ -1,7 +1,9 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
-DESTDIR ?= $(abspath debian/gcc-ia16-elf)
+export DEB_CFLAGS_APPEND += @ifstatic_cflags@
+export DEB_LDFLAGS_APPEND += @ifstatic_ldflags@
+DESTDIR ?= $(abspath debian/gcc-ia16-elf@ifstatic@)
 
 %:
 	exec dh $@ --parallel --builddirectory=build
@@ -16,7 +18,7 @@ override_dh_auto_configure:
 	    --enable-libssp --disable-libquadmath --enable-languages=c,c++ \
 	    --with-newlib --disable-libstdcxx-dual-abi \
 	    --disable-extern-template --disable-wchar_t \
-	    --disable-libstdcxx-verbose
+	    --disable-libstdcxx-verbose @disable_enable_shared@
 
 override_dh_auto_build-arch:
 	dh_auto_build -a -O--parallel -O--builddirectory=build

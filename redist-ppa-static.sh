@@ -147,13 +147,11 @@ if in_list gcc2 BUILDLIST; then
   echo "* Packaging stage 2 GCC *"
   echo "*************************"
   echo
-  echo "unimplemented!"
-  exit 1
-  rm -rf redist-ppa/"$distro"/gcc-ia16-elf_*
-  decide_binutils_ver_and_dirs
-  decide_gcc_ver_and_dirs
-  decide_newlib_ver_and_dirs
-  decide_libi86_ver_and_dirs
+  rm -rf redist-ppa/"$distro"/gcc-ia16-elf-static_*
+  decide_binutils_ver_and_dirs -static
+  decide_gcc_ver_and_dirs -static
+  decide_newlib_ver_and_dirs -static
+  decide_libi86_ver_and_dirs -static
   mkdir -p redist-ppa/"$distro"/"$g2_pdir"
   # Copy the source tree over, except for .git* files, untracked files, and
   # the bigger testsuites.
@@ -170,11 +168,17 @@ if in_list gcc2 BUILDLIST; then
   cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
       -e "s|@li_ver@|$li_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
-      debian/control.in >debian/control
-  rm debian/control.in
+      -e "s|@ifstatic@|-static|g" debian/control.in >debian/control
+  sed \
+    -e "s|@ifstatic@|-static|g" \
+    -e "s|@ifstatic_cflags@|-static|g" \
+    -e "s|@ifstatic_ldflags@|-static -Wl,-static|g" \
+    -e "s|@disable_enable_shared@|--disable-shared|g" \
+    debian/rules.in >debian/rules
+  rm debian/control.in debian/rules.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
-    echo "gcc-ia16-elf ($g2_pver) $distro; urgency=medium"
+    echo "gcc-ia16-elf-static ($g2_pver) $distro; urgency=medium"
     echo
     echo '  * Release.'
     echo
