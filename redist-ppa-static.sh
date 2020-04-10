@@ -118,8 +118,9 @@ if in_list binutils BUILDLIST; then
   # The -static flag only causes libtool to refrain from dynamically linking
   # _some_ libraries.  Thus I need to force libtool to pass -static to the
   # host linker by saying -Wl,-static.  This however causes an unresolved
-  # reference to dl_iterate_phdr (, ) in gas, so we need to work around
-  # this in $(LIBS).  What a mess.  -- tkchia 20200409
+  # reference to dl_iterate_phdr (, ) in gas --- likely due to a circular
+  # library dependency --- so we need to work around this in $(LIBS).  What a
+  # mess.  -- tkchia 20200410
   sed \
     -e "s|@ifstatic_cflags@|-static|g" \
     -e "s|@ifstatic_ldflags@|-static -Wl,-static|g" \
