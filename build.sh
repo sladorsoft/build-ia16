@@ -46,6 +46,21 @@ either_in_list () {
   return 1
 }
 
+ensure_prog () {
+  local x
+  for x in ${1+"$@"}; do
+    if type -p "$x" >/dev/null; then
+      return 0
+    fi
+  done
+  echo -n "Need one of these programs for build:"
+  for x in ${1+"$@"}; do
+    echo -n " '$x'"
+  done
+  echo
+  exit 1
+}
+
 declare -a BUILDLIST
 BUILDLIST=()
 
@@ -135,6 +150,11 @@ if in_list binutils BUILDLIST; then
   echo "* Building binutils *"
   echo "*********************"
   echo
+  ensure_prog gcc cc
+  ensure_prog make
+  ensure_prog flex
+  ensure_prog bison
+  ensure_prog makeinfo
   rm -rf build-binutils
   mkdir build-binutils
   pushd build-binutils
@@ -150,6 +170,11 @@ if in_list binutils-debug BUILDLIST; then
   echo "* Building debug binutils *"
   echo "***************************"
   echo
+  ensure_prog gcc cc
+  ensure_prog make
+  ensure_prog flex
+  ensure_prog bison
+  ensure_prog makeinfo
   rm -rf build-binutils-debug
   mkdir build-binutils-debug
   pushd build-binutils-debug
