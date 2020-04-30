@@ -409,6 +409,8 @@ if in_list libi86 BUILDLIST; then
   echo
   [ -f libi86/.git/config ] || \
     git clone https://gitlab.com/tkchia/libi86.git
+  ensure_prog autoconf
+  ensure_prog autom4te
   if obsolete_multilibs_installed; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
