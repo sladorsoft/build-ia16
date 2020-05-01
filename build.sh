@@ -537,6 +537,7 @@ if in_list test BUILDLIST; then
   echo "* Running tests *"
   echo "*****************"
   echo
+  ensure_prog runtest
   export DEJAGNU="$HERE/site.exp"
   if [ -e 86sim/86sim.cpp ]; then
     target_board="--target_board=86sim"
