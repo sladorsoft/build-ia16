@@ -825,6 +825,7 @@ if in_list binutils-djgpp BUILDLIST; then
   echo "* Building DJGPP binutils *"
   echo "***************************"
   echo
+  ensure_prog upx
   rm -rf build-binutils-djgpp
   mkdir build-binutils-djgpp
   pushd build-binutils-djgpp
