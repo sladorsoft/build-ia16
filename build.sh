@@ -771,7 +771,7 @@ if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
   # the elks-libc include directories as <stdint.h>.  FIXME: remove the need
   # for these hacks.
   if [ -f elks/.git/config ]; then
-    pushd elks
+    pushd build-elks
     (. env.sh \
      && cd libc \
      && make -j4 DESTDIR="$PREFIX-djgpp-elkslibc" install)
