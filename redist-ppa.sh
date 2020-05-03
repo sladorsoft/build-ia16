@@ -46,6 +46,21 @@ in_list () {
   return 1
 }
 
+ensure_prog () {
+  local x
+  for x in ${1+"$@"}; do
+    if type -p "$x" >/dev/null; then
+      return 0
+    fi
+  done
+  echo -n "Need one of these programs for doing PPA packaging:"
+  for x in ${1+"$@"}; do
+    echo -n " '$x'"
+  done
+  echo
+  exit 1
+}
+
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -130,6 +145,8 @@ fi
 
 . redist-common.sh
 
+ensure_prog dh_make
+ensure_prog debuild
 
 if in_list stubs BUILDLIST; then
   echo
