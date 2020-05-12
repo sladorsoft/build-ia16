@@ -538,6 +538,7 @@ if in_list test BUILDLIST; then
   echo "*****************"
   echo
   ensure_prog runtest
+  ensure_prog autogen
   export DEJAGNU="$HERE/site.exp"
   if [ -e 86sim/86sim.cpp ]; then
     target_board="--target_board=86sim"
