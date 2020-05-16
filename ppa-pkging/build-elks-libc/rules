@@ -21,5 +21,10 @@ override_dh_auto_build:
 override_dh_auto_test:
 	# Unimplemented.
 
+override_dh_strip:
+	# Stock GNU Binutils's strip(1) will fail on new (May 2020)
+	# medium-model elks-libc libraries, as it does not understand the
+	# IA16-specific segment relocations.
+
 override_dh_auto_install:
 	. ./env.sh && cd libc && make DESTDIR='$(DESTDIR)/usr' install
