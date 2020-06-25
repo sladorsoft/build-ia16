@@ -160,10 +160,11 @@ if in_list elks-libc BUILDLIST; then
     djgpp-fdos-pkging/i16elklc.lsm.in >redist-djgpp/appinfo/i16elklc.lsm
   ln -s "$our_dir"/prefix-djgpp-elkslibc/* redist-djgpp/devel/i16gnu
   # Workaround.  See prereqs-djgpp in build.sh.
-  (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/include/linuxmt && \
-   rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
-  (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/rtd/include/linuxmt && \
-   rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
+  for multidir in . rtd medium medium/rtd; do
+    (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/"$multidir"/` \
+	`include/linuxmt && \
+     rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
+  done
   mkdir -p redist-djgpp/source/i16elklc
   git -C elks archive --format=zip --prefix=elks/ -0 -v HEAD \
     >redist-djgpp/source/i16elklc/elks.zip

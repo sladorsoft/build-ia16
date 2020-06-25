@@ -776,38 +776,26 @@ if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
     (. env.sh \
      && cd libc \
      && make -j4 DESTDIR="$PREFIX-djgpp-elkslibc" install)
-    cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/linuxmt
-    (
-      echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
-      echo '   <linuxmt/minix_fs_sb.h>. */'
-      cat minix_fs.h minix_fs_sb.h 
-    ) >minix_fs_combined.h
-    (
-      echo '/* Automatically combined from <linuxmt/msdos_fs.h>,'
-      echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
-      cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
-    ) >msdos_fs_combined.h
-    cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/linuxmt
-    (
-      echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
-      echo '   <linuxmt/minix_fs_sb.h>. */'
-      cat minix_fs.h minix_fs_sb.h 
-    ) >minix_fs_combined.h
-    (
-      echo '/* Automatically combined from <linuxmt/msdos_fs.h>,'
-      echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
-      cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
-    ) >msdos_fs_combined.h
-    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
-       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/
-    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
-       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/include/stdint.h
-    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
-       "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
-       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/
-    cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
-       "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/rtd/include/stdint.h
+    for multidir in . rtd medium medium/rtd; do
+      cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/"$multidir"/` \
+	 `include/linuxmt
+      (
+	echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
+	echo '   <linuxmt/minix_fs_sb.h>. */'
+	cat minix_fs.h minix_fs_sb.h 
+      ) >minix_fs_combined.h
+      (
+	echo '/* Automatically combined from <linuxmt/msdos_fs.h>,'
+	echo '   <linuxmt/msdos_fs_sb.h> and <linuxmt/msdos_fs_i.h>. */'
+	cat msdos_fs.h msdos_fs_sb.h msdos_fs_i.h
+      ) >msdos_fs_combined.h
+      cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stddef.h)" \
+	 "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdarg.h)" \
+	 "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/"$multidir"/include/
+      cp "$($PREFIX/bin/ia16-elf-gcc -print-file-name=include/stdint-gcc.h)" \
+	 "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/"$multidir"/include/`\
+	 `stdint.h
+    done
     cp -lrf "$PREFIX-djgpp-elkslibc"/* "$PREFIX-djgpp"
     popd
   fi
