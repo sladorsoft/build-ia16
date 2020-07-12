@@ -11,7 +11,7 @@ REDIST_PPA="$HERE/redist-ppa"
 REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
-AUTOTESTPARALLEL="-j2"
+AUTOTESTPARALLEL="-j3"
 
 # Set this to false to disable C++ (speed up build a bit) for Linux and
 # Windows hosts.
