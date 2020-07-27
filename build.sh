@@ -427,9 +427,7 @@ if in_list libi86 BUILDLIST; then
   if [ -e ../libi86/autogen.sh ]; then
     (cd ../libi86 && ./autogen.sh)
   fi
-  script -e -c "../libi86/configure --host=ia16-elf --prefix='$PREFIX' \
-				    --exec-prefix='$PREFIX'/ia16-elf \
-				    --disable-elks-libc" build.log
+  script -e -c "../libi86/configure --prefix='$PREFIX'" build.log
   script -e -c "make $PARALLEL" -a build.log
   # Only run tests if dosemu exists.  (I prefer the "original" dosemu ---
   # dosemu2 does not have a designated stable version yet.  Unfortunately,
