@@ -1,6 +1,6 @@
 # New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 15 Aug 2019 version)
+(TK Chia — 14 Aug 2020 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
@@ -58,7 +58,7 @@ Definitions:
   * _Z_(_S_): an address for "IA-16 offset 0" in _S_'s output section _X_.  This is computed as the LMA corresponding to VMA 0 of _X_, minus _H_.
   * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[9]</sup> this will simply shift the address right by 4 bits.
 
-An `R_386_OZSEG16` or `R_386_SEG16` corresponds to a segment relocation in an MS-DOS `MZ`<sup>[10]</sup> executable header.  The linker will only try to synthesize `MZ` relocations from ELF relocations if there will be an `.msdos_mz_hdr` section in the output program.  I hope to generalize the synthesizing of relocations to other executable formats.
+An `R_386_OZSEG16` or `R_386_SEG16` corresponds to a segment relocation in an MS-DOS `MZ`<sup>[10]</sup> executable header.  The linker will only try to synthesize `MZ` relocations from ELF relocations if there will be an `.msdos_mz_hdr` section in the output program.  (FIXME: this mechanism for emitting `MZ` relocations looks kind of hacky.)
 
 Currently, programs that only use the `R_386_OZSEG16` and `R_386_OZRELSEG16` relocations may be linked directly as `binary` format files.
 
