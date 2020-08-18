@@ -4,7 +4,7 @@
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
-The `R_386_OZSEG16` relocation (a.k.a. `R_386_SEGMENT16`) is stable enough and already used in existing code.  The rest of the ABI is evolving and subject to change.
+The `R_386_OZSEG16` relocation (a.k.a. `R_386_SEGMENT16`) is stable enough and already used in existing code, but has some limitations.  The rest of the ABI is evolving and subject to change.
 
 ## Discussion: modelling IA-16 segments in GNU Binutils
 
@@ -20,6 +20,8 @@ An instruction and relocation sequence to load a far pointer to a variable `foo`
     			1: R_386_16	foo
        3:	ba 00 00             	mov    $0x0,%dx
     			4: R_386_OZSEG16	foo
+
+Due to the current limitations of the Binutils linker script syntax, programs that use this relocation scheme cannot have an arbitrarily large number of output IA-16 segments.
 
 ### New `segelf` relocation scheme
 
