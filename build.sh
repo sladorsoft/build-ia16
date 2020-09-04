@@ -12,6 +12,7 @@ REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
 AUTOTESTPARALLEL="-j3"
+export SHELL=/bin/bash  # make sure subshells, e.g. in `script', are also bash
 
 # Set this to false to disable C++ (speed up build a bit) for Linux and
 # Windows hosts.
