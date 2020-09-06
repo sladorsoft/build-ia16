@@ -25,30 +25,76 @@ before_script:
   - apt-get update -y
   - >
       DEBIAN_FRONTEND=noninteractive
-      apt-get install -y make gcc flex bison texinfo autoconf git ncurses-bin
-      wget
+      apt-get install -y make gcc g++ flex bison texinfo autoconf git
+      ncurses-bin libncurses-dev wget file
 stages:
-  - fetch
-  - build
-fetch:linux:
-  stage: fetch
+  - build1
+  - build2
+  - build3
+  - build4
+build1:linux:
+  stage: build1
   script:
-    - ./fetch.sh gitlab.com
-build:linux:
-  stage: build
-  script:
-    - ./build.sh clean
-    - ./build.sh binutils
-    - ./build.sh prereqs
-    - ./build.sh gcc1
-    - ./build.sh newlib
-    - ./build.sh elks-libc
-    - ./build.sh elksemu
-    - ./build.sh libi86
-    - ./build.sh gcc2
-    - ./build.sh extra
-    - ./build.sh sim
+    - nice ./fetch.sh gitlab.com shallow
+    - nice ./build.sh clean
+    - nice ./build.sh binutils
+    - nice ./build.sh prereqs
+    - MAKEFLAGS=-s nice ./build.sh gcc1
   timeout: 4h
   artifacts:
     paths:
-      - prefix
+      - ./prefix*
+      - ./gcc-ia16
+      - ./newlib-ia16
+      - ./libi86
+      - ./reenigne
+      - ./86sim
+    exclude:
+      # Do not exclude ./libi86/.git --- we may use it to derive a version no.
+      - ./*-ia16/.git
+      - ./elks/.git
+    expire_in: 2h
+build2:linux:
+  stage: build2
+  script:
+    - MAKEFLAGS=-s nice ./build.sh newlib
+  timeout: 4h
+  artifacts:
+    paths:
+      - ./prefix*
+      - ./gcc-ia16
+      - ./libi86
+      - ./reenigne
+      - ./86sim
+    exclude:
+      - ./*-ia16/.git
+      - ./elks/.git
+    expire_in: 2h
+build3:linux:
+  stage: build3
+  script:
+    - nice ./build.sh elks-libc
+    - nice ./build.sh elksemu
+    - nice ./build.sh libi86
+    - MAKEFLAGS=-s nice ./build.sh gcc2
+  timeout: 4h
+  artifacts:
+    paths:
+      - ./prefix*
+      - ./gcc-ia16
+      - ./reenigne
+      - ./86sim
+    exclude:
+      - ./*-ia16/.git
+      - ./elks/.git
+    expire_in: 2h
+build4:linux:
+  stage: build4
+  script:
+    - MAKEFLAGS=-s nice ./build.sh gcc2
+  timeout: 4h
+  artifacts:
+    paths:
+      - ./prefix*
+      - ./reenigne
+      - ./86sim
