@@ -11,6 +11,8 @@ REDIST_PPA="$HERE/redist-ppa"
 REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
+BINUTILSOPTS="--enable-ld=default --enable-gold=yes ` \
+	     `--enable-targets=ia16-elf --enable-hpa-segelf=yes"
 AUTOTESTPARALLEL="-j3"
 export SHELL=/bin/bash  # make sure subshells, e.g. in `script', are also bash
 
@@ -159,7 +161,9 @@ if in_list binutils BUILDLIST; then
   rm -rf build-binutils
   mkdir build-binutils
   pushd build-binutils
-  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
+  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
+    $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
+    --disable-sim --disable-nls 2>&1 | tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
@@ -179,7 +183,9 @@ if in_list binutils-debug BUILDLIST; then
   rm -rf build-binutils-debug
   mkdir build-binutils-debug
   pushd build-binutils-debug
-  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
+  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
+    $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
+    --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
@@ -642,7 +648,9 @@ if in_list binutils-windows BUILDLIST; then
   rm -rf build-binutils-windows
   mkdir build-binutils-windows
   pushd build-binutils-windows
-  ../binutils-ia16/configure --host=i686-w64-mingw32 --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
+  ../binutils-ia16/configure --host=i686-w64-mingw32 --target=ia16-elf \
+    --prefix="$PREFIX" $BINUTILSOPTS --disable-gdb --disable-libdecnumber \
+    --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-windows 2>&1 | tee -a build.log
   popd
@@ -827,8 +835,9 @@ if in_list binutils-djgpp BUILDLIST; then
     --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale \
-    --disable-gdb --disable-libdecnumber --disable-readline --disable-sim \
-    --disable-nls --disable-plugins --disable-lto 2>&1 | tee build.log
+    $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
+    --disable-sim --disable-nls --disable-plugins --disable-lto 2>&1 \
+    | tee build.log
   # The binutils include a facility to allow `ar' and `ranlib' to be invoked
   # as the same executable, and likewise for `objcopy' and `strip'.  However,
   # this facility is disabled in the source.  Do a hack to re-enable it.
