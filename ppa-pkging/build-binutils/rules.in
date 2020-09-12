@@ -17,7 +17,9 @@ override_dh_auto_configure:
 	# See redist-ppa.sh .
 	exec dh_auto_configure -O--parallel -- \
 	    --infodir=/usr/ia16-elf/info \
-	    --target=ia16-elf --disable-gdb --disable-libdecnumber \
+	    --target=ia16-elf --enable-ld=default --enable-gold=yes \
+	    --enable-targets=ia16-elf --enable-hpa-segelf=yes \
+	    --disable-gdb --disable-libdecnumber \
 	    --disable-readline --disable-sim --disable-nls --with-system-zlib \
 	    @disable_enable_static@ @disable_enable_shared@
 
