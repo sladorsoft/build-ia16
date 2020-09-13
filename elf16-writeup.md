@@ -1,6 +1,6 @@
 # New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 12 Sep 2020 version)
+(TK Chia — 13 Sep 2020 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
@@ -34,11 +34,16 @@ An instruction and relocation sequence to load a far pointer to a variable `foo`
     			1: R_386_SUB16	foo!
        3:	ba 00 00             	mov    $0x0,%dx
     			4: R_386_SEG16	foo!
+
+To support this scheme:
+
+  * The Binutils assembler is modified so that, whenever a program defines (say) a label `foo` in a section `.data`, it can automatically create a corresponding "segment base" label `foo!` in a "segment base" section `.data!`.  The `.data!` segment should always have a size of zero.
+  * Also, to potentially support linking protected-mode programs, the assembler can also create a label `.foo&` and section `.data&`<sup>[10]</sup> to mark the end of the IA-16 segment that `foo` resides in.
 			
 This scheme is currently the default when targeting ELKS (`ia16-elf-gcc -melks` …).  It can also be enabled
 
   * in the assembler with `ia16-elf-as --32-segelf` …
-  * or in GCC with `ia16-elf-gcc -msegelf` ….
+  * or in GCC with `ia16-elf-gcc -msegelf` … .
 
 However, the MS-DOS platform libraries and `libgcc` have not been set up to use this scheme, so you may need to recompile them.
 
@@ -58,11 +63,9 @@ Definitions:
   * _A_, _S_: the addend and symbol value for the relocation, per the original ELF specification.<sup>[1]</sup>
   * _B_: the flat address — known only at program run time — where the first byte of the program will be loaded.
   * _Z_(_S_): the runtime linear address for "IA-16 offset 0" in _S_'s output section _X_.
-  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[10]</sup> this will simply shift the address right by 4 bits.
+  * _M_(·): a function to map a segment base address to a segment register value.  For a program which will run in x86 real mode,<sup>[11]</sup> this will simply shift the address right by 4 bits.
 
-An `R_386_OZSEG16` or `R_386_SEG16` corresponds to a segment relocation in an MS-DOS `MZ`<sup>[11]</sup> executable header.
-
-Currently, programs that only use the `R_386_OZSEG16` and `R_386_OZRELSEG16` relocations may be linked directly as `binary` format files using my hacked-up version of Binutils's BFD-based linker `ld.bfd`.
+An `R_386_OZSEG16` or `R_386_SEG16` basically corresponds to a segment relocation in an MS-DOS `MZ`<sup>[12]</sup> executable header or an ELKS `a.out` file.
 
 ## Sample linker script
 
@@ -139,6 +142,8 @@ A script for producing an MS-DOS `MZ` executable with separate text and data seg
 
 <sup>[9] H. P. Anvin.  ABI for 16-bit real mode segmented code in ELF.  2019.  [`https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt`](https://git.zytor.com/users/hpa/segelf/abi.git/plain/segelf.txt)</sup>
 
-<sup>[10] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+<sup>[10] H. P. Anvin wrote at [`https://bugzilla.nasm.us/show_bug.cgi?id=3392533`](https://bugzilla.nasm.us/show_bug.cgi?id=3392533), "it probably would involve creating a new section (say '`section~`' or '`~group`') that would sort at the _end_ of the relevant segment".  However, I think using `&` rather than `~` as a "sigil" works better — the sigil should sort lexicographically _before_ "normal" symbol characters such as `.`, digits, and letters.
 
-<sup>[11] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
+<sup>[11] Intel Corporation.  _Intel® 64 and IA-32 Architectures Software Developer’s Manual_.  _Volume 3B: System Programming Guide, Part 2_.  May 2019.  Chapter 20.</sup>
+
+<sup>[12] See Ralf Brown's Interrupt List ([`www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html`](http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html)) on `int 0x21`, `ah = 0x4b`.
