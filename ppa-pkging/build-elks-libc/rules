@@ -17,6 +17,8 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	. ./env.sh && cd libc && make all
+	# Also build (and later install) elf2elks...
+	. ./env.sh && cd elks/tools/elf2elks && make
 
 override_dh_auto_test:
 	# Unimplemented.
@@ -25,6 +27,8 @@ override_dh_strip:
 	# Stock GNU Binutils's strip(1) will fail on new (May 2020)
 	# medium-model elks-libc libraries, as it does not understand the
 	# IA16-specific segment relocations.
+	dh_strip -X.o -X.a
 
 override_dh_auto_install:
 	. ./env.sh && cd libc && make DESTDIR='$(DESTDIR)/usr' install
+	install -m elks/tools/bin/elf2elks $(DESTDIR)/usr/bin

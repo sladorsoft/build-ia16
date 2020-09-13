@@ -26,7 +26,7 @@ before_script:
   - >
       DEBIAN_FRONTEND=noninteractive
       apt-get install -y make gcc g++ flex bison texinfo autoconf git
-      ncurses-bin libncurses-dev wget file
+      ncurses-bin libncurses-dev libelf-dev wget file
 stages:
   - build1
   - build2

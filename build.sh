@@ -49,6 +49,21 @@ either_in_list () {
   return 1
 }
 
+either_or_or_in_list () {
+  local needle1=$1
+  local needle2=$2
+  local needle3=$3
+  local haystackname=$4
+  local -a haystack
+  eval "haystack=( "\${$haystackname[@]}" )"
+  for x in "${haystack[@]}"; do
+    if [ "$x" = "$needle1" -o "$x" = "$needle2" -o "$x" = "$needle3" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 ensure_prog () {
   local x
   for x in ${1+"$@"}; do
@@ -69,11 +84,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|prereqs|gcc1|newlib|elks-libc|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "elf2elks-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -84,7 +99,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -367,15 +382,16 @@ if in_list newlib BUILDLIST; then
   popd
 fi
 
-if either_in_list elks-libc elksemu BUILDLIST; then
+if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   echo
-  echo "**********************************"
-  echo "* Building elks-libc and elksemu *"
-  echo "**********************************"
+  echo "*********************************************"
+  echo "* Building elks-libc, elf2elks, and elksemu *"
+  echo "*********************************************"
   echo
-  # For now, specifying either the `elks-libc' or `elksemu' option will build
-  # both elks-libc and elksemu together.  However, I am leaving open the
-  # possibility of building them separately later.  -- tkchia 20191215
+  # For now, specifying either the `elks-libc', `elf2elks', or `elksemu'
+  # option will build both all of these together.  However, I am leaving
+  # open the possibility of building them separately later.
+  #	-- tkchia 20200913
   #
   # The ELKS source tree is not downloaded on default by fetch.sh, since it
   # is quite big and we may not always need it.  -- tkchia 20190426
@@ -402,6 +418,10 @@ if either_in_list elks-libc elksemu BUILDLIST; then
   script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
   script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
 	 -a build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
+	 -a build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && make" -a build.log
+  cp -a elks/tools/bin/elf2elks "$PREFIX"/bin/
   script -e -c ". env.sh && cd elksemu && make clean" -a build.log
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
@@ -684,11 +704,10 @@ if in_list clean-djgpp BUILDLIST; then
   echo "* Cleaning DJGPP *"
   echo "******************"
   echo
-  rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
-	 "$PREFIX-djgpp-elkslibc" "$PREFIX-djgpp-binutils" \
-	 "$PREFIX-djgpp-gcc" "$REDIST_DJGPP"
+  rm -rf "$PREFIX-djgpp" "$PREFIX-djgpp-"* "$REDIST_DJGPP"
   mkdir -p "$PREFIX-djgpp/bin" "$PREFIX-djgpp-newlib" "$PREFIX-djgpp-libi86" \
-	   "$PREFIX-djgpp-elkslibc" "$PREFIX-djgpp-binutils/bin" \
+	   "$PREFIX-djgpp-elkslibc" \
+	   "$PREFIX-djgpp-binutils/bin" "$PREFIX-djgpp-elf2elks/bin" \
 	   "$PREFIX-djgpp-gcc/bin"
 fi
 
@@ -700,6 +719,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   echo
   rm -rf "$PREFIX-djgpp-prereqs"
   mkdir -p "$PREFIX-djgpp-prereqs"
+  #
   rm -rf build-gmp-djgpp
   mkdir build-gmp-djgpp
   pushd build-gmp-djgpp
@@ -711,6 +731,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
+  #
   rm -rf build-mpfr-djgpp
   mkdir build-mpfr-djgpp
   pushd build-mpfr-djgpp
@@ -720,6 +741,7 @@ if in_list prereqs-djgpp BUILDLIST; then
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
+  #
   rm -rf build-mpc-djgpp
   mkdir build-mpc-djgpp
   pushd build-mpc-djgpp
@@ -730,10 +752,14 @@ if in_list prereqs-djgpp BUILDLIST; then
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
+  #
   rm -rf build-isl-djgpp
   mkdir build-isl-djgpp
   pushd build-isl-djgpp
-  ../isl-0.16.1/configure --target=i586-pc-msdosdjgpp --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | tee build.log
+  ../isl-0.16.1/configure --target=i586-pc-msdosdjgpp \
+    --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
+    --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | \
+    tee build.log
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make $PARALLEL install" -a build.log
   popd
@@ -881,6 +907,29 @@ if in_list binutils-djgpp BUILDLIST; then
   popd
   # Now (really) hard-link everything into the grand unified directory.
   cp -lrf "$PREFIX-djgpp-binutils"/* "$PREFIX-djgpp"
+fi
+
+if in_list elf2elks-djgpp BUILDLIST; then
+  echo
+  echo "***************************"
+  echo "* Building DJGPP elf2elks *"
+  echo "***************************"
+  echo
+  ensure_prog upx
+  rm -rf build-elf2elks-djgpp
+  mkdir build-elf2elks-djgpp
+  (cd elks && find . \! -type d -print0 | xargs -0 git ls-files --) | \
+    xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elf2elks-djgpp
+  pushd build-elf2elks-djgpp
+  script -e -c ". env.sh && make defconfig" build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
+	 -a build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && \
+		i586-pc-msdosdjgpp-gcc -O3 elf2elks.c -o elf2elks" -a build.log
+  popd
+  upx -9 -o "$PREFIX-djgpp-elf2elks/bin/elf2elks.exe" \
+	 build-elf2elks-djgpp/elks/tools/bin/elf2elks
+  cp -lrf "$PREFIX-djgpp-elf2elks"/* "$PREFIX-djgpp"
 fi
 
 if in_list gcc-djgpp BUILDLIST; then
