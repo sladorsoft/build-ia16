@@ -720,6 +720,21 @@ if in_list prereqs-djgpp BUILDLIST; then
   rm -rf "$PREFIX-djgpp-prereqs"
   mkdir -p "$PREFIX-djgpp-prereqs"
   #
+  rm -rf build-elf2elks-djgpp
+  mkdir build-elf2elks-djgpp
+  (cd elks && find . \! -type d -print0 | xargs -0 git ls-files --) | \
+    xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elf2elks-djgpp
+  pushd build-elf2elks-djgpp
+  mkdir -p cross include
+  script -e -c ". env.sh && make defconfig" build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
+	 -a build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && \
+		make CC=i586-pc-msdosdjgpp-gcc ../bin/elf2elks" -a build.log
+  # FIXME: is this a good place to install elf2elks?!?
+  cp -a elks/tools/bin/elf2elks "$PREFIX-djgpp-elkslibc"/bin/elf2elks.exe
+  popd
+  #
   rm -rf build-gmp-djgpp
   mkdir build-gmp-djgpp
   pushd build-gmp-djgpp
@@ -915,6 +930,7 @@ if in_list elf2elks-djgpp BUILDLIST; then
   echo "* Building DJGPP elf2elks *"
   echo "***************************"
   echo
+  ensure_prog m4
   ensure_prog upx
   rm -rf build-elf2elks-djgpp
   mkdir build-elf2elks-djgpp
@@ -925,7 +941,12 @@ if in_list elf2elks-djgpp BUILDLIST; then
   script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
 	 -a build.log
   script -e -c ". env.sh && cd elks/tools/elf2elks && \
-		i586-pc-msdosdjgpp-gcc -O3 elf2elks.c -o elf2elks" -a build.log
+		make CC='i586-pc-msdosdjgpp-gcc -I$HERE/djgpp-fdos-pkging \
+			 -DLIBELF_ARCH=EM_386 -DLIBELF_BYTEORDER=ELFDATA2LSB \
+			 -DLIBELF_CLASS=ELFCLASS32 -DELFTC_VCSID\(id\)= \
+			 -DS_ISSOCK\(mode\)=0 -Droundup2=roundup \
+			 -Droundup\(x,y\)=\(\(\(x\)+\(y\)-1\)/\(y\)*\(y\)\)' \
+		     ../bin/elf2elks" -a build.log
   popd
   upx -9 -o "$PREFIX-djgpp-elf2elks/bin/elf2elks.exe" \
 	 build-elf2elks-djgpp/elks/tools/bin/elf2elks
