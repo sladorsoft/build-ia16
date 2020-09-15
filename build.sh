@@ -401,6 +401,7 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
   fi
+  ensure_prog m4
   rm -rf build-elks
   mkdir build-elks
   # Instead of building inside the ELKS source tree, create a copy of it (with
@@ -850,9 +851,17 @@ if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
 fi
 
 djgpp_symlink () {
-  "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubify -g "$2"
-  "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubedit "$2" \
-    runfile="`basename "$1" .exe`"
+  case "$2" in
+    *.exe)
+      "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubify -g "$2"
+      "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubedit "$2" \
+	runfile="`basename "$1" .exe`";;
+    *)
+      "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubify -g "$2".tmp.exe
+      "$HERE"/djgpp/i586-pc-msdosdjgpp/bin/stubedit "$2".tmp.exe \
+	runfile="`basename "$1" .exe`"
+      mv "$2".tmp.exe "$2";;
+  esac
   chmod +x "$2"
 }
 
@@ -871,14 +880,19 @@ if in_list binutils-djgpp BUILDLIST; then
   #
   # Also, to save installation space, disable support for plugins, localized
   # messages, and LTO --- for now.
+  #
+  # And, suppress -Werror.  The gold linker likes to use "%u" format
+  # specifiers for Elf_Word's, and GCC does not like this, since Elf_Word is
+  # defined as `unsigned long' under DJGPP, even though `unsigned long' and
+  # `unsigned' have the same properties under GCC for x86-32.
   ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
     --program-prefix=i16 --prefix="$PREFIX-djgpp" \
     --datadir="$PREFIX-djgpp"/ia16-elf \
     --infodir="$PREFIX-djgpp"/ia16-elf/info \
     --localedir="$PREFIX-djgpp"/ia16-elf/locale \
     $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
-    --disable-sim --disable-nls --disable-plugins --disable-lto 2>&1 \
-    | tee build.log
+    --disable-sim --disable-nls --disable-plugins --disable-lto \
+    --disable-werror 2>&1 | tee build.log
   # The binutils include a facility to allow `ar' and `ranlib' to be invoked
   # as the same executable, and likewise for `objcopy' and `strip'.  However,
   # this facility is disabled in the source.  Do a hack to re-enable it.
@@ -895,15 +909,23 @@ if in_list binutils-djgpp BUILDLIST; then
     localedir="$PREFIX-djgpp-binutils"/ia16-elf/locale 2>&1 | tee -a build.log
   popd
   pushd "$PREFIX-djgpp-binutils"
-  # Remove *ld.bfd.exe, since they seriously disagree with MS-DOS's 8.3 file
-  # naming scheme.  We should not really need them anyway.
+  # Drop the .exe in ld.bfd.exe and ld.gold.exe, so that they kind of agree
+  # with MS-DOS's 8.3 file naming scheme.  Make ld.bfd a symlink back to
+  # ld.exe.
+  #
+  # Remove i16ld.bfd.exe and i16ld.gold.exe; i16ld.bfd.exe is not really
+  # needed, and we will replace i16ld.gold.exe with a i16gold.exe "symlink"
+  # later.
   #
   # Also remove the info hierarchy root, to avoid clashes.
-  rm -f bin/i16ld.bfd.exe ia16-elf/bin/ld.bfd.exe ia16-elf/info/dir
+  rm -f bin/i16ld.bfd.exe bin/i16ld.gold.exe \
+	ia16-elf/bin/ld.bfd.exe ia16-elf/info/dir
+  mv ia16-elf/bin/ld.gold.exe ia16-elf/bin/ld.gold
+  djgpp_symlink ia16-elf/bin/ld.exe ia16-elf/bin/ld.bfd
   # Turn `ranlib' into a DJGPP-style "symbolic link" to `ar'.  Ditto for
   # `objcopy' and `strip'.  Also compress all executables in ia16-elf/bin/.
   rm -f ia16-elf/bin/ranlib.exe ia16-elf/bin/strip.exe
-  upx -9 ia16-elf/bin/*.exe
+  upx -9 ia16-elf/bin/*.exe ia16-elf/bin/ld.gold
   djgpp_symlink ia16-elf/bin/ar.exe ia16-elf/bin/ranlib.exe
   djgpp_symlink ia16-elf/bin/objcopy.exe ia16-elf/bin/strip.exe
   # Replace bin/i16as.exe etc. with programs that hand over to ia16-elf/bin/
@@ -919,6 +941,7 @@ if in_list binutils-djgpp BUILDLIST; then
   for f in ar as ld nm objcopy objdump ranlib readelf strip; do
     djgpp_symlink bin/i16butil.exe bin/i16"$f".exe
   done
+  djgpp_symlink bin/i16butil.exe bin/i16gold.exe
   popd
   # Now (really) hard-link everything into the grand unified directory.
   cp -lrf "$PREFIX-djgpp-binutils"/* "$PREFIX-djgpp"

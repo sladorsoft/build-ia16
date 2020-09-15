@@ -24,8 +24,9 @@ int main(int argc, char **argv, char **envp)
 		char name[8];
 	} prog_t;
 	static const prog_t progs[] =
-		{ P("ar"), P("as"), P("ld"), P("nm"), P("objcopy"),
-		  P("objdump"), P("ranlib"), P("readelf"), P("strip"), P("") };
+		{ P("ar"), P("as"), P("ld"), P("gold"), P("nm"),
+		  P("objcopy"), P("objdump"), P("ranlib"), P("readelf"),
+		  P("strip"), P("") };
 	const prog_t *prog;
 	const char *base = argv[0], *p;
 	size_t dir_len;
@@ -42,8 +43,12 @@ int main(int argc, char **argv, char **envp)
 		if (strncasecmp(base, prog->name, prog->cmp_len) == 0) {
 			q = new_path + dir_len;
 			q = stpcpy(q, "../ia16-elf/bin/");
-			q = stpcpy(q, prog->name);
-			stpcpy(q, ".exe");
+			if (prog->name[0] == 'g')
+				stpcpy(q, "ld.gold");
+			else {
+				q = stpcpy(q, prog->name);
+				stpcpy(q, ".exe");
+			}
 			argv[0] = new_path;
 			execve(new_path, argv, envp);
 			fprintf(stderr, "Cannot run %s: %s\n", new_path,
