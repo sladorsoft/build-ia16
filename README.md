@@ -17,6 +17,8 @@
     ./build.sh newlib ────┐         │
             │             ▾         │
             │  ./build.sh elks-libc │
+            │             ▾         │
+            │  ./build.sh elf2elks  │
             ├◂────────────┘         │
             ▾                       │
     ./build.sh libi86 ────────────────────────────┐
@@ -27,9 +29,9 @@
             ├◂────────────┘         │             ▾
             ├─────────────┐         │     ./build.sh binutils-djgpp
             │             ▾         │             ▾
-            │  ./build.sh sim       │     ./build.sh gcc-djgpp
-            │             ▾         │             │
-            │  ./build.sh test ─────┘             │
+            │  ./build.sh sim       │     ./build.sh elf2elks-djgpp
+            │             ▾         │             ▾
+            │  ./build.sh test ─────┘     ./build.sh gcc-djgpp
             ├◂────────────┘                       │
             ├─────────────┐                       │
             │             ▾                       ▾

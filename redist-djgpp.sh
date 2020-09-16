@@ -159,6 +159,8 @@ if in_list elks-libc BUILDLIST; then
   sed -e "s|@date@|$date|" -e "s|@el_ver@|$el_uver-$el_date|" \
     djgpp-fdos-pkging/i16elklc.lsm.in >redist-djgpp/appinfo/i16elklc.lsm
   ln -s "$our_dir"/prefix-djgpp-elkslibc/* redist-djgpp/devel/i16gnu
+  # Also include elf2elks as part of the elks-libc package...
+  ln -s "$our_dir"/prefix-djgpp-elf2elks/* redist-djgpp/devel/i16gnu
   # Workaround.  See prereqs-djgpp in build.sh.
   for multidir in . rtd medium medium/rtd; do
     (cd redist-djgpp/devel/i16gnu/ia16-elf/lib/elkslibc/"$multidir"/` \
