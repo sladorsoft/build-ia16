@@ -1,10 +1,10 @@
 # New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 13 Sep 2020 version)
+(TK Chia — 16 Sep 2020 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
-The older LMA ≠ VMA relocation scheme is currently the default when building for the MS-DOS — as of writing, some programs such as the FreeDOS kernel<sup>[7]</sup> still assume it.  I am experimenting with using Anvin's `segelf` relocation scheme for the Embeddable Linux Kernel Subset (ELKS)<sup>[8]</sup> project.
+The older LMA ≠ VMA relocation scheme is currently the default when building for the MS-DOS — as of writing, some programs such as the FreeDOS kernel<sup>[7]</sup> still assume it.  It has some limitations.  I am experimenting with using Anvin's `segelf` relocation scheme for the Embeddable Linux Kernel Subset (ELKS)<sup>[8]</sup> project.
 
 ## Discussion: modelling IA-16 segments in GNU Binutils
 
