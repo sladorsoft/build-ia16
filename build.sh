@@ -421,7 +421,8 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
 	 -a build.log
   script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
 	 -a build.log
-  script -e -c ". env.sh && cd elks/tools/elf2elks && make" -a build.log
+  script -e -c ". env.sh && cd elks/tools/elf2elks && make ../bin/elf2elks" \
+	 -a build.log
   cp -a elks/tools/bin/elf2elks "$PREFIX"/bin/
   script -e -c ". env.sh && cd elksemu && make clean" -a build.log
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
