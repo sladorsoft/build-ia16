@@ -257,6 +257,9 @@ obsolete_gcc_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/frame-pointer -o \
     -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/frame-pointer -o \
     -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/frame-pointer -o \
+    -e "$PREFIX"/ia16-elf/lib/size -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/size -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/size -o \
     -e "$PREFIX"/ia16-elf/lib/rtd/elkslibc -o \
     -e "$PREFIX"/ia16-elf/lib/regparmcall/elkslibc ]
 }
@@ -297,9 +300,9 @@ if in_list gcc1 BUILDLIST; then
   echo "* Building stage 1 GCC *"
   echo "************************"
   echo
-  # Check for any previously installed `i80286', `wide-types', or `frame-
-  # pointer' multilibs, Newlib/ELKS libraries, as well as "old style"
-  # `elkslibc' libraries, and clean them away...
+  # Check for any previously installed `i80286', `wide-types',
+  # `frame-pointer', or `size' multilibs, Newlib/ELKS libraries, as well as
+  # "old style" `elkslibc' libraries, and clean them away...
   if obsolete_gcc_multilibs_installed; then
     set +e
     find "$PREFIX"/ia16-elf/lib -name i80286 -print0 | xargs -0 rm -rf
@@ -316,6 +319,9 @@ if in_list gcc1 BUILDLIST; then
       | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/include -name frame-pointer -print0 \
       | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name size -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name size -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name size -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name elkslibc -print0 | xargs -0 rm -rf
     set -e
   fi
