@@ -421,18 +421,39 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   pushd build-elks
   mkdir -p cross include
   script -e -c ". env.sh && make defconfig" build.log
-  script -e -c ". env.sh && cd libc && make clean" -a build.log
-  script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
-  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
-	 -a build.log
   script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
 	 -a build.log
   script -e -c ". env.sh && cd elks/tools/elf2elks && make ../bin/elf2elks" \
 	 -a build.log
-  cp -a elks/tools/bin/elf2elks "$PREFIX"/bin/
+  script -e -c ". env.sh && cd libc && make clean" -a build.log
+  script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
   script -e -c ". env.sh && cd elksemu && make clean" -a build.log
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
+  # Compile & try to run an ELKS application program, as a way to test the
+  # toolchain, elks-libc, & elksemu.  Also try building all the applications
+  # in elks/elkscmd/ .
+  #
+  # But before running the tests, we need to install elf2elks & libc first. :-|
+  cp -a elks/tools/bin/elf2elks "$PREFIX"/bin/
+  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
+	 -a build.log
+  ia16-elf-gcc -melks -Os -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  ia16-elf-gcc -melks -O2 -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  ia16-elf-gcc -melks -O0 -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  ia16-elf-gcc -melks -mcmodel=medium -Os -o elks-fartext-test \
+    "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  ia16-elf-gcc -melks -mcmodel=medium -O2 -o elks-fartext-test \
+    "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  ia16-elf-gcc -melks -mcmodel=medium -O0 -o elks-fartext-test \
+    "$HERE"/elks-fartext-test.c
+  elksemu/elksemu ./elks-fartext-test
+  script -e -c ". env.sh && cd elkscmd && make all" -a build.log
   popd
 fi
 
