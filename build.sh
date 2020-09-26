@@ -12,7 +12,7 @@ REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
 BINUTILSOPTS="--enable-ld=default --enable-gold=yes ` \
-	     `--enable-targets=ia16-elf --enable-hpa-segelf=yes"
+	     `--enable-targets=ia16-elf --enable-x86-hpa-segelf=yes"
 AUTOTESTPARALLEL="-j3"
 export SHELL=/bin/bash  # make sure subshells, e.g. in `script', are also bash
 
