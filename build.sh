@@ -427,6 +427,9 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
 	 -a build.log
   script -e -c ". env.sh && cd libc && make clean" -a build.log
   script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
+  # Build elksemu.  This requires elks-libc to be installed.
+  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
+	 -a build.log
   script -e -c ". env.sh && cd elksemu && make clean" -a build.log
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
@@ -434,10 +437,8 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   # toolchain, elks-libc, & elksemu.  Also try building all the applications
   # in elks/elkscmd/ .
   #
-  # But before running the tests, we need to install elf2elks & libc first. :-|
+  # But before running the tests, we need to install elf2elks first. :-|
   cp -a elks/tools/bin/elf2elks "$PREFIX"/bin/
-  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
-	 -a build.log
   ia16-elf-gcc -melks -Os -o elks-fartext-test "$HERE"/elks-fartext-test.c
   elksemu/elksemu ./elks-fartext-test
   ia16-elf-gcc -melks -O2 -o elks-fartext-test "$HERE"/elks-fartext-test.c
