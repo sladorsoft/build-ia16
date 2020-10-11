@@ -73,8 +73,7 @@ build2:linux:
 build3:linux:
   stage: build3
   script:
-    - nice ./build.sh elks-libc
-    - nice ./build.sh elksemu
+    - nice ./build.sh elks-libc elksemu
     - nice ./build.sh libi86
     - MAKEFLAGS=-s nice ./build.sh gcc2
   timeout: 4h
