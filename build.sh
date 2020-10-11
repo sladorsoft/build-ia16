@@ -13,7 +13,7 @@ PARALLEL="-j 4"
 #PARALLEL=""
 BINUTILSOPTS="--enable-ld=default --enable-gold=yes ` \
 	     `--enable-targets=ia16-elf --enable-x86-hpa-segelf=yes"
-AUTOTESTPARALLEL="-j3"
+AUTOTESTPARALLEL="-j4"
 export SHELL=/bin/bash  # make sure subshells, e.g. in `script', are also bash
 
 # Set this to false to disable C++ (speed up build a bit) for Linux and
@@ -491,7 +491,9 @@ if in_list libi86 BUILDLIST; then
   # dosemu2 does not have a designated stable version yet.  Unfortunately,
   # Ubuntu Focal does not seem to come with the original dosemu.)
   if dosemu --version; then
-    script -e -c "make check TESTSUITEFLAGS='$AUTOTESTPARALLEL'" -a build.log
+    script -e \
+	-c "make check TESTSUITEFLAGS='$AUTOTESTPARALLEL --x-test-underlying'"\
+	-a build.log
   fi
   script -e -c "make $PARALLEL install" -a build.log
   popd
