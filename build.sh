@@ -435,8 +435,7 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
   # Compile & try to run an ELKS application program, as a way to test the
-  # toolchain, elks-libc, & elksemu.  Also try building all the applications
-  # in elks/elkscmd/ .
+  # toolchain, elks-libc, & elksemu.
   #
   # But before running the tests, we need to install elf2elks first. :-|
   #
@@ -465,7 +464,6 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   ia16-elf-gcc -melks -mcmodel=medium -O0 -o elks-fartext-test \
     "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  script -e -c ". env.sh && cd elkscmd && make all" -a build.log
   popd
 fi
 
