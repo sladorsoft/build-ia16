@@ -38,6 +38,9 @@
             ▾  ./redist-ppa.sh all        ./redist-djgpp.sh all
           «END» ◂─────────┴◂──────────────────────┘
 
+  * The Linux-hosted toolchain will be installed in the `prefix/` subdirectory under this top-level directory.  To use the newly-built toolchain, you can add ...`/prefix/bin` to your `$PATH`.
+  * The DJGPP-hosted toolchain — if any — will appear under `prefix-djgpp/`.
+
 ### Pre-compiled compiler toolchain packages
 
   * A pre-compiled [Ubuntu Personal Package Archive](https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/) is now available.
