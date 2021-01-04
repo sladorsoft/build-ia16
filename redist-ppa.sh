@@ -17,13 +17,10 @@
 # There is a Personal Package Archive (PPA) for the source packages I have
 # created, at https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/ .
 #
-# For very new versions of Ubuntu (e.g. 20.04, Focal), the libisl version
-# is too new (!) and no longer compatible with the GCC 6.3 code.  For now, I
-# leave out libisl as a dependency except for cases where it is known to
-# work.  For the older Ubuntu Trusty, the mainline libisl version (0.12-2)
-# is too old, so I have copied over the libisl 0.16.1-1 from Jonathon F's
-# PPA (https://launchpad.net/%7Ejonathonf/+archive/ubuntu/gcc-5.3/+packages)
-# into my PPA.
+# For Ubuntu Linux 14.04 LTS (Trusty Tahr), the mainline libisl version
+# (0.12-2) is too old, so I have copied over the libisl 0.16.1-1 from
+# Jonathon F's PPA (https://launchpad.net/%7Ejonathonf/+archive/ubuntu/
+# gcc-5.3/+packages) into my PPA.
 #
 # TODO: create more fine-grained packages, e.g. rather than one big package
 # gcc-ia16-elf, have separate packages for the C compiler, C++ compiler,
@@ -114,13 +111,6 @@ case "$distro" in
     echo "Bad distribution name (\`$distro')!"
     exit 1
     ;;
-esac
-
-case "$distro" in
-  trusty | xenial | bionic)
-    maybe_libisl_dev='libisl-dev (>= 0.14),';;
-  *)
-    maybe_libisl_dev=;;
 esac
 
 # Create unsigned packages if $DEBSIGN_KEYID is undefined or blank;
@@ -280,8 +270,7 @@ if in_list gcc1 BUILDLIST; then
   dh_make -s -p "$g1_pdir" -n -f ../"$g1_dir".orig.tar.xz -y
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build/* debian/
-  sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
-    debian/control.in >debian/control
+  sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
   rm debian/control.in
   find debian -name '*~' -print0 | xargs -0 rm -f
   (
@@ -471,7 +460,7 @@ if in_list gcc2 BUILDLIST; then
   rm debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
-      -e "s|@li_ver@|$li_ver|g" -e "s|@maybe_libisl_dev@|$maybe_libisl_dev|g" \
+      -e "s|@li_ver@|$li_ver|g" \
       -e "s|@ifstatic@||g" debian/control.in >debian/control
   sed -e "s|@ifstatic@||g" \
       -e "s|@ifstatic_cflags@||g" -e "s|@ifstatic_ldflags@||g" \
