@@ -558,7 +558,7 @@ if in_list extra BUILDLIST; then
   popd
   #
   [ -f tinyasm/.git/config ] || \
-    git clone https://github.com/tkchia/tinyasm.git
+    git clone https://github.com/nanochess/tinyasm.git
   pushd tinyasm
   rm -rf tinyasm.exe TINYASM.EXE
   (
