@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/libnewlib-ia16-elf)
 
 %:
 	exec dh $@ --parallel --builddirectory=build
@@ -18,6 +19,13 @@ override_dh_auto_configure:
 	    --disable-newlib-unbuf-stream-opt --enable-target-optspace \
 	    --enable-newlib-iconv \
 	    --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni
+
+override_dh_install:
+	dh_install -O--parallel -O--builddirectory=build
+	# See build.sh regarding .../sys-include/ .
+	rm -rf $(DESTDIR)/usr/ia16-elf/sys-include
+	mkdir -p $(DESTDIR)/usr/ia16-elf/sys-include
+	ln -s ../include/limits.h $(DESTDIR)/usr/ia16-elf/sys-include/limits.h
 
 override_dh_strip:
 	# Not needed for now.  Note that stock GNU Binutils's strip(1) will
