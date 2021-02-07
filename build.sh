@@ -325,6 +325,10 @@ if in_list gcc1 BUILDLIST; then
     find "$PREFIX"/ia16-elf/lib -name elkslibc -print0 | xargs -0 rm -rf
     set -e
   fi
+  # When building stage 1 GCC, exclude any directory containing native
+  # (i.e. Newlib) system headers.
+  rm -rf "$PREFIX"/ia16-elf/sys-include
+  # Build.
   rm -rf build
   mkdir build
   pushd build
@@ -387,6 +391,13 @@ if in_list newlib BUILDLIST; then
   script -e -c "make $PARALLEL" -a build.log
   script -e -c "make install" -a build.log
   popd
+  # Create a small directory for containing a symlink to the native (i.e.
+  # Newlib) version of <limits.h>, at the place where the stage 2 GCC build
+  # expects to find it.  The GCC build will take this file into account when
+  # fabricating its own <limits.h>.
+  rm -rf "$PREFIX"/ia16-elf/sys-include
+  mkdir -p "$PREFIX"/ia16-elf/sys-include
+  ln -s ../include/limits.h "$PREFIX"/ia16-elf/sys-include/limits.h
 fi
 
 if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
