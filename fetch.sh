@@ -49,9 +49,6 @@ wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2
 tar -xjf isl-0.16.1.tar.bz2
 do_git_clone libi86 "${1-gitlab.com}" tkchia/libi86.git "$2"
 # ^- GitLab, not GitHub!
-do_git_clone pdcurses "${1-github.com}" tkchia/PDCurses.git "$2"
-do_git_clone ubasic-ia16 "${1-github.com}" tkchia/ubasic-ia16.git "$2"
-do_git_clone tinyasm "${1-github.com}" tkchia/tinyasm.git "$2"
 wget https://github.com/andrewwutw/build-djgpp/releases/download/v2.8/` \
   `djgpp-linux64-gcc720.tar.bz2
 tar -xjf djgpp-linux64-gcc720.tar.bz2
