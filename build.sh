@@ -439,9 +439,16 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
 	 -a build.log
   script -e -c ". env.sh && cd libc && make clean" -a build.log
   script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
-  # Build elksemu.  This requires elks-libc to be installed.
+  # Install elks-libc.  Also create dummy "system" <limits.h> files at the
+  # expected places, for GCC's `#include_next <limits.h>'. :-|
   script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
 	 -a build.log
+  for multidir in . rtd medium medium/rtd; do
+    pushd "$PREFIX"/ia16-elf/lib/elkslibc/"$multidir"/include
+    [ -e limits.h ] || true >limits.h
+    popd
+  done
+  # Build elksemu.  This requires elks-libc to be installed.
   script -e -c ". env.sh && cd elksemu && make clean" -a build.log
   script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
 	 -a build.log
@@ -827,10 +834,17 @@ if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
   # including any C++ libraries --- just install Newlib into the DJGPP tree.
   # Create a separate tree dedicated to Newlib, then hard link everything.
   #
+  # As above, we need to create a small sys-include/ directory for stage 2
+  # GCC to see Newlib's <limits.h>.
+  #
   # Remove libg.a for each multilib --- it is just a copy of the corresponding
   # libc.a .
   pushd build-newlib
   make install prefix="$PREFIX-djgpp-newlib"
+  rm -rf "$PREFIX-djgpp-newlib"/ia16-elf/sys-include
+  mkdir -p "$PREFIX-djgpp-newlib"/ia16-elf/sys-include
+  cp -lrf "$PREFIX-djgpp-newlib"/ia16-elf/include/limits.h \
+	  "$PREFIX-djgpp-newlib"/ia16-elf/sys-include/limits.h
   find "$PREFIX-djgpp-newlib" -name libg.a -print0 | xargs -0 rm -f
   cp -lrf "$PREFIX-djgpp-newlib"/* "$PREFIX-djgpp"
   popd
@@ -862,8 +876,9 @@ if either_in_list prereqs-djgpp some-prereqs-djgpp BUILDLIST; then
      && cd libc \
      && make -j4 DESTDIR="$PREFIX-djgpp-elkslibc" install)
     for multidir in . rtd medium medium/rtd; do
-      cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/"$multidir"/` \
-	 `include/linuxmt
+      cd "$PREFIX-djgpp-elkslibc"/ia16-elf/lib/elkslibc/"$multidir"/include
+      [ -e limits.h ] || true >limits.h
+      cd linuxmt
       (
 	echo '/* Automatically combined from <linuxmt/minix_fs.h> and'
 	echo '   <linuxmt/minix_fs_sb.h>. */'
