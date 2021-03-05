@@ -17,7 +17,7 @@ override_dh_auto_configure:
 	    --enable-newlib-global-atexit --enable-newlib-reent-small \
 	    --disable-newlib-fseek-optimization \
 	    --disable-newlib-unbuf-stream-opt --enable-target-optspace \
-	    --enable-newlib-iconv \
+	    --enable-newlib-io-c99-formats --enable-newlib-iconv \
 	    --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni
 
 override_dh_install:
