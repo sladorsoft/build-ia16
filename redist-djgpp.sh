@@ -167,11 +167,15 @@ if in_list elks-libc BUILDLIST; then
 	`include/linuxmt && \
      rm -f -v minix_fs.h minix_fs_sb.h msdos_fs.h msdos_fs_sb.h msdos_fs_i.h)
   done
-  mkdir -p redist-djgpp/source/i16elklc
+  mkdir -p redist-djgpp/links redist-djgpp/source/i16elklc
+  for path in redist-djgpp/devel/i16gnu/bin/*.exe; do
+    prog="`basename "$path" .exe | cut -c1-8`"
+    echo 'devel\i16gnu\bin\'"$prog.exe" >redist-djgpp/links/"$prog.bat"
+  done
   git -C elks archive --format=zip --prefix=elks/ -0 -v HEAD \
     >redist-djgpp/source/i16elklc/elks.zip
   rm -f redist-djgpp/i16elklc.zip
-  (cd redist-djgpp && zip -9rkX i16elklc.zip appinfo devel source)
+  (cd redist-djgpp && zip -9rkX i16elklc.zip appinfo devel links source)
   rm -r redist-djgpp/appinfo/*.lsm redist-djgpp/devel/i16gnu/* \
     redist-djgpp/source/*
   repack i16elklc
