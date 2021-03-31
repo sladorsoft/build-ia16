@@ -84,11 +84,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|prereqs|gcc1|newlib|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "elf2elks-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -99,7 +99,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -998,7 +998,8 @@ if in_list binutils-djgpp BUILDLIST; then
   cp -lrf "$PREFIX-djgpp-binutils"/* "$PREFIX-djgpp"
 fi
 
-if in_list elf2elks-djgpp BUILDLIST; then
+# elf2elks does not work properly under DJGPP yet.  -- tkchia 20210331
+if false && in_list elf2elks-djgpp BUILDLIST; then
   echo
   echo "***************************"
   echo "* Building DJGPP elf2elks *"

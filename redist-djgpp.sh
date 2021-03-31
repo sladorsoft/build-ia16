@@ -52,11 +52,11 @@ in_list () {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|newlib|elks-libc|libi86|gcc)
+    clean|binutils|newlib|libi86|gcc)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "newlib" "elks-libc" "libi86" "gcc")
+      BUILDLIST=("clean" "binutils" "newlib" "libi86" "gcc")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -66,7 +66,7 @@ done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-djgpp options:"
-  echo "clean binutils newlib elks-libc libi86 gcc"
+  echo "clean binutils newlib libi86 gcc"
   exit 1
 fi
 
@@ -153,7 +153,10 @@ if in_list newlib BUILDLIST; then
   repack i16newli
 fi
 
-if in_list elks-libc BUILDLIST; then
+# Supporting the ELKS target and elks-libc on the DJGPP host is still
+# problematic, so elks-libc packaging for DJGPP is disabled for now.
+# -- tkchia 20210331
+if false && in_list elks-libc BUILDLIST; then
   decide_elks_libc_ver_and_dirs
   # Again, use a short version number inside the .lsm .
   sed -e "s|@date@|$date|" -e "s|@el_ver@|$el_uver-$el_date|" \
