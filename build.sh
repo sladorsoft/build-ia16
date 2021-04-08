@@ -11,6 +11,15 @@ REDIST_PPA="$HERE/redist-ppa"
 REDIST_DJGPP="$HERE/redist-djgpp"
 PARALLEL="-j 4"
 #PARALLEL=""
+# Suppress -Werror, to prevent certain harmless conditions from being
+# considered as fatal errors:
+# (1) Apparently newer versions of glibc, e.g. 2.33, deprecate mallinfo(),
+#     (https://github.com/tkchia/build-ia16/pull/20), and will flag a warning
+#     if it is used.
+# (2) For DJGPP, the gold linker likes to use "%u" format specifiers for
+#     Elf_Word's, and GCC does not like this, since Elf_Word is defined as
+#     `unsigned long' under DJGPP, even though `unsigned long' and
+#     `unsigned' have the same properties under GCC for x86-32.
 BINUTILSOPTS="--enable-ld=default --enable-gold=yes ` \
 	     `--enable-targets=ia16-elf --enable-x86-hpa-segelf=yes ` \
 	     `--disable-werror"
@@ -932,11 +941,6 @@ if in_list binutils-djgpp BUILDLIST; then
   #
   # Also, to save installation space, disable support for plugins, localized
   # messages, and LTO --- for now.
-  #
-  # And, suppress -Werror.  The gold linker likes to use "%u" format
-  # specifiers for Elf_Word's, and GCC does not like this, since Elf_Word is
-  # defined as `unsigned long' under DJGPP, even though `unsigned long' and
-  # `unsigned' have the same properties under GCC for x86-32.
   ../binutils-ia16/configure --host=i586-pc-msdosdjgpp --target=ia16-elf \
     --program-prefix=i16 --prefix="$PREFIX-djgpp" \
     --datadir="$PREFIX-djgpp"/ia16-elf \
