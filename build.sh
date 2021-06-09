@@ -639,13 +639,12 @@ if in_list test BUILDLIST; then
   else
     target_board="--target_board=dosemu"
   fi
-  pushd build2
   GROUP=""
-  if [ -f ../group ]; then
-    read GROUP < ../group
+  if [ -f group ]; then
+    read GROUP < group
   fi
   i=0
-  while [[ -e ../fails-$GROUP$i.txt ]] ; do
+  while [[ -e fails-$GROUP$i.txt ]] ; do
     i=$[$i+1]
   done
   if [ -z "$RUNTESTFLAGS" ]; then
@@ -653,7 +652,12 @@ if in_list test BUILDLIST; then
   else
     RUNTESTFLAGS="$RUNTESTFLAGS $target_board"
   fi
+  pushd build-newlib
   nice make -k check RUNTESTFLAGS="$RUNTESTFLAGS" 2>&1 | tee test.log
+  popd
+  pushd build2
+  nice make -k check RUNTESTFLAGS="$RUNTESTFLAGS" 2>&1 | tee test.log
+  # FIXME: include Newlib test results in overall results too?
   ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
