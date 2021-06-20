@@ -40,6 +40,7 @@
 
   * The Linux-hosted toolchain will be installed in the `prefix/` subdirectory under this top-level directory.  To use the newly-built toolchain, you can add ...`/prefix/bin` to your `$PATH`.
   * The DJGPP-hosted toolchain — if any — will appear under `prefix-djgpp/`.
+  * You can specify multiple build stages together when running `build.sh`.  E.g., `./build.sh binutils prereqs gcc1`.
 
 ### Pre-compiled compiler toolchain packages
 
