@@ -577,7 +577,7 @@ if in_list extra BUILDLIST; then
   popd
   #
   [ -f ubasic-ia16/.git/config ] || \
-    git clone https://github.com/tkchia/ubasic-ia16.git
+    git clone https://github.com/EtchedPixels/ubasic.git ubasic-ia16
   rm -rf build-ubasic
   mkdir build-ubasic
   pushd build-ubasic
