@@ -61,8 +61,8 @@ decide_newlib_ver_and_dirs () {
   decide_gcc_ver_and_dirs "$1"
   nl_uver="`cat newlib-ia16/newlib/configure | \
     sed -n "/^PACKAGE_VERSION='/ { s/^.*='*//; s/'*$//; p; q; }" || :`"
-  nl_date="`cd newlib-ia16 && git log -n1 --oneline --date=short-local \
-    --format='%ad' | sed 's/-//g'`"
+  nl_date="`cd newlib-ia16 && git log -n1 --oneline --date=iso-strict-local \
+    --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$nl_uver" -a -n "$nl_date" ]
   # Include the GCC and binutils versions inside the newlib version, to
   # distinguish between different newlib binaries compiled from the same
