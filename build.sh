@@ -395,7 +395,7 @@ if in_list newlib BUILDLIST; then
       --disable-newlib-multithread --enable-newlib-global-atexit \
       --enable-newlib-reent-small --disable-newlib-fseek-optimization \
       --disable-newlib-unbuf-stream-opt --enable-target-optspace \
-      --enable-newlib-io-c99-formats --enable-newlib-mb --enable-newlib-iconv \
+      --enable-newlib-io-c99-formats --enable-newlib-iconv \
       --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni 2>&1 \
       | tee build.log
   script -e -c "make $PARALLEL" -a build.log
