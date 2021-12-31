@@ -89,6 +89,25 @@ ensure_prog () {
   exit 1
 }
 
+start_build_log() {
+  case "`uname -s 2>/dev/null`:`uname -o 2>/dev/null`" in
+    Linux:GNU/Linux)
+      # Assume that script(1) on a GNU/Linux system knows about -e & -c...
+      script -e -c "$*" build.log;;
+    *)
+      eval "$*" 2>&1 | tee build.log;;
+  esac
+}
+
+cont_build_log() {
+  case "`uname -s 2>/dev/null`:`uname -o 2>/dev/null`" in
+    Linux:GNU/Linux)
+      script -e -c "$*" -a build.log;;
+    *)
+      eval "$*" 2>&1 | tee -a build.log;;
+  esac
+}
+
 declare -a BUILDLIST
 BUILDLIST=()
 
@@ -189,8 +208,8 @@ if in_list binutils BUILDLIST; then
   ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
     $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
     --disable-sim --disable-nls 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
 fi
 
@@ -212,7 +231,7 @@ if in_list binutils-debug BUILDLIST; then
     $BINUTILSOPTS --disable-gdb --disable-libdecnumber --disable-readline \
     --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL install"
   popd
 fi
 
@@ -230,27 +249,27 @@ if in_list prereqs BUILDLIST; then
   pushd build-gmp
   ../gmp-6.1.2/configure --prefix="$PREFIX-gmp" --disable-shared 2>&1 \
     | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   pushd build-mpfr
   ../mpfr-3.1.5/configure --prefix="$PREFIX-mpfr" \
     --with-gmp="$PREFIX-gmp" --disable-shared 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   pushd build-mpc
   ../mpc-1.0.3/configure --prefix="$PREFIX-mpc" \
     --with-gmp="$PREFIX-gmp" --with-mpfr="$PREFIX-mpfr" --disable-shared 2>&1 \
     | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   pushd build-isl
   ../isl-0.16.1/configure --prefix="$PREFIX-isl" \
     --with-gmp-prefix="$PREFIX-gmp" --disable-shared 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
 fi
 
@@ -348,8 +367,8 @@ if in_list gcc1 BUILDLIST; then
     --with-gmp="$PREFIX-gmp" --with-mpc="$PREFIX-mpc" \
     --with-mpfr="$PREFIX-mpfr" --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make install"
   popd
 fi
 
@@ -398,8 +417,8 @@ if in_list newlib BUILDLIST; then
       --enable-newlib-io-c99-formats --enable-newlib-mb --enable-newlib-iconv \
       --enable-newlib-iconv-encodings=utf_8,utf_16,cp850,cp852,koi8_uni 2>&1 \
       | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make install"
   popd
   # Create a small directory for containing a symlink to the native (i.e.
   # Newlib) version of <limits.h>, at the place where the stage 2 GCC build
@@ -442,26 +461,22 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
     xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elks
   pushd build-elks
   mkdir -p cross include
-  script -e -c ". env.sh && make defconfig" build.log
-  script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
-	 -a build.log
-  script -e -c ". env.sh && cd elks/tools/elf2elks && make ../bin/elf2elks" \
-	 -a build.log
-  script -e -c ". env.sh && cd libc && make clean" -a build.log
-  script -e -c ". env.sh && cd libc && make -j4 all" -a build.log
+  start_build_log ". env.sh && make defconfig"
+  cont_build_log ". env.sh && cd elks/tools/elf2elks && make doclean"
+  cont_build_log ". env.sh && cd elks/tools/elf2elks && make ../bin/elf2elks"
+  cont_build_log ". env.sh && cd libc && make clean"
+  cont_build_log ". env.sh && cd libc && make -j4 all"
   # Install elks-libc.  Also create dummy "system" <limits.h> files at the
   # expected places, for GCC's `#include_next <limits.h>'. :-|
-  script -e -c ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install" \
-	 -a build.log
+  cont_build_log ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install"
   for multidir in . rtd medium medium/rtd; do
     pushd "$PREFIX"/ia16-elf/lib/elkslibc/"$multidir"/include
     [ -e limits.h ] || true >limits.h
     popd
   done
   # Build elksemu.  This requires elks-libc to be installed.
-  script -e -c ". env.sh && cd elksemu && make clean" -a build.log
-  script -e -c ". env.sh && cd elksemu && make PREFIX='$PREFIX'" \
-	 -a build.log
+  cont_build_log ". env.sh && cd elksemu && make clean"
+  cont_build_log ". env.sh && cd elksemu && make PREFIX='$PREFIX'"
   # Compile & try to run an ELKS application program, as a way to test the
   # toolchain, elks-libc, & elksemu.
   #
@@ -521,17 +536,16 @@ if in_list libi86 BUILDLIST; then
   if [ -e ../libi86/autogen.sh ]; then
     (cd ../libi86 && ./autogen.sh)
   fi
-  script -e -c "../libi86/configure --prefix='$PREFIX'" build.log
-  script -e -c "make $PARALLEL" -a build.log
+  start_build_log "../libi86/configure --prefix='$PREFIX'"
+  cont_build_log "make $PARALLEL"
   # Only run tests if dosemu exists.  (I prefer the "original" dosemu ---
   # dosemu2 does not have a designated stable version yet.  Unfortunately,
   # Ubuntu Focal does not seem to come with the original dosemu.)
   if dosemu --version; then
-    script -e \
-	-c "make check TESTSUITEFLAGS='$AUTOTESTPARALLEL --x-test-underlying'"\
-	-a build.log
+    cont_build_log \
+	"make check TESTSUITEFLAGS='$AUTOTESTPARALLEL --x-test-underlying'"
   fi
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL install"
   popd
 fi
 
@@ -552,8 +566,8 @@ if in_list gcc2 BUILDLIST; then
     --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --disable-libquadmath \
     --with-gmp="$PREFIX-gmp" --with-mpc="$PREFIX-mpc" \
     --with-mpfr="$PREFIX-mpfr" --with-isl="$PREFIX-isl" 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make install"
   popd
 fi
 
@@ -703,29 +717,29 @@ if in_list prereqs-windows BUILDLIST; then
   mkdir build-gmp-windows
   pushd build-gmp-windows
   ../gmp-6.1.2/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   rm -rf build-mpfr-windows
   mkdir build-mpfr-windows
   pushd build-mpfr-windows
   ../mpfr-3.1.5/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   rm -rf build-mpc-windows
   mkdir build-mpc-windows
   pushd build-mpc-windows
   ../mpc-1.0.3/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   rm -rf build-isl-windows
   mkdir build-isl-windows
   pushd build-isl-windows
   ../isl-0.16.1/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-prereqs" 2>&1 | tee -a build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   mkdir "$PREFIX-windows/ia16-elf"
   cp -R "$PREFIX/ia16-elf/lib" "$PREFIX-windows/ia16-elf"
@@ -801,8 +815,8 @@ if in_list prereqs-djgpp BUILDLIST; then
   ../gmp-6.1.2/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --disable-shared --disable-fft 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   #
   rm -rf build-mpfr-djgpp
@@ -811,8 +825,8 @@ if in_list prereqs-djgpp BUILDLIST; then
   ../mpfr-3.1.5/configure --target=i586-pc-msdosdjgpp \
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --with-gmp="$PREFIX-djgpp-prereqs" --disable-shared 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   #
   rm -rf build-mpc-djgpp
@@ -822,8 +836,8 @@ if in_list prereqs-djgpp BUILDLIST; then
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --with-gmp="$PREFIX-djgpp-prereqs" --with-mpfr="$PREFIX-djgpp-prereqs" \
     --disable-shared 2>&1 | tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
   #
   rm -rf build-isl-djgpp
@@ -833,8 +847,8 @@ if in_list prereqs-djgpp BUILDLIST; then
     --host=i586-pc-msdosdjgpp --prefix="$PREFIX-djgpp-prereqs" \
     --disable-shared --with-gmp-prefix="$PREFIX-djgpp-prereqs" 2>&1 | \
     tee build.log
-  script -e -c "make $PARALLEL" -a build.log
-  script -e -c "make $PARALLEL install" -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
   popd
 fi
 
@@ -1021,16 +1035,15 @@ if false && in_list elf2elks-djgpp BUILDLIST; then
   (cd elks && find . \! -type d -print0 | xargs -0 git ls-files --) | \
     xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elf2elks-djgpp
   pushd build-elf2elks-djgpp
-  script -e -c ". env.sh && make defconfig" build.log
-  script -e -c ". env.sh && cd elks/tools/elf2elks && make doclean" \
-	 -a build.log
-  script -e -c ". env.sh && cd elks/tools/elf2elks && \
-		make CC='i586-pc-msdosdjgpp-gcc -I$HERE/djgpp-fdos-pkging \
-			 -DLIBELF_ARCH=EM_386 -DLIBELF_BYTEORDER=ELFDATA2LSB \
-			 -DLIBELF_CLASS=ELFCLASS32 -DELFTC_VCSID\(id\)= \
-			 -DS_ISSOCK\(mode\)=0 -Droundup2=roundup \
-			 -Droundup\(x,y\)=\(\(\(x\)+\(y\)-1\)/\(y\)*\(y\)\)' \
-		     ../bin/elf2elks" -a build.log
+  start_build_log ". env.sh && make defconfig"
+  cont_build_log ". env.sh && cd elks/tools/elf2elks && make doclean"
+  cont_build_log ". env.sh && cd elks/tools/elf2elks && \
+		  make CC='i586-pc-msdosdjgpp-gcc -I$HERE/djgpp-fdos-pkging \
+			   -DLIBELF_ARCH=EM_386 -DLIBELF_BYTEORDER=ELFDATA2LSB\
+			   -DLIBELF_CLASS=ELFCLASS32 -DELFTC_VCSID\(id\)= \
+			   -DS_ISSOCK\(mode\)=0 -Droundup2=roundup \
+			   -Droundup\(x,y\)=\(\(\(x\)+\(y\)-1\)/\(y\)*\(y\)\)'\
+		       ../bin/elf2elks"
   popd
   rm -f "$PREFIX-djgpp-elf2elks/bin/elf2elks.exe"
   upx -9 -o "$PREFIX-djgpp-elf2elks/bin/elf2elks.exe" \
@@ -1067,12 +1080,12 @@ if in_list gcc-djgpp BUILDLIST; then
   #	"checking whether byte ordering is bigendian... unknown
   #	 configure: error: unknown endianness
   #	 presetting ac_cv_c_bigendian=no (or yes) will help"
-  script -e -c "make $PARALLEL 'CFLAGS=-s -O2' \
-    'CXXFLAGS=-s -O2 -Wno-narrowing' 'BOOT_CFLAGS=-s -O2' 2>&1" -a build.log
-  script -e -c "make $PARALLEL install prefix='$PREFIX-djgpp-gcc' \
+  cont_build_log "make $PARALLEL 'CFLAGS=-s -O2' \
+    'CXXFLAGS=-s -O2 -Wno-narrowing' 'BOOT_CFLAGS=-s -O2' 2>&1"
+  cont_build_log "make $PARALLEL install prefix='$PREFIX-djgpp-gcc' \
     datadir='$PREFIX-djgpp-gcc'/ia16-elf \
     infodir='$PREFIX-djgpp-gcc'/ia16-elf/info \
-    localedir='$PREFIX-djgpp-gcc'/ia16-elf/locale" -a build.log
+    localedir='$PREFIX-djgpp-gcc'/ia16-elf/locale"
   popd
   pushd "$PREFIX-djgpp-gcc"
   # We do not need the copy of the GCC driver with a long name.
