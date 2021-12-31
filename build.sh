@@ -362,7 +362,7 @@ if in_list gcc1 BUILDLIST; then
   mkdir build
   pushd build
   ../gcc-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
-    --without-headers --with-newlib --enable-languages=c,c++ --disable-libssp \
+    --without-headers --with-newlib --enable-languages=c --disable-libssp \
     --disable-libquadmath --disable-libstdcxx \
     --with-gmp="$PREFIX-gmp" --with-mpc="$PREFIX-mpc" \
     --with-mpfr="$PREFIX-mpfr" --with-isl="$PREFIX-isl" 2>&1 | tee build.log
