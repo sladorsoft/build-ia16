@@ -290,7 +290,10 @@ obsolete_gcc_multilibs_installed () {
     -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/size -o \
     -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/size -o \
     -e "$PREFIX"/ia16-elf/lib/rtd/elkslibc -o \
-    -e "$PREFIX"/ia16-elf/lib/regparmcall/elkslibc ]
+    -e "$PREFIX"/ia16-elf/lib/regparmcall/elkslibc -o \
+    -e "$PREFIX"/ia16-elf/lib/segelf -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/segelf -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/segelf ]
 }
 
 obsolete_newlib_multilibs_installed () {
@@ -330,8 +333,7 @@ if in_list gcc1 BUILDLIST; then
   echo "************************"
   echo
   # Check for any previously installed `i80286', `wide-types',
-  # `frame-pointer', or `size' multilibs, Newlib/ELKS libraries, as well as
-  # "old style" `elkslibc' libraries, and clean them away...
+  # `frame-pointer', or `size' multilibs, etc., and clean them away...
   if obsolete_gcc_multilibs_installed; then
     set +e
     find "$PREFIX"/ia16-elf/lib -name i80286 -print0 | xargs -0 rm -rf
@@ -352,6 +354,9 @@ if in_list gcc1 BUILDLIST; then
     find "$PREFIX"/lib/gcc/ia16-elf -name size -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/include -name size -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name elkslibc -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name segelf -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name segelf -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name segelf -print0 | xargs -0 rm -rf
     set -e
   fi
   # When building stage 1 GCC, exclude any directory containing native
