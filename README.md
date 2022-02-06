@@ -50,3 +50,4 @@
 ### Further information
 
   * A [write-up](elf16-writeup.md) on the ELF relocation schemes implemented for IA-16 segmented addressing.
+  * [`libi86` project home page](https://gitlab.com/tkchia/libi86), including documentation.
