@@ -113,11 +113,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|prereqs|gcc1|newlib|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|causeway|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "elf2elks-djgpp" "gcc-djgpp" "redist-djgpp")
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "causeway" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "elf2elks-djgpp" "gcc-djgpp" "redist-djgpp")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -128,7 +128,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils prereqs gcc1 newlib elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib causeway elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -293,7 +293,10 @@ obsolete_gcc_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/regparmcall/elkslibc -o \
     -e "$PREFIX"/ia16-elf/lib/segelf -o \
     -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/segelf -o \
-    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/segelf ]
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/segelf -o \
+    -e "$PREFIX"/ia16-elf/lib/pmode/regparmcall -o \
+    -e "$PREFIX"/lib/gcc/ia16-elf/6.3.0/pmode/regparmcall -o \
+    -e "$PREFIX"/ia16-elf/include/c++/6.3.0/ia16-elf/pmode/regparmcall ]
 }
 
 obsolete_newlib_multilibs_installed () {
@@ -357,6 +360,9 @@ if in_list gcc1 BUILDLIST; then
     find "$PREFIX"/ia16-elf/lib -name segelf -print0 | xargs -0 rm -rf
     find "$PREFIX"/lib/gcc/ia16-elf -name segelf -print0 | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/include -name segelf -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name pmode -print0 | xargs -0 rm -rf
+    find "$PREFIX"/lib/gcc/ia16-elf -name pmode -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/include -name pmode -print0 | xargs -0 rm -rf
     set -e
   fi
   # When building stage 1 GCC, exclude any directory containing native
@@ -414,7 +420,7 @@ if in_list newlib BUILDLIST; then
   pushd build-newlib
   CFLAGS_FOR_TARGET='-g -Os -D_IEEE_LIBM ' \
     ../newlib-ia16/configure --target=ia16-elf --prefix="$PREFIX" \
-      --enable-newlib-elix-level=2 --disable-elks-libc \
+      --enable-newlib-elix-level=2 --disable-elks-libc --disable-freestanding \
       --disable-newlib-wide-orient --enable-newlib-nano-malloc \
       --disable-newlib-multithread --enable-newlib-global-atexit \
       --enable-newlib-reent-small --disable-newlib-fseek-optimization \
@@ -515,6 +521,23 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   popd
 fi
 
+if in_list causeway BUILDLIST; then
+  echo
+  echo "**********************************"
+  echo "* Building CauseWay DOS extender *"
+  echo "**********************************"
+  echo
+  [ -f libi86/.git/config ] || \
+    ./fetch.sh
+  rm -rf build-causeway
+  cp -a causeway build-causeway
+  pushd build-causeway
+  make clean
+  make $PARALLEL prefix="$PREFIX"
+  make install prefix="$PREFIX"
+  popd
+fi
+
 if in_list libi86 BUILDLIST; then
   echo
   echo "*******************"
@@ -522,7 +545,7 @@ if in_list libi86 BUILDLIST; then
   echo "*******************"
   echo
   [ -f libi86/.git/config ] || \
-    git clone https://gitlab.com/tkchia/libi86.git
+    ./fetch.sh
   ensure_prog autoconf
   ensure_prog autom4te
   if obsolete_multilibs_installed; then

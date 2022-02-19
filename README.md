@@ -21,6 +21,8 @@
             │  ./build.sh elf2elks  │
             ├◂────────────┘         │
             ▾                       │
+    ./build.sh causeway             │
+            ▾                       │
     ./build.sh libi86 ────────────────────────────┐
             ▾                       │             ▾
     ./build.sh gcc2 ──────┐         │     ./build.sh clean-djgpp

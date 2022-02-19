@@ -24,6 +24,7 @@ do_git_pull newlib-ia16
 do_git_pull binutils-ia16
 do_git_pull reenigne
 do_git_pull elks
+do_git_pull causeway
 do_git_pull libi86
 do_git_pull pdcurses
 do_git_pull ubasic-ia16
