@@ -11,6 +11,7 @@ Vcs-Git: https://github.com/tkchia/newlib-ia16.git
 Package: libnewlib-ia16-elf
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: causeway-dosx
 Suggests: gcc-ia16-elf
 Description: C library and math library, for ia16-elf target
  Unofficial port of the Newlib C library and math library to the ia16-elf
