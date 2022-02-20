@@ -61,12 +61,12 @@ ensure_prog () {
 distro=
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|stubs|binutils|gcc1|newlib|elks-libc|elksemu|libi86|gcc2)
+    clean|stubs|binutils|gcc1|newlib|causeway|elks-libc|elksemu|libi86|gcc2)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "elks-libc" \
-		 "elksemu" "libi86" "gcc2")
+      BUILDLIST=("clean" "stubs" "binutils" "gcc1" "newlib" "causeway" \
+		 "elks-libc" "elksemu" "libi86" "gcc2")
       ;;
     --distro=?*)
       distro="${1#--distro=}"
@@ -82,7 +82,7 @@ done
 if [ "${#BUILDLIST}" -eq 0 ]; then
   echo "redist-ppa options:"
   echo "--distro={trusty|xenial|...} clean stubs binutils gcc1 newlib" \
-       "elks-libc elksemu libi86 gcc2"
+       "causeway elks-libc elksemu libi86 gcc2"
   exit 1
 fi
 
@@ -320,6 +320,22 @@ if in_list newlib BUILDLIST; then
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
   debuild -i'.*' -S -rfakeroot -d ${signing[@]}
+  popd
+fi
+
+if in_list causeway BUILDLIST; then
+  echo
+  echo "***********************************"
+  echo "* Packaging CauseWay DOS extender *"
+  echo "***********************************"
+  echo
+  rm -rf redist-ppa/"$distro"/causeway-dosx_* \
+	 redist-ppa/"$distro"/causeway-dosx
+  cp -a causeway redist-ppa/"$distro"/causeway-dosx
+  pushd redist-ppa/"$distro"/causeway-dosx
+  git clean -f -x
+  sed "s/@distro@/$distro/g" debian/changelog.in >debian/changelog
+  debuild --no-tgz-check -i -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
