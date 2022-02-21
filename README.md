@@ -14,14 +14,14 @@
             ▾
     ./build.sh gcc1 ◂───────────────┐
             ▾                       │
-    ./build.sh newlib ────┐         │
+    ./build.sh newlib               │
+            ▾                       │
+    ./build.sh causeway ──┐         │
             │             ▾         │
             │  ./build.sh elks-libc │
             │             ▾         │
             │  ./build.sh elf2elks  │
             ├◂────────────┘         │
-            ▾                       │
-    ./build.sh causeway             │
             ▾                       │
     ./build.sh libi86 ────────────────────────────┐
             ▾                       │             ▾

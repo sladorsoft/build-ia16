@@ -1,6 +1,6 @@
 # New ELF i386 relocation types to support 16-bit x86 segmented addressing
 
-(TK Chia — 16 Sep 2020 version)
+(TK Chia — 21 Feb 2022 version)
 
 The new ELF i386<sup>[1][2][3]</sup> relocations described below have been implemented in the main branch of my fork of GNU Binutils,<sup>[4]</sup> and are also partially supported by my fork of GCC.<sup>[5]</sup>  They allow one to use ELF i386 as an intermediate object format, to support the linking of 16-bit x86<sup>[6]</sup> programs whose code and data may span multiple segments.
 
@@ -40,12 +40,12 @@ To support this scheme:
   * The Binutils assembler is modified so that, whenever a program defines (say) a label `foo` in a section `.data`, it can automatically create a corresponding "segment base" label `foo!` in a "segment base" section `.data!`.  The `.data!` segment should always have a size of zero.
   * Also, to potentially support linking protected-mode programs, the assembler can also create a label `.foo&` and section `.data&`<sup>[10]</sup> to mark the end of the IA-16 segment that `foo` resides in.
 			
-This scheme is currently the default when targeting ELKS (`ia16-elf-gcc -melks` …).  It can also be enabled
+This scheme is currently the default when targeting ELKS (`ia16-elf-gcc -melks` …) and when targeting MS-DOS in DOS extender mode (`ia16-elf-gcc -mdosx` …).  It can also be enabled
 
   * in the assembler with `ia16-elf-as --32-segelf` …
   * or in GCC with `ia16-elf-gcc -msegelf` … .
 
-However, the MS-DOS platform libraries and `libgcc` have not been set up to use this scheme, so you may need to recompile them.
+**Note**: the real-mode MS-DOS platform libraries and real-mode `libgcc` have not been set up to use this scheme, so you may need to recompile them.
 
 ## The new relocation types
 
@@ -67,9 +67,9 @@ Definitions:
 
 An `R_386_OZSEG16` or `R_386_SEG16` basically corresponds to a segment relocation in an MS-DOS `MZ`<sup>[12]</sup> executable header or an ELKS `a.out` file.
 
-## Sample linker script
+## Sample linker scripts
 
-A script for producing an MS-DOS `MZ` executable with separate text and data segments under the old modelling scheme might look like this:
+A script for producing an MS-DOS `MZ` executable, with separate text and data segments, under the old modelling scheme, might look like this:
 
     /* Run objcopy later to convert the output ELF to "binary" format. */
     OUTPUT_FORMAT ("elf32-i386")
@@ -116,6 +116,78 @@ A script for producing an MS-DOS `MZ` executable with separate text and data seg
         *(.bss .bss.* .gnu.linkonce.b.*) …
         *(COMMON) …
         . = ALIGN (16);
+      } …
+
+      /* Throw away everything else. */
+      /DISCARD/ : { *(*) }
+    }
+
+A script for producing a CauseWay DOS extender `3P` executable, with separate text and data segments, under the new `segelf` modelling scheme, might look like this:
+
+    /* Run objcopy later to convert the output ELF to "binary" format. */
+    OUTPUT_FORMAT ("elf32-i386")
+    SECTIONS
+    {
+      /* Any needed front matter. */
+      …
+
+      /* segelf segment start markers for target text section. */
+      ".text!" . (NOLOAD) :
+      {
+        "__stext!" = .;
+        *(".text!*" ".text.*!") …
+        "__etext!" = .; …
+      }
+
+      /* Target text section. */
+      .text . :
+      {
+        __stext = .;
+        *(.text .text.*) …
+        __etext = .; …
+        . = ALIGN (16);
+      }
+
+      /* segelf segment end markers for target text section. */
+      ".text&" . (NOLOAD) :
+      {
+        "__stext&" = .;
+        *(".text&*" ".text.*&") …
+        "__etext&" = .; …
+      }
+
+      /* segelf segment start markers for target data section. */
+      ".data!" . (NOLOAD) :
+      {
+        "__sdata!" = .;
+        *(".data!*" ".data.*!") …
+        "__edata!" = .;
+        "__ebss!" = .; …
+      }
+
+      /* Target data section. */
+      .data . :
+      {
+        __sdata = .;
+        *(.data .data.*) …
+        __edata = .; …
+      }
+
+      /* Target BSS section, with same segment bases as data section. */
+      .bss . (NOLOAD) :
+      {
+        *(.bss .bss.*) …
+        __ebss = .; …
+      }
+
+      /* segelf segment end markers for target data section. */
+      ".data&" . (NOLOAD) :
+      {
+        "__sdata&" = .;
+        *(".data&*" ".data.*&") …
+        *(".bss&*" ".bss.*&") …
+        "__edata&" = .;
+        "__ebss& " = .; …
       } …
 
       /* Throw away everything else. */
