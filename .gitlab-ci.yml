@@ -46,6 +46,7 @@ build1:linux:
       - ./prefix*
       - ./gcc-ia16
       - ./newlib-ia16
+      - ./causeway
       - ./libi86
       - ./reenigne
       - ./86sim
