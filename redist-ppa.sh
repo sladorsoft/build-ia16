@@ -154,7 +154,7 @@ if in_list stubs BUILDLIST; then
     >redist-ppa/"$distro"/"$gs_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$gs_pdir"
   dh_make -s -p "$gs_pdir" -n -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-stubs-gcc/* debian/
   sed "s|@gcc_ver@|$gcc_ver|g" debian/control.in >debian/control
   rm debian/control.in
@@ -197,7 +197,7 @@ if in_list binutils BUILDLIST; then
   # ...but we do need to tell debuild later to ignore all the "removed" files
   # in the source tree.
   dh_make -s -p "$bu_pdir" -n -f ../"$bu_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-binutils/* debian/
   sed "s|@ifstatic@||g" debian/control.in >debian/control
   sed -e "s|@ifstatic_cflags@||g" -e "s|@ifstatic_ldflags@||g" \
@@ -268,7 +268,7 @@ if in_list gcc1 BUILDLIST; then
     >redist-ppa/"$distro"/"$g1_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g1_pdir"
   dh_make -s -p "$g1_pdir" -n -f ../"$g1_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build/* debian/
   sed "s|@bu_ver@|$bu_ver|g" debian/control.in >debian/control
   rm debian/control.in
@@ -305,7 +305,7 @@ if in_list newlib BUILDLIST; then
     >redist-ppa/"$distro"/"$nl_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$nl_pdir"
   dh_make -s -p "$nl_pdir" -n -f ../"$nl_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-newlib/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
     debian/control.in >debian/control
@@ -358,7 +358,7 @@ if in_list elks-libc BUILDLIST; then
     >redist-ppa/"$distro"/"$el_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$el_pdir"
   dh_make -s -p "$el_pdir" -n -f ../"$el_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-elks-libc/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
     debian/control.in >debian/control
@@ -394,7 +394,7 @@ if in_list elksemu BUILDLIST; then
     >redist-ppa/"$distro"/"$ee_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$ee_pdir"
   dh_make -s -p "$ee_pdir" -n -f ../"$ee_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-elksemu/* debian/
   sed -e "s|@el_ver@|$el_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
     debian/control.in >debian/control
@@ -432,7 +432,7 @@ if in_list libi86 BUILDLIST; then
     >redist-ppa/"$distro"/"$li_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$li_pdir"
   dh_make -s -p "$li_pdir" -n -f ../"$li_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build-libi86/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
       -e "s|@nl_ver@|$nl_ver|g" debian/control.in >debian/control
@@ -473,7 +473,7 @@ if in_list gcc2 BUILDLIST; then
     >redist-ppa/"$distro"/"$g2_dir".orig.tar.xz
   pushd redist-ppa/"$distro"/"$g2_pdir"
   dh_make -s -p "$g2_pdir" -n -f ../"$g2_dir".orig.tar.xz -y
-  rm debian/*.ex debian/*.EX debian/README debian/README.*
+  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
   cp -a ../../../ppa-pkging/build2/* debian/
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@nl_ver@|$nl_ver|g" \
       -e "s|@li_ver@|$li_ver|g" \
