@@ -25,8 +25,8 @@ before_script:
   - apt-get update -y
   - >
       DEBIAN_FRONTEND=noninteractive
-      apt-get install -y make gcc g++ flex bison texinfo autoconf git
-      ncurses-bin libncurses-dev libelf-dev wget file
+      apt-get install -y make gcc gcc-multilib g++ flex bison texinfo autoconf
+      git ncurses-bin libncurses-dev libelf-dev wget file dosbox
 stages:
   - build1
   - build2
