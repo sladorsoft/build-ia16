@@ -57,7 +57,8 @@ fi
 if ! tar -tjf mpfr-3.1.5.tar.bz2 >/dev/null 2>&1
 then
     rm -f mpfr-3.1.5.tar.bz2
-    wget https://www.mpfr.org/mpfr-3.1.5/mpfr-3.1.5.tar.bz2
+    wget https://www.mpfr.org/mpfr-3.1.5/mpfr-3.1.5.tar.bz2 || \
+      wget https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.5.tar.bz2
     tar -xjf mpfr-3.1.5.tar.bz2
 fi
 if ! tar -tzf mpc-1.0.3.tar.gz >/dev/null 2>&1
