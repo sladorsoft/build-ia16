@@ -325,7 +325,8 @@ obsolete_newlib_multilibs_installed () {
     -e "$PREFIX"/ia16-elf/lib/dos-exe-small-crt0.o -o \
     -e "$PREFIX"/ia16-elf/lib/dosx/dx-mss.ld -o \
     -e "$PREFIX"/ia16-elf/lib/dosx/dx-msl.ld -o \
-    -e "$PREFIX"/ia16-elf/lib/dosx/dx-mssl.ld ]
+    -e "$PREFIX"/ia16-elf/lib/dosx/dx-mssl.ld -o \
+    -e "$PREFIX"/ia16-elf/lib/elf2dosx ]
 }
 
 obsolete_multilibs_installed () {
@@ -417,6 +418,7 @@ if in_list newlib BUILDLIST; then
       | xargs -0 rm -rf
     find "$PREFIX"/ia16-elf/lib -name 'dx-ms[sl].ld' -print0 \
 			     -o -name 'dx-mssl.ld' -print0 | xargs -0 rm -rf
+    find "$PREFIX"/ia16-elf/lib -name elf2dosx -print0 | xargs -0 rm -rf
     set -e
   fi
   # Then...
