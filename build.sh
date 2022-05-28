@@ -369,9 +369,9 @@ if in_list gcc1 BUILDLIST; then
     find "$PREFIX"/ia16-elf/include -name pmode -print0 | xargs -0 rm -rf
     set -e
   fi
-  # When building stage 1 GCC, exclude any directory containing native
-  # (i.e. Newlib) system headers.
-  rm -rf "$PREFIX"/ia16-elf/sys-include
+  # When building stage 1 GCC, exclude any directory containing runtime-specs
+  # files & native (i.e. Newlib) system headers.
+  rm -rf "$PREFIX"/ia16-elf/sys-include "$PREFIX"/ia16-elf/lib/rt-specs
   # Build.
   rm -rf build
   mkdir build
@@ -421,6 +421,9 @@ if in_list newlib BUILDLIST; then
     find "$PREFIX"/ia16-elf/lib -name elf2dosx -print0 | xargs -0 rm -rf
     set -e
   fi
+  # Prevent any prior runtime-specs files or system headers from getting in
+  # the way.
+  rm -rf "$PREFIX"/ia16-elf/sys-include "$PREFIX"/ia16-elf/lib/rt-specs
   # Then...
   rm -rf build-newlib
   mkdir build-newlib
