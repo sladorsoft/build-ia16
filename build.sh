@@ -567,6 +567,8 @@ if in_list libi86 BUILDLIST; then
   rm -f "$PREFIX"/ia16-elf/include/libi86/internal/conio.h \
 	"$PREFIX"/ia16-elf/include/libi86/internal/int86.h \
 	"$PREFIX"/ia16-elf/include/libi86/internal/farptr.h
+  # Remove any libi86 runtime-specs files from older installations.
+  rm -rf "$PREFIX"/ia16-elf/lib/rt-specs/r-msdos.d/libi86.spec
   # Then...
   rm -rf build-libi86
   mkdir build-libi86
