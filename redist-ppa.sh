@@ -334,8 +334,7 @@ if in_list causeway BUILDLIST; then
   cp -a causeway redist-ppa/"$distro"/causeway-dosx
   pushd redist-ppa/"$distro"/causeway-dosx
   git clean -f -x
-  sed "s/@distro@/$distro/g" debian/changelog.in >debian/changelog
-  debuild --no-tgz-check -i -S -rfakeroot -d ${signing[@]}
+  etc/dist-ppa.sh "$distro"
   popd
 fi
 
