@@ -423,17 +423,9 @@ if in_list libi86 BUILDLIST; then
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
   decide_libi86_ver_and_dirs
-  mkdir -p redist-ppa/"$distro"/"$li_pdir"
-  git -C libi86 ls-files -z | \
-    sed -z -n '/^\.git/! { /\/\.git/! p }' | \
-    (cd libi86 && \
-     tar cf - --no-recursion --null -T - --transform "s?^?$li_dir/?") | \
-    xz -9v \
-    >redist-ppa/"$distro"/"$li_dir".orig.tar.xz
+  cp -a libi86 redist-ppa/"$distro"/"$li_pdir"
   pushd redist-ppa/"$distro"/"$li_pdir"
-  dh_make -s -p "$li_pdir" -n -f ../"$li_dir".orig.tar.xz -y
-  rm -f debian/*.ex debian/*.EX debian/README debian/README.*
-  cp -a ../../../ppa-pkging/build-libi86/* debian/
+  git clean -f -x
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
       -e "s|@nl_ver@|$nl_ver|g" debian/control.in >debian/control
   rm debian/control.in
@@ -446,7 +438,7 @@ if in_list libi86 BUILDLIST; then
     echo " -- user <user@localhost.localdomain>  $curr_tm"
   ) >debian/changelog
   cp -a debian/docs debian/*.docs
-  debuild -i'.*' -S -rfakeroot -d ${signing[@]}
+  debuild --no-tgz-check -i -S -rfakeroot -d ${signing[@]}
   popd
 fi
 
