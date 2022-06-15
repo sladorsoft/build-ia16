@@ -585,7 +585,11 @@ if in_list libi86 BUILDLIST; then
     cont_build_log \
 	"make check TESTSUITEFLAGS='$AUTOTESTPARALLEL --x-test-underlying'"
   fi
-  cont_build_log "make $PARALLEL install"
+  cont_build_log "make $PARALLEL install install-testsuite"
+  if dosemu --version; then
+    cont_build_log "make installcheck \
+		      TESTSUITEFLAGS='$AUTOTESTPARALLEL --x-test-underlying'"
+  fi
   popd
 fi
 
