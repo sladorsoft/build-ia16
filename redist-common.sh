@@ -76,8 +76,26 @@ decide_newlib_ver_and_dirs () {
 decide_elks_libc_ver_and_dirs () {
   decide_binutils_ver_and_dirs "$1"
   decide_gcc_ver_and_dirs "$1"
-  el_uver="`cat elks/libc/Makefile.inc | \
-    sed -n "/^VERSION *=/ { s/^.*= *//; s/^elks-//; s/ *$//; p; q; }" || :`"
+  el_uver1="`cat elks/elks/Makefile* | sed -n \
+    "/^VERSION[ \t]*=/ { s/^.*=[ \t]*//; s/#.*$//; s/[ \t]*$//; p; q; }" || :`"
+  el_uver2="`cat elks/elks/Makefile* | sed -n \
+    "/^PATCHLEVEL[ \t]*=/ { s/^.*=[ \t]*//; s/#.*$//; s/[ \t]*$//; p; q; }" \
+    || :`"
+  el_uver3="`cat elks/elks/Makefile* | sed -n \
+    "/^SUBLEVEL[ \t]*=/ { s/^.*=[ \t]*//; s/#.*$//; s/[ \t]*$//; p; q; }" \
+    || :`"
+  el_uver4="`cat elks/elks/Makefile* | sed -n \
+    "/^PRE[ \t]*=/ { s/^.*=[ \t]*//; s/#.*$//; s/[ \t]*$//; p; q; }" \
+    || :`"
+  el_uver="$el_uver1"
+  if [ -n "$el_uver2" ]; then
+    el_uver="$el_uver.$el_uver2"
+    if [ -n "$el_uver3" ]
+      then el_uver="$el_uver.$el_uver3"; fi
+  fi
+  if [ -n "$el_uver4" ]; then
+    el_uver="$el_uver~pre$el_uver4"
+  fi
   el_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
     --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$el_uver" -a -n "$el_date" ]

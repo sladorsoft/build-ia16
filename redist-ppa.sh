@@ -426,7 +426,8 @@ if in_list libi86 BUILDLIST; then
   pushd redist-ppa/"$distro"/"$li_pdir"
   git clean -f -x
   sed -e "s|@bu_ver@|$bu_ver|g" -e "s|@gcc_ver@|$gcc_ver|g" \
-      -e "s|@nl_ver@|$nl_ver|g" debian/control.host-gcc.in >debian/control
+      -e "s|@nl_ver@|$nl_ver|g" -e "s|@li_pver@|$li_pver|g" \
+      debian/control.host-gcc.in >debian/control
   cp debian/rules.host-gcc debian/rules
   rm debian/control.host-*.in debian/rules.host-*
   find debian -name '*~' -print0 | xargs -0 rm -f
