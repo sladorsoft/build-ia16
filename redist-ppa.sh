@@ -331,6 +331,7 @@ if in_list causeway BUILDLIST; then
   echo
   rm -rf redist-ppa/"$distro"/causeway-dosx_* \
 	 redist-ppa/"$distro"/causeway-dosx
+  mkdir -p redist-ppa/"$distro"
   cp -a causeway redist-ppa/"$distro"/causeway-dosx
   pushd redist-ppa/"$distro"/causeway-dosx
   git clean -f -x
