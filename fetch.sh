@@ -42,10 +42,10 @@ do_git_clone () {
     exit 1
 }
 
-do_git_clone gcc-ia16 "${1-github.com}" tkchia/gcc-ia16.git "$2"
-do_git_clone newlib-ia16 "${1-github.com}" tkchia/newlib-ia16.git "$2"
-do_git_clone binutils-ia16 "${1-github.com}" tkchia/binutils-ia16.git "$2"
-do_git_clone reenigne "${1-github.com}" tkchia/reenigne.git "$2"
+do_git_clone gcc-ia16 "${1-gitlab.com}" tkchia/gcc-ia16.git "$2"
+do_git_clone newlib-ia16 "${1-gitlab.com}" tkchia/newlib-ia16.git "$2"
+do_git_clone binutils-ia16 "${1-gitlab.com}" tkchia/binutils-ia16.git "$2"
+do_git_clone reenigne "${1-gitlab.com}" tkchia/reenigne.git "$2"
 rm -f 86sim
 ln -s reenigne/8088/86sim 86sim
 if ! tar -tjf gmp-6.1.2.tar.bz2 >/dev/null 2>&1
