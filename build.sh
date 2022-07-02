@@ -464,7 +464,7 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   # The ELKS source tree is not downloaded on default by fetch.sh, since it
   # is quite big and we may not always need it.  -- tkchia 20190426
   [ -f elks/.git/config ] || \
-    git clone -b tkchia/devel https://github.com/tkchia/elks.git
+    git clone -b tkchia/devel https://gitlab.com/tkchia/elks.git
   if obsolete_multilibs_installed; then
     echo 'Please rebuild gcc1 and newlib.'
     exit 1
@@ -622,7 +622,7 @@ if in_list extra BUILDLIST; then
   echo "****************************************************"
   echo
   [ -f pdcurses/.git/config ] || \
-    git clone https://github.com/tkchia/PDCurses.git pdcurses
+    git clone https://gitlab.com/tkchia/PDCurses.git pdcurses
   rm -rf build-pdcurses
   mkdir build-pdcurses
   pushd build-pdcurses
