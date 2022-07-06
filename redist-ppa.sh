@@ -442,6 +442,9 @@ if in_list libi86 BUILDLIST; then
   cp -a debian/docs debian/*.docs
   debuild --no-tgz-check -i -S -rfakeroot -d ${signing[@]}
   popd
+  if [ -x libi86/etc/dist-ppa-ack.sh ]; then
+    (cd libi86 && etc/dist-ppa-ack.sh ../redist-ppa/"$distro" "$distro")
+  fi
 fi
 
 if in_list gcc2 BUILDLIST; then
