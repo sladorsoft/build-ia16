@@ -418,7 +418,8 @@ if in_list libi86 BUILDLIST; then
   echo "* Packaging libi86 *"
   echo "********************"
   echo
-  rm -rf redist-ppa/"$distro"/libi86-ia16-elf_*
+  rm -rf redist-ppa/"$distro"/libi86-ia16-elf_* \
+	 redist-ppa/"$distro"/libi86-ack_*
   decide_binutils_ver_and_dirs
   decide_gcc_ver_and_dirs
   decide_newlib_ver_and_dirs
