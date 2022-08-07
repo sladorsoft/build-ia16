@@ -513,20 +513,23 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   else
     SKIPELKSEMUTEST=true
   fi
-  ia16-elf-gcc -melks -Os -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  ia16-elf-gcc -melks -Os -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
+    "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -O2 -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  ia16-elf-gcc -melks -O2 -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
+    "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -O0 -o elks-fartext-test "$HERE"/elks-fartext-test.c
+  ia16-elf-gcc -melks -O0 -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
+   "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
   ia16-elf-gcc -melks -mcmodel=medium -Os -o elks-fartext-test \
-    "$HERE"/elks-fartext-test.c
+    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
   ia16-elf-gcc -melks -mcmodel=medium -O2 -o elks-fartext-test \
-    "$HERE"/elks-fartext-test.c
+    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
   ia16-elf-gcc -melks -mcmodel=medium -O0 -o elks-fartext-test \
-    "$HERE"/elks-fartext-test.c
+    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
   $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
   popd
 fi
