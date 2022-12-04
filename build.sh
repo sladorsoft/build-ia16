@@ -513,42 +513,15 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   else
     SKIPELKSEMUTEST=true
   fi
-  ia16-elf-gcc -melks -Os -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
-    "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -O2 -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
-    "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -O0 -o elks-fartext-test -Wl,-Map=elks-fartext-test.map \
-   "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mregparmcall -Os -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mregparmcall -O2 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mregparmcall -O0 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -Os -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -O2 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -O0 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -mregparmcall  -Os -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -mregparmcall -O2 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
-  ia16-elf-gcc -melks -mcmodel=medium -mregparmcall -O0 -o elks-fartext-test \
-    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
+  for mm in '' -mcmodel=medium; do
+    for abi in '' -mrtd -mregparmcall; do
+      for opt in -Os -O2 -O0; do
+	ia16-elf-gcc -melks $mm $abi $opt -o elks-fartext-test \
+	  -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
+	$SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
+      done
+    done
+  done
   popd
 fi
 
