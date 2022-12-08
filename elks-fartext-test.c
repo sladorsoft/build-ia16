@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 extern char **environ;
@@ -19,11 +20,17 @@ hello2(char *arg0)
 	return hello1(arg0);
 }
 
+void hello3(void)
+{
+	printf("hello again\n");
+}
+
 int main(int argc, char **argv)
 {
 	int i;
 	if (argc == 1)
 		return hello2(argv[0]);
+	atexit(hello3);
 	for (i = 1; i < argc; ++i)
 		printf("%s ", argv[i]);
 	putchar('\n');
