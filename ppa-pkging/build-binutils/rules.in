@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/binutils-ia16-elf)
 export DEB_CFLAGS_APPEND += @ifstatic_cflags@
 export DEB_LDFLAGS_APPEND += @ifstatic_ldflags@
 export CFLAGS = -g -O2
@@ -17,6 +18,7 @@ override_dh_update_autotools_config:
 override_dh_auto_configure:
 	# See redist-ppa.sh .
 	exec dh_auto_configure -O--parallel -- \
+	    --libdir=/usr/"$(our_host_platform)"/ia16-elf/lib \
 	    --infodir=/usr/ia16-elf/info \
 	    --target=ia16-elf --enable-ld=default --enable-gold=yes \
 	    --enable-targets=ia16-elf --enable-x86-hpa-segelf=yes \
