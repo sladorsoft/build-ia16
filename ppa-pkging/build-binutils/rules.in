@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE = 1
+DESTDIR ?= $(abspath debian/binutils-ia16-elf)
 export DEB_CFLAGS_APPEND += @ifstatic_cflags@
 export DEB_LDFLAGS_APPEND += @ifstatic_ldflags@
 export CFLAGS = -g -O2
@@ -22,7 +23,8 @@ override_dh_auto_configure:
 	    --enable-targets=ia16-elf --enable-x86-hpa-segelf=yes \
 	    --disable-werror \
 	    --disable-libctf --disable-gdb --disable-libdecnumber \
-	    --disable-readline --disable-sim --disable-nls --with-system-zlib \
+	    --disable-readline --disable-sim --disable-nls \
+	    --disable-plugins --with-system-zlib \
 	    @disable_enable_static@ @disable_enable_shared@
 
 override_dh_auto_test:
@@ -31,3 +33,8 @@ override_dh_auto_test:
 override_dh_shlibdeps:
 	exec dh_shlibdeps -O--parallel -O--builddirectory=build \
 	    -l/usr/"$(our_host_platform)"/ia16-elf/lib
+
+override_dh_install:
+	dh_install -O--parallel -O--builddirectory=build
+	# This conflicts with the same file from host Binutils.  Ugh.
+	$(RM) $(DESTDIR)/usr/lib/*/bfd-plugins/libdep.so
