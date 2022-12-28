@@ -570,7 +570,12 @@ if in_list libi86 BUILDLIST; then
   if [ -e ../libi86/autogen.sh ]; then
     (cd ../libi86 && ./autogen.sh)
   fi
-  start_build_log "../libi86/configure --prefix='$PREFIX'"
+  # Enable ELKS multilibs only if we have downloaded ELKS.
+  if [ -f ../elks/.git/config ]; then
+    start_build_log "../libi86/configure --prefix='$PREFIX' --enable-elks-libc"
+  else
+    start_build_log "../libi86/configure --prefix='$PREFIX'"
+  fi
   cont_build_log "make $PARALLEL"
   # Only run tests if dosemu exists.  (I prefer the "original" dosemu ---
   # dosemu2 does not have a designated stable version yet.  Unfortunately,
