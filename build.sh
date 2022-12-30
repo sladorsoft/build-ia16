@@ -423,7 +423,8 @@ if in_list newlib BUILDLIST; then
   fi
   # Prevent any prior runtime-specs files or system headers from getting in
   # the way.
-  rm -rf "$PREFIX"/ia16-elf/sys-include "$PREFIX"/ia16-elf/lib/rt-specs
+  rm -rf "$PREFIX"/ia16-elf/sys-include \
+	 "$PREFIX"/ia16-elf/lib/rt-specs/r-msdos.*
   # Then...
   rm -rf build-newlib
   mkdir build-newlib
@@ -470,14 +471,16 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
     exit 1
   fi
   ensure_prog m4
-  rm -rf build-elks
-  mkdir build-elks
+  # Remove any obsolete runtime-specs files for ELKS.
+  rm -rf "$PREFIX"/ia16-elf/lib/rt-specs/r-elks.*
   # Instead of building inside the ELKS source tree, create a copy of it (with
   # only the files under Git control) as a separate subdirectory, and build
   # elks-libc and elksemu inside the copy.
   #
   # Copy the working tree versions of the files, not the committed versions.
   #	-- tkchia 20200227
+  rm -rf build-elks
+  mkdir build-elks
   (cd elks && find . \! -type d -print0 | xargs -0 git ls-files --) | \
     xargs -d '\n' tar cvf - -C elks | tar xvf - -C build-elks
   pushd build-elks
