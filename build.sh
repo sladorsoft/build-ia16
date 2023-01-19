@@ -489,15 +489,17 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   cont_build_log ". env.sh && cd elks/tools/elf2elks && make doclean"
   cont_build_log ". env.sh && cd elks/tools/elf2elks && make ../bin/elf2elks"
   cont_build_log ". env.sh && cd libc && make clean"
-  cont_build_log ". env.sh && cd libc && make -j4 all"
-  # Install elks-libc.  Also create dummy "system" <limits.h> files at the
-  # expected places, for GCC's `#include_next <limits.h>'. :-|
-  cont_build_log ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install"
+  # Create dummy "system" <limits.h> files at the expected places, for GCC's
+  # `#include_next <limits.h>'. :-|
   for multidir in . rtd medium medium/rtd; do
+    mkdir -p "$PREFIX"/ia16-elf/lib/elkslibc/"$multidir"/include
     pushd "$PREFIX"/ia16-elf/lib/elkslibc/"$multidir"/include
     [ -e limits.h ] || true >limits.h
     popd
   done
+  # Build and install elks-libc.
+  cont_build_log ". env.sh && cd libc && make -j4 all"
+  cont_build_log ". env.sh && cd libc && make -j4 DESTDIR='$PREFIX' install"
   # Build elksemu.  This requires elks-libc to be installed.
   cont_build_log ". env.sh && cd elksemu && make clean"
   cont_build_log ". env.sh && cd elksemu && make PREFIX='$PREFIX'"
