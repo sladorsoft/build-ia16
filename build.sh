@@ -521,9 +521,11 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   for mm in '' -mcmodel=medium; do
     for abi in '' -mrtd -mregparmcall; do
       for opt in -Os -O2 -O0; do
-	ia16-elf-gcc -melks $mm $abi $opt -o elks-fartext-test \
-	  -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
-	$SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
+	for extra in '' -finstrument-functions-simple; do
+	  ia16-elf-gcc -melks $mm $abi $opt $extra -o elks-fartext-test \
+	    -Wl,-Map=elks-fartext-test.map "$HERE"/elks-fartext-test.c
+	  $SKIPELKSEMUTEST || elksemu/elksemu ./elks-fartext-test
+	done
       done
     done
   done
