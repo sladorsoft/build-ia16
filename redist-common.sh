@@ -93,7 +93,7 @@ decide_elks_libc_ver_and_dirs () {
     if [ -n "$el_uver3" ]
       then el_uver="$el_uver.$el_uver3"; fi
   fi
-  if [ -n "$el_uver4" ]; then
+  if [ -n "$el_uver4" ] && [ 0 != "$el_uver4" ]; then
     el_uver="$el_uver~pre$el_uver4"
   fi
   el_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
@@ -115,13 +115,13 @@ decide_elks_libc_ver_and_dirs () {
 
 decide_elksemu_ver_and_dirs () {
   # Use the ELKS version number rather than elks-libc's...
-  ee_uver="`awk 'BEGIN { v = p = s = 0; q = -1; FS = "[ \t]*[=#][ \t]*" }
+  ee_uver="`awk 'BEGIN { v = p = s = q = 0; FS = "[ \t]*[=#][ \t]*" }
 		 /^VERSION[ \t]*=/ { v = $2 }
 		 /^PATCHLEVEL[ \t]*=/ { p = $2 }
 		 /^SUBLEVEL[ \t]*=/ { s = $2 }
 		 /^PRE[ \t]*=/ { q = $2 }
-		 END { if (q != -1) print v "." p "." s "." q; else
-				    print v "." p "." s }' \
+		 END { if (q > 0) print v "." p "." s "~pre" q; else
+				  print v "." p "." s }' \
 	      elks/elks/Makefile-rules || :`"
   ee_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
     --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
