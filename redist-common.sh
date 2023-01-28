@@ -123,6 +123,9 @@ decide_elksemu_ver_and_dirs () {
 		 END { if (q > 0) print v "." p "." s "~pre" q; else
 				  print v "." p "." s }' \
 	      elks/elks/Makefile-rules || :`"
+  if [ 0.6.0 = "$ee_uver" ]; then
+    ee_uver=0.6.0.0
+  fi
   ee_date="`cd elks && git log -n1 --oneline --date=iso-strict-local \
     --format='%ad' | sed 's/-//g; s/:.*$//g; s/T/./g'`"
   [ -n "$ee_uver" -a -n "$ee_date" ]
