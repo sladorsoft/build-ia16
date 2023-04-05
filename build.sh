@@ -113,11 +113,17 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|prereqs|gcc1|newlib|causeway|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
+    clean|binutils|prereqs|gcc1|newlib|causeway|elks-libc|elf2elks|elksemu|libi86|gcc2|extra|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|gcc-windows|clean-win64|prereqs-win64|binutils-win64|gcc-win64|clean-djgpp|prereqs-djgpp|some-prereqs-djgpp|binutils-djgpp|elf2elks-djgpp|gcc-djgpp|redist-djgpp)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
       BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "causeway" "elks-libc" "elf2elks" "elksemu" "libi86" "gcc2" "extra" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows" "clean-djgpp" "prereqs-djgpp" "some-prereqs-djgpp" "binutils-djgpp" "elf2elks-djgpp" "gcc-djgpp" "redist-djgpp")
+      ;;
+    all-windows)
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "causeway" "elks-libc" "elf2elks" "libi86" "gcc2" "clean-windows" "prereqs-windows" "binutils-windows" "gcc-windows")
+      ;;
+    all-win64)
+      BUILDLIST=("clean" "binutils" "prereqs" "gcc1" "newlib" "causeway" "elks-libc" "elf2elks" "libi86" "gcc2" "clean-win64" "prereqs-win64" "binutils-win64" "gcc-win64")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -128,7 +134,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils prereqs gcc1 newlib causeway elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows gcc-windows clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
+  echo "build options: clean binutils prereqs gcc1 newlib causeway elks-libc elf2elks elksemu libi86 gcc2 extra sim test debug binutils-debug all all-windows all-win64 clean-windows prereqs-windows binutils-windows gcc-windows clean-win64 prereqs-win64 binutils-win64 gcc-win64 clean-djgpp prereqs-djgpp some-prereqs-djgpp binutils-djgpp elf2elks-djgpp gcc-djgpp redist-djgpp"
   exit 1
 fi
 
@@ -451,6 +457,23 @@ if in_list newlib BUILDLIST; then
   ln -s ../include/limits.h "$PREFIX"/ia16-elf/sys-include/limits.h
 fi
 
+if in_list causeway BUILDLIST; then
+  echo
+  echo "**********************************"
+  echo "* Building CauseWay DOS extender *"
+  echo "**********************************"
+  echo
+  [ -f causeway/.git/config ] || \
+    ./fetch.sh
+  rm -rf build-causeway
+  cp -a causeway build-causeway
+  pushd build-causeway
+  make clean
+  make $PARALLEL prefix="$PREFIX"
+  make install prefix="$PREFIX"
+  popd
+fi
+
 if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
   echo
   echo "*********************************************"
@@ -529,23 +552,6 @@ if either_or_or_in_list elks-libc elf2elks elksemu BUILDLIST; then
       done
     done
   done
-  popd
-fi
-
-if in_list causeway BUILDLIST; then
-  echo
-  echo "**********************************"
-  echo "* Building CauseWay DOS extender *"
-  echo "**********************************"
-  echo
-  [ -f libi86/.git/config ] || \
-    ./fetch.sh
-  rm -rf build-causeway
-  cp -a causeway build-causeway
-  pushd build-causeway
-  make clean
-  make $PARALLEL prefix="$PREFIX"
-  make install prefix="$PREFIX"
   popd
 fi
 
@@ -791,7 +797,7 @@ if in_list prereqs-windows BUILDLIST; then
   cont_build_log "make $PARALLEL"
   cont_build_log "make $PARALLEL install"
   popd
-  mkdir "$PREFIX-windows/ia16-elf"
+  mkdir -p "$PREFIX-windows/ia16-elf"
   cp -R "$PREFIX/ia16-elf/lib" "$PREFIX-windows/ia16-elf"
   cp -R "$PREFIX/ia16-elf/include" "$PREFIX-windows/ia16-elf"
 fi
@@ -832,6 +838,97 @@ if in_list gcc-windows BUILDLIST; then
     $EXTRABUILD2OPTS --with-isl="$PREFIX-prereqs" 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-windows 2>&1 | tee -a build.log
+  export PATH=$OLDPATH
+  popd
+fi
+
+if in_list clean-win64 BUILDLIST; then
+  echo
+  echo "***************************"
+  echo "* Cleaning Windows 64-bit *"
+  echo "***************************"
+  echo
+  rm -rf "$PREFIX-win64"
+  mkdir -p "$PREFIX-win64/bin"
+fi
+
+if in_list prereqs-win64 BUILDLIST; then
+  echo
+  echo "*****************************************"
+  echo "* Building Windows 64-bit prerequisites *"
+  echo "*****************************************"
+  echo
+  rm -rf "$PREFIX-prereqs"
+  mkdir -p "$PREFIX-prereqs"
+  rm -rf build-gmp-win64
+  mkdir build-gmp-win64
+  pushd build-gmp-win64
+  ../gmp-6.1.2/configure --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared 2>&1 | tee build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
+  popd
+  rm -rf build-mpfr-win64
+  mkdir build-mpfr-win64
+  pushd build-mpfr-win64
+  ../mpfr-3.1.5/configure --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
+  popd
+  rm -rf build-mpc-win64
+  mkdir build-mpc-win64
+  pushd build-mpc-win64
+  ../mpc-1.0.3/configure --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --prefix="$PREFIX-prereqs" --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --disable-shared 2>&1 | tee -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
+  popd
+  rm -rf build-isl-win64
+  mkdir build-isl-win64
+  pushd build-isl-win64
+  ../isl-0.16.1/configure --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-prereqs" 2>&1 | tee -a build.log
+  cont_build_log "make $PARALLEL"
+  cont_build_log "make $PARALLEL install"
+  popd
+  mkdir -p "$PREFIX-win64/ia16-elf"
+  cp -R "$PREFIX/ia16-elf/lib" "$PREFIX-win64/ia16-elf"
+  cp -R "$PREFIX/ia16-elf/include" "$PREFIX-win64/ia16-elf"
+fi
+
+if in_list binutils-win64 BUILDLIST; then
+  echo
+  echo "************************************"
+  echo "* Building Windows 64-bit binutils *"
+  echo "************************************"
+  echo
+  rm -rf build-binutils-win64
+  mkdir build-binutils-win64
+  pushd build-binutils-win64
+  ../binutils-ia16/configure --host=x86_64-w64-mingw32 --target=ia16-elf \
+    --prefix="$PREFIX" $BINUTILSOPTS --disable-libctf --disable-gdb \
+    --disable-libdecnumber --disable-readline --disable-sim --disable-nls \
+    2>&1 | tee build.log
+  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
+  make $PARALLEL install prefix=$PREFIX-win64 2>&1 | tee -a build.log
+  popd
+fi
+
+if in_list gcc-win64 BUILDLIST; then
+  echo
+  echo "***************************************"
+  echo "* Building stage 2 Windows 64-bit GCC *"
+  echo "***************************************"
+  echo
+  rm -rf build-win64
+  mkdir build-win64
+  pushd build-win64
+  OLDPATH=$PATH
+  export PATH=$PREFIX-win64/bin:$PATH
+  ../gcc-ia16/configure --host=x86_64-w64-mingw32 --target=ia16-elf \
+    --prefix="$PREFIX" --enable-libssp --enable-languages=$LANGUAGES \
+    --disable-libquadmath --with-gmp="$PREFIX-prereqs" \
+    --with-mpfr="$PREFIX-prereqs" --with-mpc="$PREFIX-prereqs" \
+    $EXTRABUILD2OPTS --with-isl="$PREFIX-prereqs" 2>&1 | tee build.log
+  make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
+  make $PARALLEL install prefix=$PREFIX-win64 2>&1 | tee -a build.log
   export PATH=$OLDPATH
   popd
 fi
