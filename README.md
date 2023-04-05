@@ -1,55 +1,47 @@
-(possible workflow to build compiler toolchain on Linux build machine, for Linux host and/or DJGPP/MS-DOS host)
+This is a fork of the repo from [https://github.com/tkchia/build-ia16](https://github.com/tkchia/build-ia16) mainly focused on building the toolchain for Windows.
+
+This is the workflow to build the ia16-elf compiler toolchain on Linux machine (tested on Ubuntu 22.04 LTS) for Windows:
 
          «START»
             ▾
     ./fetch.sh
             ▾
-    ./build.sh clean ─────┐
-            │             ▾
-            │  ./build.sh binutils-debug
-            ▾             │
-    ./build.sh binutils ◂─┘
+    ./build.sh clean
+            ▾
+    ./build.sh binutils
             ▾
     ./build.sh prereqs
             ▾
-    ./build.sh gcc1 ◂───────────────┐
-            ▾                       │
-    ./build.sh newlib               │
-            ▾                       │
-    ./build.sh causeway ──┐         │
-            │             ▾         │
-            │  ./build.sh elks-libc │
-            │             ▾         │
-            │  ./build.sh elf2elks  │
-            ├◂────────────┘         │
-            ▾                       │
-    ./build.sh libi86 ────────────────────────────┐
-            ▾                       │             ▾
-    ./build.sh gcc2 ──────┐         │     ./build.sh clean-djgpp
-            │             ▾         │             ▾
-            │  ./build.sh extra     │     ./build.sh prereqs-djgpp
-            ├◂────────────┘         │             ▾
-            ├─────────────┐         │     ./build.sh binutils-djgpp
-            │             ▾         │             ▾
-            │  ./build.sh sim       │     ./build.sh gcc-djgpp
-            │             ▾         │             │
-            │  ./build.sh test ─────┘             │
-            ├◂────────────┘                       │
-            ├─────────────┐                       │
-            │             ▾                       ▾
-            ▾  ./redist-ppa.sh all        ./redist-djgpp.sh all
-          «END» ◂─────────┴◂──────────────────────┘
+    ./build.sh gcc1
+            ▾
+    ./build.sh newlib
+            ▾
+    ./build.sh causeway
+            ▾
+    ./build.sh elks-libc
+            ▾
+    ./build.sh libi86
+            ▾
+    ./build.sh gcc2 ────────────────────────────┐
+            ▾                                   ▾
+    ./build.sh clean-windows        ./build.sh clean-win64
+            ▾                                   ▾
+    ./build.sh binutils-windows     ./build.sh binutils-win64
+            ▾                                   ▾
+    ./build.sh prereqs-windows      ./build.sh prereqs-win64
+            ▾                                   ▾
+    ./build.sh gcc-windows          ./build.sh gcc-win64
+            ▾                                   ▾
+          «END» ◂───────────────────────────────┘
 
-  * The Linux-hosted toolchain will be installed in the `prefix/` subdirectory under this top-level directory.  To use the newly-built toolchain, you can add ...`/prefix/bin` to your `$PATH`.
-  * The DJGPP-hosted toolchain — if any — will appear under `prefix-djgpp/`.
-  * You can specify multiple build stages together when running `build.sh`.  E.g., `./build.sh binutils prereqs gcc1`.
+### Build process
+  * Follow the workflow above. You can specify multiple build stages together when running `build.sh`.  E.g., `./build.sh binutils prereqs gcc1`.
+  * The easiest way to run the whole build in one command is to use either: `./build.sh all-windows` or `./build.sh all-win64` (after issuing `./fetch.sh`).
+  * The 32-bit version of the toolchain will be installed in the `prefix-windows/` subdirectory.
+  * The 64-bit version of the toolchain will be installed in the `prefix-win64/` subdirectory.
 
-### Pre-compiled compiler toolchain packages
+### Pre-compiled compiler toolchain binaries
 
-  * A pre-compiled [Ubuntu Personal Package Archive](https://launchpad.net/~tkchia/+archive/ubuntu/build-ia16/) is now available.
-  * There are also binary FreeDOS packages [for the toolchain](https://github.com/tkchia/build-ia16/releases) and [for `libi86`](https://github.com/tkchia/libi86/releases).  The toolchain requires a 32-bit machine (i.e. 80386 or above), but it will produce 16-bit code.
+  * A pre-compiled [binaries for Windows](https://github.com/sladorsoft/build-ia16/releases) are now available.
+  * Other binaries may be found on the [original GitHub page](https://github.com/tkchia/libi86/releases) of this repo.
 
-### Further information
-
-  * A [write-up](elf16-writeup.md) on the ELF relocation schemes implemented for IA-16 segmented addressing.
-  * [`libi86` project home page](https://gitlab.com/tkchia/libi86), including documentation.
